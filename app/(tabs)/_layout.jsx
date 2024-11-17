@@ -1,16 +1,22 @@
 import { Tabs } from "expo-router";
 
-const MainTabsLayout = () => {
-    console.log("Hello from app tabs");
-  
-
+const MainTabsLayout = () => {  
   return (
     <Tabs>
-      <Tabs.Screen name="index"></Tabs.Screen>
-      <Tabs.Screen name="search"></Tabs.Screen>
-      <Tabs.Screen name="favorite"></Tabs.Screen>
-      <Tabs.Screen name="history"></Tabs.Screen>
-      <Tabs.Screen name="profile"></Tabs.Screen>
+      <Tabs.Screen name="index" options={{
+      }}/>
+      <Tabs.Screen name="search" options={{
+        headerShown: false,
+      }}/>
+      <Tabs.Screen name="favorite" options={{
+        headerShown: false,
+      }}/>
+      <Tabs.Screen name="history" options={{
+        headerShown: false,
+      }}/>
+      <Tabs.Screen name="profile" options={{
+        headerShown: false,
+      }}/>
     </Tabs>
   );
 };

@@ -2,21 +2,45 @@ import { Tabs } from "expo-router";
 
 const MainTabsLayout = () => {  
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          height: 74,
+          paddingHorizontal: 8,
+        },
+      }}
+    >
       <Tabs.Screen name="index" options={{
-      }}/>
-      <Tabs.Screen name="search" options={{
-        headerShown: false,
-      }}/>
-      <Tabs.Screen name="favorite" options={{
-        headerShown: false,
-      }}/>
-      <Tabs.Screen name="history" options={{
-        headerShown: false,
-      }}/>
-      <Tabs.Screen name="profile" options={{
-        headerShown: false,
-      }}/>
+        title: "Trang chủ",
+      }} />
+      <Tabs.Screen
+        name="search"
+        options={{
+          headerShown: false,
+          title: "Tìm kiếm",
+        }}
+      />
+      <Tabs.Screen
+        name="favorite"
+        options={{
+          headerShown: false,
+          title: "Yêu thích",
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          headerShown: false,
+          title: "Lịch sử",
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          headerShown: false,
+          title: "Tài khoản",
+        }}
+      />
     </Tabs>
   );
 };

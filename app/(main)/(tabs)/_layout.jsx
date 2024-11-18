@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 
 const MainTabsLayout = () => {  
+  console.log('Hello Main tabs')
   return (
     <Tabs
       screenOptions={{

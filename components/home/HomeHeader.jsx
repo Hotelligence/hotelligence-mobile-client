@@ -1,29 +1,37 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, Image, Pressable } from 'react-native'
 import React from 'react'
+import { COLOR } from '@/assets/colors/Colors'
+import { Inbox } from '@/assets/icons'
 
-const HomeHeader = () => {
+const HomeHeader = ({ style }) => {
   return (
-    <View>
-      <Text>HomeHeader</Text>
+    <View style={[styles.container, style]}>
+      <Image currentColor style={styles.logo} source={require("@/assets/images/logo-long.png")}/>
+      <Pressable style={styles.button}>
+        <Inbox width={28} height={26}/>
+      </Pressable>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
     container:{
-
+      flexDirection: "row",
+      backgroundColor: COLOR.primary_blue_100,
+      height: "12%",
+      alignItems: "flex-end",
+      justifyContent: "center",
     },
 
     logo: {
-        
+      height: 59,
+      width: 150,
     },
 
     button: {
-
-    },
-
-    button_icon: {
-
+      position: "absolute",
+      right: 20,
+      top: 52 ,
     },
 })
 

@@ -13,6 +13,7 @@ const MainTabsLayout = () => {
     >
       <Tabs.Screen name="index" options={{
         title: "Trang chủ",
+        headerShown: false,
       }} />
       <Tabs.Screen
         name="search"

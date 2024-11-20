@@ -1,11 +1,11 @@
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { User } from "@/assets/icons";
+import { UserFill } from "@/assets/icons";
 
 const GuestNumberPicker = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <User fill={COLOR.primary_blue_100} width={24} height={24} />
+      <UserFill fill={COLOR.primary_blue_100} width={24} height={24} />
       <View style={styles.content_container}>
         <Text style={styles.title}>Chọn số lượng khách</Text>
         <TextInput

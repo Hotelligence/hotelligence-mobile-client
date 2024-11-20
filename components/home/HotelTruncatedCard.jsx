@@ -1,10 +1,12 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import { FavoriteButton } from ".";
 import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
 import { ImageOff } from "@/assets/icons";
 
 const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfReviews, isFavorite, style, isPressable }) => {
   const [imageError, setImageError] = useState(false);
+
 
   return (
     <Pressable disabled={!isPressable} style={[styles.container, style]}>
@@ -25,6 +27,7 @@ const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfRevie
           onError={() => setImageError(true)}
         />
       )}
+      <FavoriteButton isFavorite={isFavorite} style={styles.favorite_button} />
       <View style={styles.content_container}>
         <Text
           numberOfLines={1}
@@ -97,6 +100,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLOR.primary_blue_50,
     marginStart: 4,
+  },
+
+  favorite_button: {
+    position: "absolute",
+    left: 144,
+    top: 10,
   },
 });
 

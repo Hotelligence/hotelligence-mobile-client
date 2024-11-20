@@ -80,6 +80,7 @@ export const hotels = [
     taxPrice: 240000,
     extraFee: 300000,
     totalPrice: 3540000,
+    isFavorite: true,
   },
   {
     _id: {
@@ -111,6 +112,7 @@ export const hotels = [
     taxPrice: 320000,
     extraFee: 400000,
     totalPrice: 4720000,
+    isFavorite: false,
   },
   {
     _id: {
@@ -142,6 +144,7 @@ export const hotels = [
     taxPrice: 200000,
     extraFee: 250000,
     totalPrice: 2950000,
+    isFavorite: true,
   },
   {
     _id: {
@@ -172,5 +175,6 @@ export const hotels = [
     taxPrice: 280000,
     extraFee: 350000,
     totalPrice: 4130000,
+    isFavorite: true,
   },
 ];

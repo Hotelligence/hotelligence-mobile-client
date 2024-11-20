@@ -6,9 +6,9 @@ const HomeHeader = ({ style }) => {
   return (
     <View style={[styles.container, style]}>
       <Image currentColor style={styles.logo} source={require("@/assets/images/logo-long.png")}/>
-      <Pressable style={styles.button}>
+      {/* <Pressable style={styles.button}>
         <Inbox fill={COLOR.primary_gold_100} width={28} height={26}/>
-      </Pressable>
+      </Pressable> */}
     </View>
   )
 }

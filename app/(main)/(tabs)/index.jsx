@@ -10,7 +10,7 @@ const HomeScreen = () => {
       <HomeHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 10 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
       >
         <View style={styles.search_section}>
           <Text style={styles.search_section_title}>Bạn muốn đi đâu?</Text>
@@ -34,7 +34,7 @@ const HomeScreen = () => {
             Tìm kiếm gần đây của bạn
           </Text>
           <FlatList
-            contentContainerStyle={{ paddingStart: 10, paddingEnd: 20, }}
+            contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={recentSearch} //replace this with real data from API
@@ -54,7 +54,7 @@ const HomeScreen = () => {
             Khách sạn đã xem gần đây
           </Text>
           <FlatList
-            contentContainerStyle={{ paddingHorizontal: 10, paddingEnd: 20, }}
+            contentContainerStyle={{ paddingHorizontal: 10, paddingEnd: 20 }}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={hotels} //replace this with real data from API
@@ -66,6 +66,7 @@ const HomeScreen = () => {
                 ratingScore={item?.ratingScore}
                 numOfReviews={item?.numOfReviews}
                 imageURL={item?.images[0]}
+                isFavorite={item?.isFavorite}
               />
             )}
           />
@@ -79,13 +80,13 @@ const HomeScreen = () => {
             contentContainerStyle={{ marginStart: 10 }}
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={recentSearch} //replace this with real data from API
+            data={hotels} //replace this with real data from API
             renderItem={({ item }) => (
-              <RecentSearchedCard
+              <LocationTruncatedCard
                 style={{ marginStart: 10 }}
-                title={item?.title}
-                period={item?.period}
-                numOfGuestRoom={item?.numOfGuestRoom}
+                city={item?.city}
+                province={item?.province}
+                imageURL={item?.images[1]}
               />
             )}
           />

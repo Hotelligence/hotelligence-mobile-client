@@ -5,7 +5,7 @@ import { User } from "@/assets/icons";
 const GuestNumberPicker = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <User fill={COLOR.primary_blue_100} width={24} height={26} />
+      <User fill={COLOR.primary_blue_100} width={24} height={24} />
       <View style={styles.content_container}>
         <Text style={styles.title}>Chọn số lượng khách</Text>
         <TextInput

@@ -13,5 +13,8 @@ export const COLOR = {
   secondary_blue_100: '#1F8AA2',
 
   secondary_green_100: '#29A21F',
+
+  tertiary_red_100: '#F05555',
+  tertiary_blue_100: '#8DAFE0',
 };
 

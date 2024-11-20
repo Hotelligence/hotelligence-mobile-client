@@ -5,7 +5,7 @@ import { Map } from "@/assets/icons";
 const SearchBar = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <Map fill={COLOR.primary_blue_100} width={24} height={26} />
+      <Map fill={COLOR.primary_blue_100} width={24} height={24} />
       <TextInput editable={!isDisabled} style={styles.input} placeholder={placeholder} />
     </Pressable>
   );

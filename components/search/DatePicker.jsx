@@ -5,7 +5,7 @@ import { Calendar } from "@/assets/icons";
 const DatePicker = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <Calendar fill={COLOR.primary_blue_100} width={24} height={26} />
+      <Calendar fill={COLOR.primary_blue_100} width={24} height={24} />
       <View style={styles.content_container}>
         <Text style={styles.title}>Chọn ngày</Text>
         <TextInput

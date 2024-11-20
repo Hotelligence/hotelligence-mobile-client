@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, Image, Pressable } from 'react-native'
-import React from 'react'
 import { COLOR } from '@/assets/colors/Colors'
 import { Inbox } from '@/assets/icons'
 
@@ -8,7 +7,7 @@ const HomeHeader = ({ style }) => {
     <View style={[styles.container, style]}>
       <Image currentColor style={styles.logo} source={require("@/assets/images/logo-long.png")}/>
       <Pressable style={styles.button}>
-        <Inbox width={28} height={26}/>
+        <Inbox fill={COLOR.primary_gold_100} width={28} height={26}/>
       </Pressable>
     </View>
   )

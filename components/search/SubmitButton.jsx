@@ -4,7 +4,7 @@ import { Map } from '@/assets/icons'
 
 const SubmitButton = ({ text, style, disabled, isDisplayIcon, onPress }) => {
   return (
-    <Pressable style={[styles.container, style]}>
+    <Pressable disabled={disabled} onPress={onPress} style={[styles.container, style]}>
       <Text style={styles.text}>{text}</Text>
     </Pressable>
   )

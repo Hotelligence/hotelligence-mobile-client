@@ -2,13 +2,13 @@ import { View, Text, StyleSheet, Image, Pressable } from 'react-native'
 import { Building } from '@/assets/icons';
 import { COLOR } from '@/assets/colors/Colors';
 
-const RecentSearchedCard= ({ title, period, numOfGuestRoom, style, isPressable, onPress }) => {
+const RecentSearchedCard= ({ searchKeyword, period, numOfGuestRoom, style, isPressable, onPress }) => {
   return (
     <Pressable disabled={!isPressable} style={[styles.container, style]}>
       <Building fill={COLOR.primary_blue_100} width={24} height={24} />
       <View style={[styles.content_container]}>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
-          {title}
+          {searchKeyword}
         </Text>
         <Text numberOfLines={1} ellipsizeMode="tail" style={styles.period}>
           {period?.checkinDate} - {period?.checkoutDate}

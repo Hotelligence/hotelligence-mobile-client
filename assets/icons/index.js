@@ -13,3 +13,7 @@ export { default as SearchStroke } from "./search-stroke.svg";
 export { default as History } from "./history.svg";
 export { default as UserFill } from "./user-fill.svg";
 export { default as UserStroke } from "./user-stroke.svg";
+
+export { default as ChevronLeft } from "./chevron-left.svg";
+export { default as Pencil } from "./pencil.svg";
+export { default as Discount } from "./discount.svg";

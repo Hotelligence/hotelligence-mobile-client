@@ -3,8 +3,16 @@ import { HomeHeader, RecentSearchedCard, HotelTruncatedCard, LocationTruncatedCa
 import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
+import { useRouter } from "expo-router";
 
 const HomeScreen = () => {
+  const router = useRouter();
+
+  const onSearchPress = () => {
+    //handle search logic
+    router.push("/(search)/SearchResult")
+  }
+
   return (
     <View style={styles.container}>
       <HomeHeader />
@@ -26,7 +34,11 @@ const HomeScreen = () => {
             style={{ marginBottom: 10 }}
             placeholder="2 khách, 1 phòng"
           />
-          <SubmitButton style={{ marginTop: 5 }} text="Tìm" />
+          <SubmitButton
+            onPress={() => onSearchPress()}
+            style={{ marginTop: 5 }}
+            text="Tìm"
+          />
         </View>
         {/* Recent Search Section */}
         <View style={styles.general_searched_section}>
@@ -41,7 +53,7 @@ const HomeScreen = () => {
             renderItem={({ item }) => (
               <RecentSearchedCard
                 style={{ marginStart: 10 }}
-                title={item?.title}
+                searchKeyword={item?.title}
                 period={item?.period}
                 numOfGuestRoom={item?.numOfGuestRoom}
               />

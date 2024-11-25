@@ -4,6 +4,7 @@ import { SearchInfoCard, HotelDetailCard, } from "@/components/search";
 import { hotels, recentSearch } from "@/assets/TempData"; //Delete later
 import { useRouter } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
+import { useCallback } from "react";
 
 const SearchResult = () => {
   const router = useRouter();
@@ -11,6 +12,28 @@ const SearchResult = () => {
     //clear something before navigate back
     router.back();
   };
+
+  const renderSearchResult = useCallback(
+    ({ item }) => (
+      <HotelDetailCard
+        style={{ marginTop: 15 }}
+        hotelName={item?.hotelName}
+        imageURL={item?.images[2]}
+        city={item?.city}
+        ratingScore={item?.ratingScore.toFixed(1)}
+        ratingCategory={item?.ratingCategory}
+        numOfReviews={item?.numOfReviews}
+        originPrice={item?.originPrice}
+        discount={item?.discount}
+        discountPrice={item?.discountPrice}
+        taxPrice={item?.taxPrice}
+        extraFee={item?.extraFee}
+        totalPrice={item?.totalPrice}
+        isFavorite={item?.isFavorite}
+      />
+    ),
+    []
+  );
 
   return (
     <View style={styles.container}>
@@ -30,24 +53,7 @@ const SearchResult = () => {
             {hotels.length} kết quả trả về cho tìm kiếm của bạn
           </Text>
         }
-        renderItem={({ item }) => (
-          <HotelDetailCard
-            style={{marginTop: 15,}}
-            hotelName={item?.hotelName}
-            imageURL={item?.images[2]}
-            city={item?.city}
-            ratingScore={item?.ratingScore.toFixed(1)}
-            ratingCategory={item?.ratingCategory}
-            numOfReviews={item?.numOfReviews}
-            originPrice={item?.originPrice}
-            discount={item?.discount}
-            discountPrice={item?.discountPrice}
-            taxPrice={item?.taxPrice}
-            extraFee={item?.extraFee}
-            totalPrice={item?.totalPrice}
-            isFavorite={item?.isFavorite}
-          />
-        )}
+        renderItem={renderSearchResult}
       />
     </View>
   );

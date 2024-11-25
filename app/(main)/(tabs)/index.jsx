@@ -4,6 +4,7 @@ import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/compon
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
+import { useCallback } from "react";
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -12,6 +13,36 @@ const HomeScreen = () => {
     //handle search logic
     router.push("/(search)/SearchResult")
   }
+
+  const renderRecentSearched = useCallback(({ item }) => (
+    <RecentSearchedCard
+      style={{ marginStart: 10 }}
+      searchKeyword={item?.title}
+      period={item?.period}
+      numOfGuestRoom={item?.numOfGuestRoom}
+    />
+  ), []);
+
+  const renderHotels = useCallback(({ item }) => (
+    <HotelTruncatedCard
+      style={{ marginStart: 10 }}
+      hotelName={item?.hotelName}
+      city={item?.city}
+      ratingScore={item?.ratingScore}
+      numOfReviews={item?.numOfReviews}
+      imageURL={item?.images[0]}
+      isFavorite={item?.isFavorite}
+    />
+  ), []);
+
+  const renderLocations = useCallback(({ item }) => (
+     <LocationTruncatedCard
+      style={{ marginStart: 10 }}
+      city={item?.city}
+      province={item?.province}
+      imageURL={item?.images[1]}
+    />
+  ), []);
 
   return (
     <View style={styles.container}>
@@ -50,14 +81,7 @@ const HomeScreen = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={recentSearch} //replace this with real data from API
-            renderItem={({ item }) => (
-              <RecentSearchedCard
-                style={{ marginStart: 10 }}
-                searchKeyword={item?.title}
-                period={item?.period}
-                numOfGuestRoom={item?.numOfGuestRoom}
-              />
-            )}
+            renderItem={renderRecentSearched}
           />
         </View>
         {/* Recent Hotel View Section */}
@@ -70,17 +94,7 @@ const HomeScreen = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={hotels} //replace this with real data from API
-            renderItem={({ item }) => (
-              <HotelTruncatedCard
-                style={{ marginStart: 10 }}
-                hotelName={item?.hotelName}
-                city={item?.city}
-                ratingScore={item?.ratingScore}
-                numOfReviews={item?.numOfReviews}
-                imageURL={item?.images[0]}
-                isFavorite={item?.isFavorite}
-              />
-            )}
+            renderItem={renderHotels}
           />
         </View>
         {/* Suggested Famous Location */}
@@ -93,14 +107,7 @@ const HomeScreen = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={hotels} //replace this with real data from API
-            renderItem={({ item }) => (
-              <LocationTruncatedCard
-                style={{ marginStart: 10 }}
-                city={item?.city}
-                province={item?.province}
-                imageURL={item?.images[1]}
-              />
-            )}
+            renderItem={renderLocations}
           />
         </View>
       </ScrollView>

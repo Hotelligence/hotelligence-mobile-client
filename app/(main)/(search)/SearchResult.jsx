@@ -1,6 +1,10 @@
 import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
 import GeneralHeader from "@/components/GeneralHeader";
-import { SearchInfoCard, HotelDetailCard, } from "@/components/search";
+import {
+  SearchInfoCard,
+  HotelDetailCard,
+  FilterSelection,
+} from "@/components/search";
 import { hotels, recentSearch } from "@/assets/TempData"; //Delete later
 import { useRouter } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
@@ -44,9 +48,27 @@ const SearchResult = () => {
         period={recentSearch[0].period}
         numOfGuestRoom={recentSearch[0].numOfGuestRoom}
       />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginBottom: 15, height: "5%", width: "100%" }}
+        contentContainerStyle={{ paddingStart: 12, paddingEnd: 20 }}
+      >
+        <FilterSelection
+          numOfFilters={1}
+          filterCategory={"Phổ biến"}
+          style={{ marginStart: 8 }}
+        />
+        <FilterSelection filterCategory={"Giá"} style={{ marginStart: 8 }} />
+        <FilterSelection
+          numOfFilters={2}
+          filterCategory={"Đánh giá"}
+          style={{ marginStart: 8 }}
+        />
+      </ScrollView>
       <FlatList
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20, }}
+        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
         data={hotels}
         ListHeaderComponent={
           <Text style={styles.num_of_result_text}>

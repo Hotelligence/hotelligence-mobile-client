@@ -22,9 +22,7 @@ const LocationTruncatedCard = ({
         <Image
           style={styles.image}
           source={{
-            uri: imageError
-              ? "https://image.pngaaa.com/13/1887013-middle.png"
-              : imageURL,
+            uri: imageURL,
           }}
           onError={() => setImageError(true)}
         />

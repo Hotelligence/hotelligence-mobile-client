@@ -132,18 +132,18 @@ export const hotels = [
       "https://www.vn.kayak.com/rimg/himg/89/a7/c3/revato-826930-12240319-139901.jpg?width=1366&height=768&crop=true",
       "https://owa.bestprice.vn/images/hotels/large/vinpearl-resort-nha-trang-634293ad34037-848x477.jpg",
     ],
-    city: "Nha Trang",
+    city: "Nha Trang",//
     province: "Khánh Hòa",
-    ratingScore: 8.8,
-    ratingCategory: "Rất tốt",
-    numOfReviews: 2310,
-    originPrice: 2500000,
-    discount: 0.2,
-    discountPrice: 2000000,
+    ratingScore: 8.8,//
+    ratingCategory: "Rất tốt",//
+    numOfReviews: 2310,//
+    originPrice: 2500000,//
+    discount: 0.2,//
+    discountPrice: 2000000,//
     taxPercentage: 0.08,
-    taxPrice: 200000,
-    extraFee: 250000,
-    totalPrice: 2950000,
+    taxPrice: 200000,//
+    extraFee: 250000,//
+    totalPrice: 2950000,//
     isFavorite: true,
   },
   {

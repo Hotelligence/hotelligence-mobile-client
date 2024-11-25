@@ -11,18 +11,14 @@ const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfRevie
   return (
     <Pressable disabled={!isPressable} style={[styles.container, style]}>
       {imageError ? (
-        <View
-          style={styles.image_off_container}
-        >
+        <View style={styles.image_off_container}>
           <ImageOff width={48} height={48} stroke={COLOR.primary_blue_50} />
         </View>
       ) : (
         <Image
           style={styles.image}
           source={{
-            uri: imageError
-              ? "https://image.pngaaa.com/13/1887013-middle.png"
-              : imageURL,
+            uri: imageURL,
           }}
           onError={() => setImageError(true)}
         />

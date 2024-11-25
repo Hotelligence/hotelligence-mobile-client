@@ -66,7 +66,7 @@ const HomeScreen = () => {
             Khách sạn đã xem gần đây
           </Text>
           <FlatList
-            contentContainerStyle={{ paddingHorizontal: 10, paddingEnd: 20 }}
+            contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={hotels} //replace this with real data from API
@@ -89,7 +89,7 @@ const HomeScreen = () => {
             Tìm kiếm gần đây của bạn
           </Text>
           <FlatList
-            contentContainerStyle={{ marginStart: 10 }}
+            contentContainerStyle={{ paddingStart: 10, paddingEnd: 20, }}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={hotels} //replace this with real data from API

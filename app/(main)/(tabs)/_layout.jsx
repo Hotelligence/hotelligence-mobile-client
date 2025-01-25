@@ -13,7 +13,7 @@ import {
 import { COLOR } from "@/assets/colors/Colors";
 
 const MainTabsLayout = () => {
-  console.log("Hello Main tabs");
+  // console.log("Hello Main tabs");
   return (
     <Tabs
       screenOptions={{

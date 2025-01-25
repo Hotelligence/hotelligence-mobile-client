@@ -5,7 +5,7 @@ import { ChevronLeft } from '@/assets/icons';
 const GeneralHeader = ({ title, style, onBackPress }) => {
   return (
     <View style={[styles.container, style]}>
-      <Pressable style={styles.back_button} onPress={onBackPress}>
+      <Pressable style={[styles.back_button, { width: 35, height: 35 }]} onPress={onBackPress}>
         <ChevronLeft width={32} height={32} fill={COLOR.primary_gold_120}/>
       </Pressable>
       <Text style={styles.title_text}>{title}</Text>
@@ -16,7 +16,7 @@ const GeneralHeader = ({ title, style, onBackPress }) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: "12%",
+    height: 83,
     borderBottomWidth: 1,
     borderBottomColor: COLOR.primary_blue_50,
     flexDirection: "row",
@@ -27,7 +27,11 @@ const styles = StyleSheet.create({
 
   back_button: {
     position: "absolute",
-    left: 10,
+    borderRadius: 20,
+    backgroundColor: COLOR.primary_white_100,
+    justifyContent: "center",
+    alignItems: "center",
+    left: 20,
     bottom: 6,
   },
 

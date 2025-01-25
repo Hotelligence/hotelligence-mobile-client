@@ -51,9 +51,7 @@ export const recentSearch = [
 
 export const hotels = [
   {
-    _id: {
-      $oid: "664cdc26bd16c1e72174caf4",
-    },
+    id: "664cdc26bd16c1e72174caf4",
     hotelName: "Sofitel Legend Metropole Hanoi",
     address: "15 Ngô Quyền, Quận Hoàn Kiếm, Hà Nội",
     star: 5,
@@ -83,9 +81,7 @@ export const hotels = [
     isFavorite: true,
   },
   {
-    _id: {
-      $oid: "664cdc26bd16c1e72174caf5",
-    },
+    id: "664cdc26bd16c1e72174caf5",
     hotelName: "InterContinental Danang Sun Peninsula Resort",
     address: "Bãi Bắc, Sơn Trà, Đà Nẵng",
     star: 5,
@@ -103,7 +99,7 @@ export const hotels = [
     city: "Đà Nẵng",
     province: "Đà Nẵng",
     ratingScore: 9.2,
-    ratingCategory: "Tuyệt vời",
+    ratingCategory: "Tuyệt vời", 
     numOfReviews: 1456,
     originPrice: 4000000,
     discount: 0.15,
@@ -115,9 +111,7 @@ export const hotels = [
     isFavorite: false,
   },
   {
-    _id: {
-      $oid: "664cdc26bd16c1e72174caf6",
-    },
+    id: "664cdc26bd16c1e72174caf6",
     hotelName: "Vinpearl Resort Nha Trang",
     address: "Hòn Tre, Vĩnh Nguyên, Nha Trang",
     star: 5,
@@ -132,24 +126,22 @@ export const hotels = [
       "https://www.vn.kayak.com/rimg/himg/89/a7/c3/revato-826930-12240319-139901.jpg?width=1366&height=768&crop=true",
       "https://owa.bestprice.vn/images/hotels/large/vinpearl-resort-nha-trang-634293ad34037-848x477.jpg",
     ],
-    city: "Nha Trang",//
+    city: "Nha Trang",
     province: "Khánh Hòa",
-    ratingScore: 8.8,//
-    ratingCategory: "Rất tốt",//
-    numOfReviews: 2310,//
-    originPrice: 2500000,//
-    discount: 0.2,//
-    discountPrice: 2000000,//
+    ratingScore: 8.8,
+    ratingCategory: "Rất tốt",
+    numOfReviews: 2310,
+    originPrice: 2500000,
+    discount: 0.2,
+    discountPrice: 2000000,
     taxPercentage: 0.08,
-    taxPrice: 200000,//
-    extraFee: 250000,//
-    totalPrice: 2950000,//
+    taxPrice: 200000,
+    extraFee: 250000,
+    totalPrice: 2950000,
     isFavorite: true,
   },
   {
-    _id: {
-      $oid: "664cdc26bd16c1e72174caf7",
-    },
+    id: "664cdc26bd16c1e72174caf7",
     hotelName: "Fusion Maia Da Nang",
     address: "Võ Nguyên Giáp, Ngũ Hành Sơn, Đà Nẵng",
     star: 5,

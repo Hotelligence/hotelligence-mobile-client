@@ -2,7 +2,7 @@ import { Stack, Slot, Redirect, useRouter } from "expo-router";
 import { useEffect } from "react";
 
 const MainStackLayout = () => {
-  console.log("Hello Main stack");
+  // console.log("Hello Main stack");
 
   return (
     <Stack>

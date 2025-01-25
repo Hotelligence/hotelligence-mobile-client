@@ -2,7 +2,7 @@ import { Stack, Slot, Redirect, useRouter } from "expo-router";
 import { useEffect } from "react";
 
 const AppStackLayout = () => {
-    console.log('Hello app stack')
+    // console.log('Hello app stack')
     const isLoggedIn = true; //handle this later
     const router = useRouter();
 

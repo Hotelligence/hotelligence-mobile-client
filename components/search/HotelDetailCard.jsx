@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import { FavoriteButton } from "../home";
 import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
-import { ImageOff } from "@/assets/icons";
 import { DiscountTag, RatingScoreTag } from ".";
 import { formatVND } from "@/utils/ValueConverter";
+import { NoImage } from ".";
 
 const HotelDetailCard = ({
   hotelName,
@@ -26,16 +26,16 @@ const HotelDetailCard = ({
   const [imageError, setImageError] = useState(false);
 
   return (
-    <View style={[styles.container, style]}>
+    <Pressable style={[styles.container, style]} onPress={onPress}>
       <View style={styles.image_container}>
         <FavoriteButton
           style={styles.favorite_button}
           isFavorite={isFavorite}
         />
         {imageError ? (
-          <View style={styles.image_off_container}>
-            <ImageOff width={48} height={48} stroke={COLOR.primary_blue_50} />
-          </View>
+          <NoImage
+            style={{ borderTopLeftRadius: 14, borderBottomLeftRadius: 14 }}
+          />
         ) : (
           <Image
             style={styles.image}
@@ -68,7 +68,9 @@ const HotelDetailCard = ({
           >
             <RatingScoreTag ratingScore={ratingScore} />
             <View style={{ marginStart: 4 }}>
-              <Text style={styles.numOf_reviews_text}>({numOfReviews} đánh giá)</Text>
+              <Text style={styles.numOf_reviews_text}>
+                ({numOfReviews} đánh giá)
+              </Text>
               <Text style={styles.rating_category_text}>{ratingCategory}</Text>
             </View>
           </View>
@@ -77,16 +79,24 @@ const HotelDetailCard = ({
           {discount && discountPrice && (
             <>
               <DiscountTag discount={discount} />
-              <Text style={styles.origin_price_text}>{formatVND(originPrice)}đ</Text>
+              <Text style={styles.origin_price_text}>
+                {formatVND(originPrice)}đ
+              </Text>
             </>
           )}
-          <Text style={styles.discount_price_text}>{formatVND(discountPrice)}đ</Text>
-          <Text style={styles.total_price_text} ellipsizeMode="tail" numberOfLines={1}>
+          <Text style={styles.discount_price_text}>
+            {formatVND(discountPrice)}đ
+          </Text>
+          <Text
+            style={styles.total_price_text}
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
             Tổng {formatVND(totalPrice)}đ bao gồm thuế và phí
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
@@ -115,14 +125,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    borderTopLeftRadius: 14,
-    borderBottomLeftRadius: 14,
-  },
-
-  image_off_container: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 280,
     borderTopLeftRadius: 14,
     borderBottomLeftRadius: 14,
   },

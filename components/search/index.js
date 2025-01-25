@@ -7,3 +7,5 @@ export { default as HotelDetailCard } from "./HotelDetailCard";
 export { default as RatingScoreTag } from "./RatingScoreTag";
 export { default as DiscountTag } from "./DiscountTag";
 export { default as FilterSelection } from "./FilterSelection";
+export { default as CircleButton } from "./CircleButton";
+export { default as NoImage } from "./NoImage";

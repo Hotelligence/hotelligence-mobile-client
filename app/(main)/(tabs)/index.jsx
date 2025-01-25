@@ -11,7 +11,7 @@ const HomeScreen = () => {
 
   const onSearchPress = () => {
     //handle search logic
-    router.push("/(search)/SearchResult")
+    router.push("/searchResult")
   }
 
   const renderRecentSearched = useCallback(({ item }) => (

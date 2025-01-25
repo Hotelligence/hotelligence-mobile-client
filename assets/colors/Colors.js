@@ -19,3 +19,5 @@ export const COLOR = {
   tertiary_blue_40: "#8DAFE040",
 };
 
+
+

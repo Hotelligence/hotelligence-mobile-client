@@ -11,7 +11,27 @@ import { CircleButton, NoImage } from "@/components/search";
 import { hotels } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
-import { ChevronLeft } from "@/assets/icons";
+import { ChevronLeft } from "lucide-react-native";
+
+const IntroSection = ({
+  hotelName,
+  star,
+  ratingScore,
+  ratingCategory,
+  numOfReviews,
+  isFavorite,
+  onFavoritePress,
+  address,
+  description,
+}) => {};
+
+const AmenitiesSection = ({ amenities, onViewAllPress }) => {
+
+};
+
+const RoomBookingSection = ({ }) => {
+
+};
 
 const HotelDetail = () => {
   const router = useRouter();
@@ -29,14 +49,12 @@ const HotelDetail = () => {
   //   //fetch data from server
   // }, [])
 
-  console.log(wallpaperError);
-
   return (
     <View style={styles.container}>
       <CircleButton
         Icon={ChevronLeft}
         onPress={onBackPress}
-        style={{ position: "absolute", top: 41, left: 20, zIndex: 1 }}
+        style={{ position: "absolute", top: 46, left: 20, zIndex: 1 }}
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -47,9 +65,11 @@ const HotelDetail = () => {
             <NoImage style={{ borderBottomWidth: 1 }} />
           ) : (
             <Image
+              style={{ width: "100%", height: "100%" }}
               source={{
-                uri: hotels[0]?.images[2],
+                uri: hotels[1]?.images[2],
               }}
+              resizeMode="cover"
               onError={() => setWallpaperError(true)}
             />
           )}
@@ -75,7 +95,7 @@ const styles = StyleSheet.create({
 
   image: {
     width: "100%",
-    height: "26%",
+    height: "30%",
   },
 });
 

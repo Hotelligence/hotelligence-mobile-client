@@ -1,25 +1,27 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { HeartFill, HeartStroke } from "@/assets/icons";
+import { Heart } from "lucide-react-native";
 
 const FavoriteButton = ({ style, isFavorite, disabled, onPress }) => {
-
   return (
-    <Pressable onPress={onPress} disabled={disabled} style={[styles.container, style]}>
-        {
-            isFavorite ? (
-                <HeartFill width={24} height={22} fill={COLOR.tertiary_red_100}/>
-            ) : (
-                <HeartStroke width={24} height={22} fill={COLOR.tertiary_red_100}/>
-            )
-        }
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={[styles.container, style]}
+    >
+      {isFavorite ? (
+        <Heart size={24} strokeWidth={0} fill={COLOR.tertiary_red_100} />
+      ) : (
+        <Heart size={24} color={COLOR.tertiary_red_100} strokeWidth={2}  />
+      )}
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: "center",
     justifyContent: "center",
     width: 24,
     height: 24,
@@ -28,7 +30,6 @@ const styles = StyleSheet.create({
     paddingTop: 19,
     backgroundColor: "#fff",
   },
-
 });
 
 export default FavoriteButton;

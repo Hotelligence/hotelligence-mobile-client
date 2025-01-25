@@ -119,11 +119,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
 
   search_section: {
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 20,
     marginVertical: 10,
   },
@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     fontSize: 28,
     marginBottom: 15,
+    color: COLOR.primary_blue_100,
   },
 
   general_searched_section: {
@@ -143,8 +144,8 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 10,
     marginStart: 20,
+    color: COLOR.primary_blue_100,
   },
-
 });
 
 export default HomeScreen;

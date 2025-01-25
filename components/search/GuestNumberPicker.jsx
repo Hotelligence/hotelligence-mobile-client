@@ -1,11 +1,12 @@
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { UserFill } from "@/assets/icons";
+import { User } from "lucide-react-native";
 
 const GuestNumberPicker = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <UserFill fill={COLOR.primary_blue_100} width={24} height={24} />
+      <User size={24} color={COLOR.primary_blue_100} strokeWidth={2.5} />
       <View style={styles.content_container}>
         <Text style={styles.title}>Chọn số lượng khách</Text>
         <TextInput
@@ -37,10 +38,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 2,
     fontWeight: 500,
+    color: COLOR.primary_blue_100,
   },
 
   input: {
     fontSize: 16,
+    color: COLOR.primary_blue_100,
   },
 });
 

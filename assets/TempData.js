@@ -170,3 +170,5 @@ export const hotels = [
     isFavorite: true,
   },
 ];
+
+export const amenities = []

@@ -1,12 +1,11 @@
 import React from "react";
 import { Pressable, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { COLOR } from "@/assets/colors/Colors";
 
 const CircleButton = ({
-  diameter = 35,
+  diameter = 30,
   Icon,
-  size = 32,
+  size = 28,
   color = COLOR.primary_gold_120,
   onPress,
   style,
@@ -16,7 +15,7 @@ const CircleButton = ({
       style={[styles.circle, style, { width: diameter, height: diameter }]}
       onPress={onPress}
     >
-      <Icon width={size} height={size} fill={color} />
+      <Icon size={size} color={color} />
     </Pressable>
   );
 };

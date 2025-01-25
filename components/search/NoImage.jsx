@@ -1,15 +1,14 @@
 import { View, Text, StyleSheet } from "react-native";
 import React from "react";
-import { ImageOff } from "@/assets/icons";
 import { COLOR } from "@/assets/colors/Colors";
+import { ImageOff } from "lucide-react-native";
 
 const NoImage = ({ iconSize = 48, style, ...props }) => {
   return (
     <View {...props} style={[styles.image_off_container, style]}>
       <ImageOff
-        width={iconSize}
-        height={iconSize}
-        stroke={COLOR.primary_blue_50}
+        size={iconSize}
+        color={COLOR.primary_blue_50}
       />
     </View>
   );

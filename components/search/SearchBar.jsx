@@ -1,12 +1,16 @@
-import { View, TextInput, StyleSheet, Pressable } from "react-native";
+import { TextInput, StyleSheet, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { Map } from "@/assets/icons";
+import { MapPin } from "lucide-react-native";
 
 const SearchBar = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <Map fill={COLOR.primary_blue_100} width={24} height={24} />
-      <TextInput editable={!isDisabled} style={styles.input} placeholder={placeholder} />
+      <MapPin size={24} color={COLOR.primary_white_100} strokeWidth={2} fill={COLOR.primary_blue_100} />
+      <TextInput
+        editable={!isDisabled}
+        style={styles.input}
+        placeholder={placeholder}
+      />
     </Pressable>
   );
 };
@@ -25,6 +29,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
     flex: 1,
     fontSize: 18,
+    color: COLOR.primary_blue_100,
   },
 
 });

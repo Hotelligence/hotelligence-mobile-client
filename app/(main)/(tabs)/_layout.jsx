@@ -1,16 +1,7 @@
 import { Tabs } from "expo-router";
-import {
-  HomeFill,
-  HomeStroke,
-  SearchFill,
-  SearchStroke,
-  HeartFill,
-  HeartStroke,
-  History,
-  UserFill,
-  UserStroke,
-} from "@/assets/icons";
 import { COLOR } from "@/assets/colors/Colors";
+
+import { House, Search, Heart, History, User } from "lucide-react-native";
 
 const MainTabsLayout = () => {
   // console.log("Hello Main tabs");
@@ -26,7 +17,7 @@ const MainTabsLayout = () => {
         tabBarLabelStyle: {
           fontWeight: 500,
           fontSize: 11,
-        }
+        },
       }}
     >
       <Tabs.Screen
@@ -36,9 +27,9 @@ const MainTabsLayout = () => {
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
-              <HomeFill fill={COLOR.primary_blue_100} />
+              <House color={COLOR.primary_blue_100} strokeWidth={2.6} />
             ) : (
-              <HomeStroke fill={COLOR.primary_blue_50} />
+              <House color={COLOR.primary_blue_50} />
             ),
         }}
       />
@@ -49,9 +40,9 @@ const MainTabsLayout = () => {
           title: "Tìm kiếm",
           tabBarIcon: ({ focused }) =>
             focused ? (
-              <SearchFill fill={COLOR.primary_blue_100} />
+              <Search color={COLOR.primary_blue_100} strokeWidth={2.6} />
             ) : (
-              <SearchStroke fill={COLOR.primary_blue_50} />
+              <Search color={COLOR.primary_blue_50} />
             ),
         }}
       />
@@ -62,9 +53,9 @@ const MainTabsLayout = () => {
           title: "Yêu thích",
           tabBarIcon: ({ focused }) =>
             focused ? (
-              <HeartFill fill={COLOR.primary_blue_100} />
+              <Heart color={COLOR.primary_blue_100} strokeWidth={2.6} />
             ) : (
-              <HeartStroke fill={COLOR.primary_blue_50} />
+              <Heart color={COLOR.primary_blue_50} />
             ),
         }}
       />
@@ -75,9 +66,9 @@ const MainTabsLayout = () => {
           title: "Lịch sử",
           tabBarIcon: ({ focused }) =>
             focused ? (
-              <History fill={COLOR.primary_blue_100} />
+              <History color={COLOR.primary_blue_100} strokeWidth={2.6} />
             ) : (
-              <History fill={COLOR.primary_blue_50} />
+              <History color={COLOR.primary_blue_50} />
             ),
         }}
       />
@@ -88,9 +79,9 @@ const MainTabsLayout = () => {
           title: "Tài khoản",
           tabBarIcon: ({ focused }) =>
             focused ? (
-              <UserFill fill={COLOR.primary_blue_100} />
+              <User color={COLOR.primary_blue_100} strokeWidth={2.6} />
             ) : (
-              <UserStroke fill={COLOR.primary_blue_50} />
+              <User color={COLOR.primary_blue_50} />
             ),
         }}
       />

@@ -155,12 +155,14 @@ const styles = StyleSheet.create({
   hotel_name_text: {
     fontWeight: 700,
     fontSize: 18,
+    color: COLOR.primary_blue_100,
   },
 
   city_text: {
     fontWeight: 500,
     fontSize: 16,
     marginTop: 2,
+    color: COLOR.primary_blue_100,
   },
 
   numOf_reviews_text: {
@@ -171,8 +173,9 @@ const styles = StyleSheet.create({
   rating_category_text: {
     fontWeight: 600,
     fontSize: 16,
+    color: COLOR.primary_blue_100,
   },
-  
+
   origin_price_text: {
     fontSize: 14,
     color: COLOR.primary_blue_50,
@@ -183,13 +186,13 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     fontSize: 22,
     marginVertical: 2,
+    color: COLOR.primary_blue_100,
   },
 
   total_price_text: {
     fontSize: 12,
     color: COLOR.primary_blue_50,
   },
-
 });
 
 export default HotelDetailCard;

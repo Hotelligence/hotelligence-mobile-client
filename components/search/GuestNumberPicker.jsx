@@ -1,6 +1,5 @@
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { UserFill } from "@/assets/icons";
 import { User } from "lucide-react-native";
 
 const GuestNumberPicker = ({ value, placeholder, style, isDisabled }) => {

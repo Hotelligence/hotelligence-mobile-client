@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { HeartFill, HeartStroke } from "@/assets/icons";
 import { Heart } from "lucide-react-native";
 
 const FavoriteButton = ({ style, isFavorite, disabled, onPress }) => {
@@ -11,9 +10,13 @@ const FavoriteButton = ({ style, isFavorite, disabled, onPress }) => {
       style={[styles.container, style]}
     >
       {isFavorite ? (
-        <Heart size={24} strokeWidth={0} fill={COLOR.tertiary_red_100} />
+        <Heart
+          size={24}
+          color={COLOR.tertiary_red_100}
+          fill={COLOR.tertiary_red_100}
+        />
       ) : (
-        <Heart size={24} color={COLOR.tertiary_red_100} strokeWidth={2}  />
+        <Heart size={24} fill={COLOR.primary_white_100} color={COLOR.tertiary_red_100} strokeWidth={2} />
       )}
     </Pressable>
   );

@@ -1,6 +1,5 @@
 import { COLOR } from '@/assets/colors/Colors'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { Map } from '@/assets/icons'
 
 const SubmitButton = ({ text, style, disabled, isDisplayIcon, onPress }) => {
   return (
@@ -22,7 +21,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontWeight: 500,
+    fontWeight: 700,
     fontSize: 18,
     color: COLOR.primary_gold_100,
   },

@@ -3,15 +3,26 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   ScrollView,
   Image,
+  Pressable,
 } from "react-native";
-import { CircleButton, NoImage } from "@/components/search";
-import { hotels } from "@/assets/TempData"; //Delete later
+import {
+  CircleButton,
+  NoImage,
+  StarDisplay,
+  RatingScoreTag,
+  AmenityDisplay,
+  DatePicker,
+  GuestNumberPicker,
+  RoomDetailCard
+} from "@/components/search";
+import { FavoriteButton } from "@/components/home";
+import { hotels, rooms } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft, MapPin, ChevronRight } from "lucide-react-native";
+import { amenities } from "@/assets/TempData";
 
 const IntroSection = ({
   hotelName,
@@ -23,31 +34,242 @@ const IntroSection = ({
   onFavoritePress,
   address,
   description,
-}) => {};
-
-const AmenitiesSection = ({ amenities, onViewAllPress }) => {
-
+}) => {
+  return (
+    <View style={styles.intro_container}>
+      <Text
+        style={styles.hotelName_text}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+      >
+        {hotelName}
+      </Text>
+      <StarDisplay starCount={star} size={18} style={{ marginTop: 5 }} />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingVertical: 10,
+        }}
+      >
+        <RatingScoreTag ratingScore={ratingScore} />
+        <View style={{ marginStart: 4 }}>
+          <Text style={styles.numOf_reviews_text}>
+            ({numOfReviews} đánh giá)
+          </Text>
+          <Text style={styles.rating_category_text}>{ratingCategory}</Text>
+        </View>
+        <FavoriteButton
+          isFavorite={isFavorite}
+          style={{ marginStart: "auto" }}
+          // onPress={() => onFavoritePress()}
+          onPress={onFavoritePress}
+        />
+      </View>
+      <View style={{ flexDirection: "row", paddingVertical: 10 }}>
+        <MapPin size={20} color={COLOR.primary_blue_100} strokeWidth={2.5} />
+        <Text
+          style={{
+            marginStart: 5,
+            color: COLOR.primary_blue_100,
+            fontSize: 16,
+          }}
+          ellipsizeMode="tail"
+          numberOfLines={2}
+        >
+          {address}
+        </Text>
+      </View>
+      <Text
+        style={{
+          color: COLOR.primary_blue_100,
+          fontSize: 16,
+          fontStyle: "italic",
+        }}
+      >
+        {description}
+      </Text>
+    </View>
+  );
 };
 
-const RoomBookingSection = ({ }) => {
+const AmenitiesSection = ({ amenities, onViewAllPress }) => {
+  const firstColumn = amenities.slice(0, Math.ceil(amenities.length / 2));
+  const secondColumn = amenities.slice(Math.ceil(amenities.length / 2));
 
+  return (
+    <View style={styles.amenities_container}>
+      <Text style={styles.section_title_text}>Tiện nghi, dịch vụ nổi bật</Text>
+      <View style={styles.amenities_list_container}>
+        <View style={{ flex: 1 }}>
+          {firstColumn.map((amenity) => (
+            <AmenityDisplay
+              key={amenity.id}
+              iconName={amenity.iconName}
+              label={amenity.label}
+              style={{ width: "85%", marginVertical: 1 }}
+            />
+          ))}
+        </View>
+        <View style={{ flex: 1 }}>
+          {secondColumn.map((amenity) => (
+            <AmenityDisplay
+              key={amenity.id}
+              iconName={amenity.iconName}
+              label={amenity.label}
+              style={{ width: "85%", marginVertical: 1 }}
+            />
+          ))}
+        </View>
+      </View>
+      <Pressable style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={styles.view_all_text}>Xem tất cả</Text>
+        <ChevronRight
+          size={16}
+          color={COLOR.primary_gold_120}
+          strokeWidth={2.25}
+        />
+      </Pressable>
+    </View>
+  );
+};
+
+const RoomBookingSection = ({
+  rooms,
+  roomFilterSelected,
+  onRoomFilterSelected,
+  displayedRoom,
+  totalRoom,
+  handleDetailPress,
+  handleSelectPress,
+}) => {
+  return (
+    <View style={styles.room_booking_container}>
+      <Text style={styles.section_title_text}>Chọn phòng</Text>
+      <DatePicker
+        style={{ marginBottom: 10, marginTop: 15 }}
+        placeholder="29 thg 3 - 30 thg 3"
+      />
+      <GuestNumberPicker
+        style={{ marginBottom: 10 }}
+        placeholder="2 khách, 1 phòng"
+      />
+      <View style={{ flexDirection: "row", alignContent: "center", gap: 10 }}>
+        <Pressable
+          onPress={() => onRoomFilterSelected(0)}
+          style={[
+            styles.filter_button,
+            {
+              backgroundColor:
+                roomFilterSelected === 0
+                  ? COLOR.tertiary_blue_40
+                  : COLOR.primary_white_100,
+            },
+          ]}
+        >
+          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+            Tất cả phòng
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onRoomFilterSelected(1)}
+          style={[
+            styles.filter_button,
+            {
+              backgroundColor:
+                roomFilterSelected === 1
+                  ? COLOR.tertiary_blue_40
+                  : COLOR.primary_white_100,
+            },
+          ]}
+        >
+          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+            1 giường
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onRoomFilterSelected(2)}
+          style={[
+            styles.filter_button,
+            {
+              backgroundColor:
+                roomFilterSelected === 2
+                  ? COLOR.tertiary_blue_40
+                  : COLOR.primary_white_100,
+            },
+          ]}
+        >
+          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+            2 giường
+          </Text>
+        </Pressable>
+      </View>
+      <Text
+        style={{
+          color: COLOR.primary_blue_100,
+          fontSize: 16,
+          marginVertical: 10,
+        }}
+      >
+        Hiển thị {displayedRoom} trên {totalRoom} phòng
+      </Text>
+      <View style={{ gap: 15 }}>
+        {rooms.map((room) => (
+          <RoomDetailCard
+            key={room?.id}
+            roomName={room?.roomName}
+            imageURL={room?.images[0]}
+            originPrice={room?.originPrice}
+            discountPercentage={room?.discountPercentage}
+            discountedPrice={room?.discountedPrice}
+            // taxPrice={room?.taxPrice}
+            // extraFee={room?.extraFee}
+            totalPrice={room?.totalPrice}
+            onDetailPress={() => handleDetailPress(room?.id)}
+            onSelectPress={() => handleSelectPress(room?.id)}
+          />
+        ))}
+      </View>
+    </View>
+  );
 };
 
 const HotelDetail = () => {
   const router = useRouter();
+
+  const hotel = hotels[1]; //adjust this later
+
+  // const { hotelID } = useLocalSearchParams();
+
+  const [wallpaperError, setWallpaperError] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(hotel?.isFavorite); //adjust this later
+  const [roomFilterSelected, setRoomFilterSelected] = useState(0);
+
+  // useEffect(() => {
+  //   //fetch data from server
+  // }, [])
+
+  const onFavoritePress = async () => {
+    //send request to server to update favorite status
+    setIsFavorite(!isFavorite);
+  };
 
   const onBackPress = () => {
     //clear something before navigate back
     router.back();
   };
 
-  // const { hotelID } = useLocalSearchParams();
+  const onFilterSelected = async (selectedFilter) => {
+    setRoomFilterSelected(selectedFilter);
+  };
 
-  const [wallpaperError, setWallpaperError] = useState(false);
+  const handleDetailPress = (roomID) => {
+    console.log("Detail Pressed: ", roomID);
+  }
 
-  // useEffect(() => {
-  //   //fetch data from server
-  // }, [])
+  const handleSelectPress = (roomID) => {
+    console.log("Select Pressed: ", roomID);
+  };
 
   return (
     <View style={styles.container}>
@@ -58,7 +280,8 @@ const HotelDetail = () => {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ height: "100%" }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
       >
         <View style={styles.image}>
           {wallpaperError ? (
@@ -67,14 +290,39 @@ const HotelDetail = () => {
             <Image
               style={{ width: "100%", height: "100%" }}
               source={{
-                uri: hotels[1]?.images[2],
+                uri: hotel?.images[2],
               }}
               resizeMode="cover"
               onError={() => setWallpaperError(true)}
             />
           )}
         </View>
-        <Text>asjkdnasjkdb</Text>
+        <IntroSection
+          hotelName={hotel?.hotelName}
+          star={hotel?.star}
+          ratingScore={hotel?.ratingScore.toFixed(1)}
+          ratingCategory={hotel?.ratingCategory}
+          numOfReviews={hotel?.numOfReviews}
+          isFavorite={isFavorite}
+          onFavoritePress={() => onFavoritePress()}
+          address={hotel?.address}
+          description={hotel?.description}
+        />
+        <AmenitiesSection
+          amenities={amenities}
+          // onViewAllPress={}
+        />
+        <RoomBookingSection
+          displayedRoom={18}
+          totalRoom={18}
+          rooms={rooms}
+          roomFilterSelected={roomFilterSelected}
+          onRoomFilterSelected={(selectedFilter) =>
+            onFilterSelected(selectedFilter)
+          }
+          handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
+          handleSelectPress={(roomID) => handleSelectPress(roomID)} //This is a 4 layer deep function, caution when maintaining
+        />
       </ScrollView>
     </View>
   );
@@ -86,16 +334,77 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
 
-  num_of_result_text: {
-    fontWeight: 500,
-    fontSize: 14,
-    color: COLOR.primary_blue_100,
-    alignSelf: "center",
-  },
-
   image: {
     width: "100%",
-    height: "30%",
+    height: 260,
+  },
+
+  section_title_text: {
+    fontWeight: 500,
+    fontSize: 22,
+    color: COLOR.primary_gold_120,
+  },
+
+  //Intro Section
+  intro_container: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+
+  hotelName_text: {
+    fontWeight: 500,
+    fontSize: 28,
+  },
+
+  numOf_reviews_text: {
+    fontSize: 11,
+    color: COLOR.primary_blue_50,
+  },
+
+  rating_category_text: {
+    fontWeight: 600,
+    fontSize: 16,
+    color: COLOR.primary_blue_100,
+  },
+
+  //Amenities Section
+  amenities_container: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+
+  view_all_text: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: COLOR.primary_gold_120,
+    textDecorationLine: "underline",
+  },
+
+  amenities_list_container: {
+    flexDirection: "row",
+    paddingVertical: 10,
+    justifyContent: "space-between",
+  },
+
+  //Room Booking Section
+  room_booking_container: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+
+  filter_button: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLOR.primary_blue_50,
+    borderRadius: 30,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+
+  filter_text: {
+    fontSize: 16,
+    color: COLOR.primary_blue_100,
   },
 });
 

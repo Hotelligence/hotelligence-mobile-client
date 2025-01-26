@@ -7,7 +7,7 @@ const FilterSelection = ({ filterCategory, numOfFilters = 0, style, disabled, on
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      style={[styles.container, style, {backgroundColor: numOfFilters > 0 ? COLOR.tertiary_blue_40 : "#FFFFFF"}]}
+      style={[styles.container, style, {backgroundColor: numOfFilters > 0 ? COLOR.tertiary_blue_40 : COLOR.primary_white_100}]}
     >
       <Text style={[styles.filter_text, {marginHorizontal: 5,}]}>{filterCategory}</Text>
       {numOfFilters > 0 && <Text style={styles.filter_text}>({numOfFilters})</Text>}

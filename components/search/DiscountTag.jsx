@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { Discount } from "@/assets/icons";
 import { TicketPercent } from "lucide-react-native";
 
 const DiscountTag = ({ discount, style, fontSize = 12 }) => {

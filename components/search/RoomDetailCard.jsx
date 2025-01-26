@@ -1,37 +1,29 @@
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
-import { FavoriteButton } from "../home";
 import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
 import { DiscountTag, RatingScoreTag } from ".";
 import { formatVND } from "@/utils/ValueConverter";
-import { NoImage } from ".";
+import { NoImage, SubmitButton } from ".";
+import { ChevronRight } from "lucide-react-native";  
 
-const HotelDetailCard = ({
-  hotelName,
+const RoomDetailCard = ({
+  roomName,
   imageURL,
-  city,
-  ratingScore,
-  ratingCategory,
-  numOfReviews,
   originPrice,
-  discount,
-  discountPrice,
+  discountPercentage,
+  discountedPrice,
+  totalPrice,
   taxPrice,
   extraFee,
-  totalPrice,
   style,
-  isFavorite,
-  onPress,
+  onDetailPress,
+  onSelectPress,
 }) => {
   const [imageError, setImageError] = useState(false);
 
   return (
-    <Pressable style={[styles.container, style]} onPress={onPress}>
+    <View style={[styles.container, style]}>
       <View style={styles.image_container}>
-        <FavoriteButton
-          style={styles.favorite_button}
-          isFavorite={isFavorite}
-        />
         {imageError ? (
           <NoImage
             style={{ borderTopLeftRadius: 14, borderBottomLeftRadius: 14 }}
@@ -51,41 +43,31 @@ const HotelDetailCard = ({
           <Text
             ellipsizeMode="tail"
             numberOfLines={1}
-            style={styles.hotel_name_text}
+            style={styles.room_name_text}
           >
-            {hotelName}
+            {roomName}
           </Text>
-          <Text ellipsizeMode="tail" numberOfLines={1} style={styles.city_text}>
-            {city}
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 10,
-            }}
-          >
-            <RatingScoreTag ratingScore={ratingScore} />
-            <View style={{ marginStart: 4 }}>
-              <Text style={styles.numOf_reviews_text}>
-                ({numOfReviews} đánh giá)
-              </Text>
-              <Text style={styles.rating_category_text}>{ratingCategory}</Text>
-            </View>
-          </View>
+          <Pressable style={{ flexDirection: "row", alignItems: "center", marginTop: 15, }} onPress={onDetailPress}>
+            <Text style={styles.view_detail_text}>Xem chi tiết phòng</Text>
+            <ChevronRight
+              size={16}
+              color={COLOR.primary_gold_120}
+              strokeWidth={2.25}
+              style={{ marginTop: 2, }}
+            />
+          </Pressable>
         </View>
         <View style={styles.content_bottom_container}>
-          {discount && discountPrice && (
+          {discountPercentage && discountedPrice && (
             <>
-              <DiscountTag discount={discount} />
+              <DiscountTag discount={discountPercentage} />
               <Text style={styles.origin_price_text}>
                 {formatVND(originPrice)}đ
               </Text>
             </>
           )}
           <Text style={styles.discount_price_text}>
-            {formatVND(discountPrice)}đ
+            {formatVND(discountedPrice)}đ
           </Text>
           <Text
             style={styles.total_price_text}
@@ -95,8 +77,9 @@ const HotelDetailCard = ({
             Tổng {formatVND(totalPrice)}đ bao gồm thuế và phí
           </Text>
         </View>
+        <SubmitButton text="Chọn" onPress={onSelectPress} style={{ width: "50%", marginStart: "auto", marginTop: 15, }} />
       </View>
-    </Pressable>
+    </View>
   );
 };
 
@@ -107,7 +90,7 @@ const styles = StyleSheet.create({
     height: 280,
     borderWidth: 1,
     borderColor: COLOR.primary_blue_50,
-    borderRadius: 15,
+    borderRadius: 20,
   },
 
   favorite_button: {
@@ -118,22 +101,22 @@ const styles = StyleSheet.create({
   },
 
   image_container: {
-    width: "30%",
+    width: "35%",
     height: "100%",
   },
 
   image: {
     width: "100%",
     height: "100%",
-    borderTopLeftRadius: 14,
-    borderBottomLeftRadius: 14,
+    borderTopLeftRadius: 19,
+    borderBottomLeftRadius: 19,
   },
 
   content_container: {
-    width: "70%",
+    width: "65%",
     height: "100%",
-    borderTopRightRadius: 14,
-    borderBottomRightRadius: 14,
+    borderTopRightRadius: 19,
+    borderBottomRightRadius: 19,
     borderLeftWidth: 1,
     borderLeftColor: COLOR.primary_blue_50,
     paddingVertical: 15,
@@ -152,8 +135,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
 
-  hotel_name_text: {
-    fontWeight: 700,
+  room_name_text: {
+    fontWeight: 600,
     fontSize: 18,
     color: COLOR.primary_blue_100,
   },
@@ -193,6 +176,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLOR.primary_blue_50,
   },
+
+  view_detail_text: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: COLOR.primary_gold_120,
+    textDecorationLine: "underline",
+  },
 });
 
-export default HotelDetailCard;
+export default RoomDetailCard;

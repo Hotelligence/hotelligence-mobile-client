@@ -20,7 +20,7 @@ import {
   CommentDisplay,
   SubmitButton,
 } from "@/components/search";
-import { BookingAdditionalModal } from "@/components/modal";
+import { BookingAdditionalModal, DetailPriceModal } from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
 import { hotels, rooms, reviews, amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -298,7 +298,9 @@ const HotelDetail = () => {
   const [wallpaperError, setWallpaperError] = useState(false);
   const [isFavorite, setIsFavorite] = useState(hotel?.isFavorite); //adjust this later
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
+
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
+  const [priceModalVisible, setPriceModalVisible] = useState(false);
 
   // useEffect(() => {
   //   //fetch data from server
@@ -329,19 +331,40 @@ const HotelDetail = () => {
 
   const onAdditionalModalClose = () => {
     setAdditionalModalVisible(false);
-  }
+  };
 
-  const handleBookingPress = (selectedOption) => {
-    console.log("Selected option: ", selectedOption);
+  const handleAdditionalBookingPress = async (selectedOption) => {
     setAdditionalModalVisible(false);
   };
+
+  const onPriceModalClose = () => {
+    setPriceModalVisible(false);
+    setAdditionalModalVisible(true);
+  };
+
+  const handlePriceBookingPress = async () => {
+    setPriceModalVisible(false);
+  };
+
+  const handleViewPricePress = () => {
+    setAdditionalModalVisible(false);
+    setPriceModalVisible(true);
+  }
 
   return (
     <View style={styles.container}>
       <BookingAdditionalModal
         visible={additionalModalVisible}
         onClose={() => onAdditionalModalClose()}
-        onBookingPress={(selectedOption) => handleBookingPress(selectedOption)}
+        onBookingPress={(selectedOption) =>
+          handleAdditionalBookingPress(selectedOption)
+        }
+        onViewPriceDetailPress={handleViewPricePress}
+      />
+      <DetailPriceModal
+        visible={priceModalVisible}
+        onClose={() => onPriceModalClose()}
+        onBookingPress={() => handlePriceBookingPress()}
       />
       <CircleButton
         Icon={ChevronLeft}

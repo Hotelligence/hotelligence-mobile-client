@@ -53,7 +53,7 @@ const BookingAdditionalModal = ({
     } else {
       Animated.timing(slideAnim, {
         toValue: SCREEN_HEIGHT,
-        duration: 250,
+        duration: 150,
         useNativeDriver: true,
       }).start();
     }
@@ -134,7 +134,9 @@ const BookingAdditionalModal = ({
               discount={10}
               style={{ alignSelf: "flex-start", marginTop: 5 }}
             />
-            <View style={{ flexDirection: "row", marginBottom: 20, marginTop: 10, }}>
+            <View
+              style={{ flexDirection: "row", marginBottom: 20, marginTop: 10 }}
+            >
               <View style={{ width: "75%" }}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.discount_price_text}>1.171.678đ</Text>
@@ -144,7 +146,7 @@ const BookingAdditionalModal = ({
                   Tổng 2.678.125đ bao gồm thuế và phí
                 </Text>
                 <Pressable
-                  //   onPress={onViewAllReviewPress}
+                  onPress={onViewPriceDetailPress}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",

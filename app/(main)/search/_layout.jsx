@@ -1,4 +1,4 @@
-import { Stack, Slot, Redirect, useRouter } from "expo-router";
+import { Stack, } from "expo-router";
 
 const SearchStackLayout = () => {
   // console.log("Hello search stack");
@@ -6,7 +6,7 @@ const SearchStackLayout = () => {
   return (
     <Stack>
       <Stack.Screen
-        name="searchResult"
+        name="search-result"
         options={{
           headerShown: false,
         }}

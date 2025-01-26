@@ -20,6 +20,7 @@ import {
   CommentDisplay,
   SubmitButton,
 } from "@/components/search";
+import { BookingAdditionalModal } from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
 import { hotels, rooms, reviews, amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -297,6 +298,7 @@ const HotelDetail = () => {
   const [wallpaperError, setWallpaperError] = useState(false);
   const [isFavorite, setIsFavorite] = useState(hotel?.isFavorite); //adjust this later
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
+  const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
 
   // useEffect(() => {
   //   //fetch data from server
@@ -318,12 +320,29 @@ const HotelDetail = () => {
 
   const handleDetailPress = (roomID) => {};
 
-  const handleSelectPress = (roomID) => {};
+  const handleSelectPress = (roomID) => {
+    //navigate to room detail page
+    setAdditionalModalVisible(true);
+  };
 
   const handleViewAllReviewPress = () => {};
 
+  const onAdditionalModalClose = () => {
+    setAdditionalModalVisible(false);
+  }
+
+  const handleBookingPress = (selectedOption) => {
+    console.log("Selected option: ", selectedOption);
+    setAdditionalModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
+      <BookingAdditionalModal
+        visible={additionalModalVisible}
+        onClose={() => onAdditionalModalClose()}
+        onBookingPress={(selectedOption) => handleBookingPress(selectedOption)}
+      />
       <CircleButton
         Icon={ChevronLeft}
         onPress={onBackPress}

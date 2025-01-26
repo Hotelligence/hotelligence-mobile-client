@@ -11,7 +11,7 @@ const DiscountTag = ({ discount, style, fontSize = 12 }) => {
         color={COLOR.primary_white_100}
       />
       <Text style={[styles.text, { fontSize: fontSize }]}>
-        Giảm {discount * 100}%
+        Giảm {discount}%
       </Text>
     </View>
   );

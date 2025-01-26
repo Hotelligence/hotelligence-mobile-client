@@ -1,13 +1,16 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native'
 import { COLOR } from '@/assets/colors/Colors';
-import { ChevronLeft } from '@/assets/icons';
+import { ChevronLeft } from 'lucide-react-native';
+import { CircleButton } from './search';
 
 const GeneralHeader = ({ title, style, onBackPress }) => {
   return (
     <View style={[styles.container, style]}>
-      <Pressable style={styles.back_button} onPress={onBackPress}>
-        <ChevronLeft width={32} height={32} fill={COLOR.primary_gold_120}/>
-      </Pressable>
+      <CircleButton
+        Icon={ChevronLeft}
+        onPress={onBackPress}
+        style={styles.back_button}
+      />
       <Text style={styles.title_text}>{title}</Text>
     </View>
   );
@@ -16,7 +19,7 @@ const GeneralHeader = ({ title, style, onBackPress }) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: "12%",
+    height: 83,
     borderBottomWidth: 1,
     borderBottomColor: COLOR.primary_blue_50,
     flexDirection: "row",
@@ -27,7 +30,7 @@ const styles = StyleSheet.create({
 
   back_button: {
     position: "absolute",
-    left: 10,
+    left: 20,
     bottom: 6,
   },
 

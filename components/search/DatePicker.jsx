@@ -1,11 +1,11 @@
 import { View, Text, TextInput, StyleSheet, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { Calendar } from "@/assets/icons";
+import { CalendarDays } from "lucide-react-native";
 
 const DatePicker = ({ value, placeholder, style, isDisabled }) => {
   return (
     <Pressable disabled={isDisabled} style={[styles.container, style]}>
-      <Calendar fill={COLOR.primary_blue_100} width={24} height={24} />
+      <CalendarDays size={24} color={COLOR.primary_blue_100} strokeWidth={2.5} />
       <View style={styles.content_container}>
         <Text style={styles.title}>Chọn ngày</Text>
         <TextInput
@@ -37,10 +37,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 2,
     fontWeight: 500,
+    color: COLOR.primary_blue_100,
   },
 
   input: {
     fontSize: 16,
+    color: COLOR.primary_blue_100,
   },
 });
 

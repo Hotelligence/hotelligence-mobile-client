@@ -1,6 +1,6 @@
 import { COLOR } from "@/assets/colors/Colors";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { Pencil } from "@/assets/icons";
+import { Pencil } from "lucide-react-native";
 
 const SearchInfoCard = ({ searchKeyword, period, numOfGuestRoom, style, disabled, onPress }) => {
   return (
@@ -29,7 +29,7 @@ const SearchInfoCard = ({ searchKeyword, period, numOfGuestRoom, style, disabled
           </Text>
         </View>
       </View>
-      <Pencil fill={COLOR.primary_blue_100} style={{ marginStart: "auto" }} />
+      <Pencil strokeWidth={2.5} color={COLOR.primary_blue_100} style={{ marginStart: "auto" }} />
     </Pressable>
   );
 };
@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     fontSize: 16,
     marginBottom: 5,
+    color: COLOR.primary_blue_100,
   },
   
   general_text: {

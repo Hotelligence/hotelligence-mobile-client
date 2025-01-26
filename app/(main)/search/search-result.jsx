@@ -17,6 +17,13 @@ const SearchResult = () => {
     router.back();
   };
 
+  const handleOnHotelCardPress = (hotelID) => {
+    router.push({
+      pathname: "/search/[hotelID]",
+      params: { hotelID: hotelID }, 
+    })
+  };
+
   const renderSearchResult = useCallback(
     ({ item }) => (
       <HotelDetailCard
@@ -30,10 +37,11 @@ const SearchResult = () => {
         originPrice={item?.originPrice}
         discount={item?.discount}
         discountPrice={item?.discountPrice}
-        taxPrice={item?.taxPrice}
-        extraFee={item?.extraFee}
+        // taxPrice={item?.taxPrice}
+        // extraFee={item?.extraFee}
         totalPrice={item?.totalPrice}
         isFavorite={item?.isFavorite}
+        onPress={() => handleOnHotelCardPress(item?.id)}
       />
     ),
     []

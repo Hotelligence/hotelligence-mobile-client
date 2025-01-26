@@ -1,13 +1,12 @@
-import { View, Text, StyleSheet, Image, Pressable } from 'react-native'
+import { View, StyleSheet, Image, } from 'react-native'
 import { COLOR } from '@/assets/colors/Colors'
-import { Inbox } from '@/assets/icons'
 
 const HomeHeader = ({ style }) => {
   return (
     <View style={[styles.container, style]}>
       <Image currentColor style={styles.logo} source={require("@/assets/images/logo-long.png")}/>
       {/* <Pressable style={styles.button}>
-        <Inbox fill={COLOR.primary_gold_100} width={28} height={26}/>
+        <Inbox fill={COLOR.primary_gold_100} width={28} height={26}/> //Inbox SVG icon deleted, use Lucide instead
       </Pressable> */}
     </View>
   )
@@ -17,14 +16,14 @@ const styles = StyleSheet.create({
     container:{
       flexDirection: "row",
       backgroundColor: COLOR.primary_blue_100,
-      height: "12%",
+      height: 83,
       alignItems: "flex-end",
       justifyContent: "center",
     },
 
     logo: {
-      height: 59,
-      width: 150,
+      height: 50,
+      width: 128,
     },
 
     button: {

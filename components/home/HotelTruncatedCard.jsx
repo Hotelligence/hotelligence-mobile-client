@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { FavoriteButton } from ".";
 import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
-import { ImageOff } from "@/assets/icons";
+import { ImageOff } from "lucide-react-native";
 
 const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfReviews, isFavorite, style, isPressable }) => {
   const [imageError, setImageError] = useState(false);
@@ -12,7 +12,7 @@ const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfRevie
     <Pressable disabled={!isPressable} style={[styles.container, style]}>
       {imageError ? (
         <View style={styles.image_off_container}>
-          <ImageOff width={48} height={48} stroke={COLOR.primary_blue_50} />
+          <ImageOff size={48} color={COLOR.primary_blue_50} />
         </View>
       ) : (
         <Image
@@ -80,11 +80,13 @@ const styles = StyleSheet.create({
   text_hotel_name: {
     fontWeight: 500,
     fontSize: 18,
+    color: COLOR.primary_blue_100,
   },
 
   text_general: {
     fontWeight: 500,
     fontSize: 14,
+    color: COLOR.primary_blue_100,
   },
 
   rating_container: {

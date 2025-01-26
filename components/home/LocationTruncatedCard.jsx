@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
-import { ImageOff } from "@/assets/icons";
+import { ImageOff } from "lucide-react-native";
 
 const LocationTruncatedCard = ({
   imageURL,
@@ -16,7 +16,7 @@ const LocationTruncatedCard = ({
     <Pressable disabled={!isPressable} style={[styles.container, style]}>
       {imageError ? (
         <View style={styles.image_off_container}>
-          <ImageOff width={48} height={48} stroke={COLOR.primary_blue_50} />
+          <ImageOff size={48} color={COLOR.primary_blue_50} />
         </View>
       ) : (
         <Image

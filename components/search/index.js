@@ -12,3 +12,5 @@ export { default as NoImage } from "./NoImage";
 export { default as StarDisplay } from "./StarDisplay";
 export { default as AmenityDisplay } from "./AmenityDisplay";
 export { default as RoomDetailCard } from "./RoomDetailCard";
+export { default as DetailReviewPoint } from "./DetailReviewPoint";
+export { default as CommentDisplay } from "./CommentDisplay";

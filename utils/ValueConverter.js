@@ -1,4 +1,6 @@
+//--------------------------CURRENCY FORMATTER----------------------------------
 export function formatVND(value) {
+  // 10000000 to 10.000.000
   if (value === 0) {
     return "0.000"; // Special case for zero value
   }
@@ -52,46 +54,49 @@ export function formatTruncateWithCommaVND(value) {
   return result;
 }
 
-export function formatDateTimeFromDateObject(value) {
+//--------------------------TIME CONVERTER----------------------------------
+export function dateStringToISOString(dateString) { //convert "yyyy-mm-dd" to "yyyy-mm-ddT00:00:00.000Z"
   try {
-    // Parse the ISOString date time into a Date object
-    const date = new Date(value);
-    // Extract and format date components according to your custom format
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Add leading zero if needed
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+    // Create a new Date object using the date string
+    const date = new Date(dateString);
 
-    const result = `${day}/${month}/${year} ${hours}:${minutes}`;
-    return result;
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+
+    // Return the ISO string representation of the date
+    return date.toISOString();
   } catch (error) {
-    console.error("Error parsing Date object:", error);
-    return null; // Return None on parsing errors
+    console.error("Error converting date string to ISOString:", error);
+    return null; // Return null on errors
   }
 }
 
-export function formatDateTime(value) {
+export function dateTimeStringToISOString(dateTimeString) { //convert "yyyy-mm-ddThh:mm" to "yyyy-mm-ddThh:mm:00.000Z"
   try {
-    // Parse the ISOString date time into a Date object
-    const date = new Date(value);
+    // Split date and time parts
+    const [datePart, timePart] = dateTimeString.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hours, minutes] = timePart.split(":").map(Number);
 
-    // Extract and format date components according to your custom format
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Add leading zero if needed
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+    // Create date in UTC
+    const date = new Date(Date.UTC(year, month - 1, day, hours, minutes));
 
-    const result = `${day}/${month}/${year} ${hours}:${minutes}`;
-    return result;
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date");
+    }
+
+    return date.toISOString();
   } catch (error) {
-    console.error("Error parsing ISOString date:", error);
-    return null; // Return None on parsing errors
+    console.error("Error converting datetime string to ISOString:", error);
+    return null;
   }
 }
 
-export function getTime(value) {
+export function isoStringToTime(value) {
+  // 2021-09-01T00:00:00.000Z to 00:00
   try {
     // Parse the ISOString date time into a Date object
     const date = new Date(value);
@@ -104,6 +109,44 @@ export function getTime(value) {
     return result;
   } catch (error) {
     console.error("Error parsing ISOString date:", error);
+    return null; // Return None on parsing errors
+  }
+}
+
+export function isoStringToDateTime(value) {
+  // 2021-09-01T00:00:00.000Z to 01/09/2021 00:00
+  try {
+    // Parse the ISOString date time into a Date object
+    const date = new Date(value);
+    // Extract and format date components according to your custom format
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Add leading zero if needed
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    const result = `${hours}:${minutes} - ${day}/${month}/${year}`;
+    return result;
+  } catch (error) {
+    console.error("Error parsing Date object:", error);
+    return null; // Return None on parsing errors
+  }
+}
+
+export function isoStringToDate(value) {
+  // 2021-09-01T00:00:00.000Z to 21 tháng 9, 2021
+  try {
+    // Parse the ISOString date time into a Date object
+    const date = new Date(value);
+    // Extract and format date components according to your custom format
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Add leading zero if needed
+    const day = String(date.getDate()).padStart(2, "0");
+
+    const result = `${day} tháng ${month}, ${year}`;
+    return result;
+  } catch (error) {
+    console.error("Error parsing Date object:", error);
     return null; // Return None on parsing errors
   }
 }

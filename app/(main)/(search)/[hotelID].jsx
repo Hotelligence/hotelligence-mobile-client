@@ -15,14 +15,17 @@ import {
   AmenityDisplay,
   DatePicker,
   GuestNumberPicker,
-  RoomDetailCard
+  RoomDetailCard,
+  DetailReviewPoint,
+  CommentDisplay,
+  SubmitButton,
 } from "@/components/search";
 import { FavoriteButton } from "@/components/home";
-import { hotels, rooms } from "@/assets/TempData"; //Delete later
+import { hotels, rooms, reviews, amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { ChevronLeft, MapPin, ChevronRight } from "lucide-react-native";
-import { amenities } from "@/assets/TempData";
+import { isoStringToDate } from "@/utils/ValueConverter";
 
 const IntroSection = ({
   hotelName,
@@ -234,10 +237,60 @@ const RoomBookingSection = ({
   );
 };
 
+const FeePolicySection = ({}) => {
+  return (
+    <View style={styles.fee_policy_section}>
+      <Text style={styles.section_title_text}>Phí và chính sách</Text>
+    </View>
+  );
+};
+
+const ReviewSection = ({ reviews, reviewPoints, onViewAllReviewPress }) => {
+  return (
+    <View style={styles.review_section}>
+      <Text style={styles.section_title_text}>Đánh giá</Text>
+      <DetailReviewPoint
+        overallPoint={8.8}
+        reviewCount="59"
+        pointCategory="Rất tốt"
+        cleanPoint={8.8}
+        servicePoint={9}
+        staffPoint={8.6}
+        facilityPoint={8.4}
+        environmentPoint={8.6}
+      />
+      <View style={{ gap: 10, marginTop: 20 }}>
+        {reviews.map((review) => (
+          <CommentDisplay
+            key={review?.id}
+            overallPoint={review?.overallPoint}
+            pointCategory={review?.pointCategory}
+            comment={review?.comment}
+            reviewDate={isoStringToDate(review?.reviewDate)}
+            userName={review?.userName}
+          />
+        ))}
+      </View>
+      <Pressable
+        onPress={onViewAllReviewPress}
+        style={{ flexDirection: "row", alignItems: "center", marginTop: 20 }}
+      >
+        <Text style={styles.view_all_text}>Xem tất cả Đánh giá</Text>
+        <ChevronRight
+          size={16}
+          color={COLOR.primary_gold_120}
+          strokeWidth={2.25}
+        />
+      </Pressable>
+    </View>
+  );
+};
+
 const HotelDetail = () => {
   const router = useRouter();
 
   const hotel = hotels[1]; //adjust this later
+  const tempRooms = rooms.slice(0, 6);
 
   // const { hotelID } = useLocalSearchParams();
 
@@ -263,13 +316,11 @@ const HotelDetail = () => {
     setRoomFilterSelected(selectedFilter);
   };
 
-  const handleDetailPress = (roomID) => {
-    console.log("Detail Pressed: ", roomID);
-  }
+  const handleDetailPress = (roomID) => {};
 
-  const handleSelectPress = (roomID) => {
-    console.log("Select Pressed: ", roomID);
-  };
+  const handleSelectPress = (roomID) => {};
+
+  const handleViewAllReviewPress = () => {};
 
   return (
     <View style={styles.container}>
@@ -281,7 +332,7 @@ const HotelDetail = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 90 }}
       >
         <View style={styles.image}>
           {wallpaperError ? (
@@ -315,7 +366,7 @@ const HotelDetail = () => {
         <RoomBookingSection
           displayedRoom={18}
           totalRoom={18}
-          rooms={rooms}
+          rooms={tempRooms}
           roomFilterSelected={roomFilterSelected}
           onRoomFilterSelected={(selectedFilter) =>
             onFilterSelected(selectedFilter)
@@ -323,7 +374,16 @@ const HotelDetail = () => {
           handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
           handleSelectPress={(roomID) => handleSelectPress(roomID)} //This is a 4 layer deep function, caution when maintaining
         />
+        <FeePolicySection />
+        <ReviewSection
+          reviews={reviews}
+          // reviewPoints={reviewPoints}
+          onViewAllReviewPress={() => handleViewAllReviewPress()}
+        />
       </ScrollView>
+      <View style={styles.submit_button_container}>
+        <SubmitButton text="Đặt phòng" style={{ width: "95%" }} />
+      </View>
     </View>
   );
 };
@@ -343,6 +403,17 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     fontSize: 22,
     color: COLOR.primary_gold_120,
+  },
+
+  submit_button_container: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 90,
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    alignItems: "center",
   },
 
   //Intro Section
@@ -405,6 +476,18 @@ const styles = StyleSheet.create({
   filter_text: {
     fontSize: 16,
     color: COLOR.primary_blue_100,
+  },
+
+  //Fee Policy Section
+  fee_policy_section: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+
+  //Review Section
+  review_section: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
   },
 });
 

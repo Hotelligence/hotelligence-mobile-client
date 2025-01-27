@@ -629,3 +629,42 @@ export const reviews = [
     reviewDate: "2024-10-12T18:55:46.997",
   },
 ];
+
+export const bookingConfirmation = {
+  hotelName: "Fusion Suites Vũng Tàu",
+  checkinTime: "2024-10-12T18:55:46.997",
+  checkoutTime: "2024-10-14T18:55:46.997",
+  numOfRooms: 1,
+  numOfNights: 1,
+
+  roomName: "Fusion Suites Twin Bed",
+  roomPrice: 1936000,
+  taxAndFee: 259424,
+  totalPrice: 2195424,
+
+  amenities: [
+    {
+      amenityIconName: "Wifi",
+      amenityLabel: "Wifi miễn phí",
+    },
+    {
+      amenityIconName: "Coffee",
+      amenityLabel: "Bao gồm bữa sáng",
+    },
+    {
+      amenityIconName: "WavesLadder",
+      amenityLabel: "Hồ bơi",
+    },
+    {
+      amenityIconName: "Utensils",
+      amenityLabel: "Nhà hàng",
+    },
+    {
+      amenityIconName: "Martini",
+      amenityLabel: "Bar",
+    },
+  ],
+
+  isBreakfastProvided: true,
+  numOfBreakfastProvided: 2,
+};

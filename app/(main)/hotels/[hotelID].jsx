@@ -340,6 +340,10 @@ const HotelDetail = () => {
 
   const handleAdditionalBookingPress = async (selectedOption) => {
     setAdditionalModalVisible(false);
+    router.push({
+      pathname: "/rooms/booking",
+      // params: { selectedOption: selectedOption },
+    })
   };
 
   const onPriceModalClose = () => {
@@ -349,6 +353,9 @@ const HotelDetail = () => {
 
   const handlePriceBookingPress = async () => {
     setPriceModalVisible(false);
+    router.push({
+      pathname: "/rooms/booking",
+    });
   };
 
   const handleViewPricePress = () => {

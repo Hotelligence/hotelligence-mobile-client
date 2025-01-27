@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     fontSize: 20,
     width: "65%",
+    textAlign: "center",
   },
 });
 

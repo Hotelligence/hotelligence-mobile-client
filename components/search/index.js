@@ -15,3 +15,4 @@ export { default as RoomDetailCard } from "./RoomDetailCard";
 export { default as DetailReviewPoint } from "./DetailReviewPoint";
 export { default as CommentDisplay } from "./CommentDisplay";
 export { default as AmenityDetailDisplay } from "./AmenityDetailDisplay";
+export { default as InputField } from "./InputField";

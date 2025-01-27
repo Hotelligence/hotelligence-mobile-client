@@ -645,23 +645,23 @@ export const bookingConfirmation = {
   amenities: [
     {
       amenityIconName: "Wifi",
-      amenityLabel: "Wifi miễn phí",
-    },
-    {
-      amenityIconName: "Coffee",
-      amenityLabel: "Bao gồm bữa sáng",
+      amenityName: "Wifi miễn phí",
     },
     {
       amenityIconName: "WavesLadder",
-      amenityLabel: "Hồ bơi",
-    },
-    {
-      amenityIconName: "Utensils",
-      amenityLabel: "Nhà hàng",
+      amenityName: "Hồ bơi",
     },
     {
       amenityIconName: "Martini",
-      amenityLabel: "Bar",
+      amenityName: "Bar",
+    },
+    {
+      amenityIconName: "Utensils",
+      amenityName: "Nhà hàng",
+    },
+    {
+      amenityIconName: "Coffee",
+      amenityName: "Bao gồm bữa sáng",
     },
   ],
 

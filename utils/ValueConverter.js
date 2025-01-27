@@ -150,3 +150,32 @@ export function isoStringToDate(value) {
     return null; // Return None on parsing errors
   }
 }
+
+export function isoStringToFullDateTime(value) { // Parse the ISOString date time into a fully date time string
+  try {
+    const date = new Date(value);
+
+    // Vietnamese days of week
+    const daysOfWeek = [
+      "Chủ nhật",
+      "Thứ hai",
+      "Thứ ba",
+      "Thứ tư",
+      "Thứ năm",
+      "Thứ sáu",
+      "Thứ bảy",
+    ];
+
+    const dayOfWeek = daysOfWeek[date.getDay()];
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${dayOfWeek}, ngày ${day} tháng ${month} năm ${year} (${hours}:${minutes})`;
+  } catch (error) {
+    console.error("Error parsing Date object:", error);
+    return null;
+  }
+}

@@ -11,7 +11,7 @@ const GeneralHeader = ({ title, style, onBackPress }) => {
         onPress={onBackPress}
         style={styles.back_button}
       />
-      <Text style={styles.title_text}>{title}</Text>
+      <Text ellipsizeMode='tail' numberOfLines={1} style={styles.title_text}>{title}</Text>
     </View>
   );
 };
@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
     height: 83,
     borderBottomWidth: 1,
     borderBottomColor: COLOR.primary_blue_50,
+    backgroundColor: COLOR.primary_white_100,
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "center",
@@ -37,6 +38,8 @@ const styles = StyleSheet.create({
   title_text: {
     fontWeight: 500,
     fontSize: 20,
+    width: "65%",
+    textAlign: "center",
   },
 });
 

@@ -163,7 +163,7 @@ const BookingAdditionalModal = ({
               </View>
               <SubmitButton
                 text="Đặt"
-                style={{ justifySelf: "flex-end", width: "25%", marginTop: 20 }}
+                style={{ justifySelf: "flex-end", width: "25%", marginTop: 30 }}
                 onPress={() => onBookingPress(selectedOption)}
               />
             </View>

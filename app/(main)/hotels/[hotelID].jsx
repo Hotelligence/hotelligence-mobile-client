@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Image,
   Pressable,
+  Animated,
 } from "react-native";
 import {
   CircleButton,
@@ -320,7 +320,12 @@ const HotelDetail = () => {
     setRoomFilterSelected(selectedFilter);
   };
 
-  const handleDetailPress = (roomID) => {};
+  const handleDetailPress = (roomID) => {
+    router.push({
+      pathname: "/rooms/[roomID]",
+      params: { roomID: roomID },
+    })
+  };
 
   const handleSelectPress = (roomID) => {
     //navigate to room detail page
@@ -349,7 +354,14 @@ const HotelDetail = () => {
   const handleViewPricePress = () => {
     setAdditionalModalVisible(false);
     setPriceModalVisible(true);
-  }
+  };
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 250, 260], // More control points
+    outputRange: [0, 0.5, 1],
+    extrapolate: "clamp",
+  });
 
   return (
     <View style={styles.container}>
@@ -366,15 +378,30 @@ const HotelDetail = () => {
         onClose={() => onPriceModalClose()}
         onBookingPress={() => handlePriceBookingPress()}
       />
+      <Animated.View style={[styles.header_container, { opacity: headerOpacity }]}>
+        <CircleButton
+          Icon={ChevronLeft}
+          onPress={onBackPress}
+          style={styles.header_back_button}
+        />
+        <Text ellipsizeMode="tail" numberOfLines={1} style={styles.header_title_text}>
+          {hotel?.hotelName}
+        </Text>
+      </Animated.View>
       <CircleButton
         Icon={ChevronLeft}
         onPress={onBackPress}
-        style={{ position: "absolute", top: 46, left: 20, zIndex: 1 }}
+        style={{ position: "absolute", top: 46, left: 20, zIndex: 2 }}
       />
-      <ScrollView
+      <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 90 }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
       >
         <View style={styles.image}>
           {wallpaperError ? (
@@ -422,7 +449,7 @@ const HotelDetail = () => {
           // reviewPoints={reviewPoints}
           onViewAllReviewPress={() => handleViewAllReviewPress()}
         />
-      </ScrollView>
+      </Animated.ScrollView>
       <View style={styles.submit_button_container}>
         <SubmitButton text="Đặt phòng" style={{ width: "95%" }} />
       </View>
@@ -439,6 +466,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 260,
+    resizeMode: "cover",
   },
 
   section_title_text: {
@@ -456,6 +484,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: "center",
+  },
+
+  header_container: {
+    position: "absolute",
+    width: "100%",
+    height: 83,
+    borderBottomWidth: 1,
+    borderBottomColor: COLOR.primary_blue_50,
+    backgroundColor: COLOR.primary_white_100,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    paddingBottom: 10,
+    zIndex: 1,
+  },
+
+  header_back_button: {
+    position: "absolute",
+    left: 20,
+    bottom: 6,
+  },
+
+  header_title_text: {
+    fontWeight: 500,
+    fontSize: 20,
+    width: "65%",
+    textAlign: "center",
   },
 
   //Intro Section

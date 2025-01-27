@@ -19,7 +19,7 @@ const SearchResult = () => {
 
   const handleOnHotelCardPress = (hotelID) => {
     router.push({
-      pathname: "/search/[hotelID]",
+      pathname: "/hotels/[hotelID]",
       params: { hotelID: hotelID }, 
     })
   };

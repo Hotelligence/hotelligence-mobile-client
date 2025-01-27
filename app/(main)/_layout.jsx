@@ -24,6 +24,18 @@ const MainStackLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="hotels"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="rooms"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

@@ -1,12 +1,11 @@
 import { Stack, } from "expo-router";
 
-const SearchStackLayout = () => {
-  // console.log("Hello search stack");
+const RoomStackLayout = () => {
 
   return (
     <Stack>
       <Stack.Screen
-        name="search-result"
+        name="[roomID]"
         options={{
           headerShown: false,
         }}
@@ -15,4 +14,4 @@ const SearchStackLayout = () => {
   );
 };
 
-export default SearchStackLayout;
+export default RoomStackLayout;

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, FlatList } from "react-native";
+import { View, Text, StyleSheet, ScrollView, FlatList, StatusBar } from "react-native";
 import { HomeHeader, RecentSearchedCard, HotelTruncatedCard, LocationTruncatedCard } from "@/components/home";
 import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
 import { COLOR } from "@/assets/colors/Colors";
@@ -8,6 +8,7 @@ import { useCallback } from "react";
 
 const HomeScreen = () => {
   const router = useRouter();
+  const isHomeScreen = true;
 
   const onSearchPress = () => {
     //handle search logic
@@ -46,6 +47,11 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar
+        barStyle={isHomeScreen && "light-content"}
+        translucent={true}
+        backgroundColor="transparent"
+      />
       <HomeHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -103,7 +109,7 @@ const HomeScreen = () => {
             Tìm kiếm gần đây của bạn
           </Text>
           <FlatList
-            contentContainerStyle={{ paddingStart: 10, paddingEnd: 20, }}
+            contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
             horizontal
             showsHorizontalScrollIndicator={false}
             data={hotels} //replace this with real data from API
@@ -119,7 +125,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: COLOR.primary_white_100,
   },
 
   search_section: {

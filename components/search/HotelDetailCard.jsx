@@ -103,7 +103,7 @@ const HotelDetailCard = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    width: 350,
+    width: "100%",
     height: 280,
     borderWidth: 1,
     borderColor: COLOR.primary_blue_50,

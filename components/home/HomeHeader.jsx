@@ -16,14 +16,14 @@ const styles = StyleSheet.create({
     container:{
       flexDirection: "row",
       backgroundColor: COLOR.primary_blue_100,
-      height: 83,
+      height: 93,
       alignItems: "flex-end",
       justifyContent: "center",
     },
 
     logo: {
       height: 50,
-      width: 128,
+      width: 132,
     },
 
     button: {

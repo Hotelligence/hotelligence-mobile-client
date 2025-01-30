@@ -28,8 +28,9 @@ const IntroSection = ({ roomName, amenities }) => {
     <View style={styles.intro_section_container}>
       <Text style={styles.room_name_text}>{roomName}</Text>
       <View style={{ marginVertical: 20 }}>
-        {amenities.map((amenity) => (
+        {amenities.map((amenity, index) => (
           <AmenityDisplay
+            key={index}
             iconName={amenity.amenityIconName}
             label={amenity.amenityType}
             style={{ marginVertical: 5 }}

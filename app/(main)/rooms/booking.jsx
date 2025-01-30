@@ -169,9 +169,9 @@ const SecondStepSection = ({ bookingInfo }) => {
         </View>
         <View style={styles.amenities_list_container}>
           <View style={{ flex: 1 }}>
-            {firstColumn.map((amenity) => (
+            {firstColumn.map((amenity, index) => (
               <AmenityDisplay
-                key={amenity.id}
+                key={index}
                 iconName={amenity.amenityIconName}
                 label={amenity.amenityName}
                 style={{ width: "85%", marginVertical: 2 }}
@@ -179,9 +179,9 @@ const SecondStepSection = ({ bookingInfo }) => {
             ))}
           </View>
           <View style={{ flex: 1, marginStart: 5 }}>
-            {secondColumn.map((amenity) => (
+            {secondColumn.map((amenity, index) => (
               <AmenityDisplay
-                key={amenity.id}
+                key={index}
                 iconName={amenity.amenityIconName}
                 label={amenity.amenityName}
                 style={{ width: "85%", marginVertical: 2 }}
@@ -309,7 +309,7 @@ const CancelPolicySection = ({}) => {
     <View style={[styles.booking_info_container, { marginTop: 20 }]}>
       <Text style={[styles.label_text, { fontSize: 18 }]}>Chính sách hủy</Text>
       {policies.map((policy, index) => (
-        <View style={{ flexDirection: "row", marginTop: 10 }}>
+        <View key={index} style={{ flexDirection: "row", marginTop: 10 }}>
           <Text style={[styles.content_text, { marginHorizontal: 5 }]}>
             {index + 1}.
           </Text>

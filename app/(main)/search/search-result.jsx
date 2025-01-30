@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
+import { View, Text, StyleSheet, FlatList, ScrollView, StatusBar } from "react-native";
 import GeneralHeader from "@/components/GeneralHeader";
 import {
   SearchInfoCard,
@@ -20,8 +20,8 @@ const SearchResult = () => {
   const handleOnHotelCardPress = (hotelID) => {
     router.push({
       pathname: "/hotels/[hotelID]",
-      params: { hotelID: hotelID }, 
-    })
+      params: { hotelID: hotelID },
+    });
   };
 
   const renderSearchResult = useCallback(
@@ -49,6 +49,11 @@ const SearchResult = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar
+        barStyle="dark-content"
+        translucent={true}
+        backgroundColor="transparent"
+      />
       <GeneralHeader title={"Vũng Tàu"} onBackPress={() => onBackPress()} />
       <SearchInfoCard
         style={{ marginHorizontal: 20, marginVertical: 15 }}
@@ -76,7 +81,7 @@ const SearchResult = () => {
       </ScrollView>
       <FlatList
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
+        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}  
         data={hotels}
         ListHeaderComponent={
           <Text style={styles.num_of_result_text}>

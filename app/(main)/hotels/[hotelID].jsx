@@ -398,7 +398,7 @@ const HotelDetail = () => {
       <CircleButton
         Icon={ChevronLeft}
         onPress={onBackPress}
-        style={{ position: "absolute", top: 46, left: 20, zIndex: 2 }}
+        style={{ position: "absolute", top: 56, left: 20, zIndex: 2 }}
       />
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
   header_container: {
     position: "absolute",
     width: "100%",
-    height: 83,
+    height: 93,
     borderBottomWidth: 1,
     borderBottomColor: COLOR.primary_blue_50,
     backgroundColor: COLOR.primary_white_100,

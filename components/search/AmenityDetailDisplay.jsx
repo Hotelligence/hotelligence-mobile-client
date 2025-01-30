@@ -9,8 +9,8 @@ const AmenityDetailDisplay = ({
 }) => {
   return (
     <View style={styles.container}>
-      {amenities.map((amenity) => (
-        <>
+      {amenities.map((amenity, index) => (
+        <View key={index}>
           <AmenityDisplay
             iconName={amenity.amenityIconName}
             label={amenity.amenityType}
@@ -19,15 +19,28 @@ const AmenityDetailDisplay = ({
             fontWeight={500}
             style={{ marginTop: 10 }}
           />
-          {amenity.amenityName.map((name) => (
+          {amenity.amenityName.map((name, amenityIndex) => (
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 40, marginVertical: 5, }}
+              key={amenityIndex}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingHorizontal: 40,
+                marginVertical: 5,
+              }}
             >
               <View style={[styles.bullet, { backgroundColor: color }]} />
-              <Text ellipsizeMode="tail" numberOfLines={1} style={[styles.text, { color: color }]}>{name}</Text>
+              <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                style={[styles.text, { color: color }]}
+              >
+                {name}
+              </Text>
             </View>
           ))}
-        </>
+        </View>
       ))}
     </View>
   );

@@ -16,7 +16,12 @@ const BookingConfirmation = () => {
   }
 
   const handleVerifyOTPPress = () => {
-    console.log("Verify OTP Pressed: ", otpInput);
+    const isSuccess = true; //adjust this later
+
+    router.push({
+      pathname: "booking/booking-status",
+      params: { isSuccess: isSuccess },
+    })   
   };
 
   return (
@@ -38,7 +43,7 @@ const BookingConfirmation = () => {
           }}
         />
         <SubmitButton
-          text="Tiếp tục"
+          text="Tiếp tục" 
           onPress={() => handleVerifyOTPPress()}
           style={{ marginTop: 40, width: "40%" }}
           disabled={otpInput.length < 6}

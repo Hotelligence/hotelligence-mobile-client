@@ -274,10 +274,10 @@ const ThirdStepSection = ({
             marginTop: 10,
           }}
         >
-          <Image source={require("@/assets/images/MasterCard_Logo.png")} />
-          <Image source={require("@/assets/images/MoMo_Logo.png")} />
-          <Image source={require("@/assets/images/Visa_Logo.png")} />
-          <Image source={require("@/assets/images/VNPay_Logo.png")} />
+          <Image style={[styles.payment_logo, { width: 57 }]} source={require("@/assets/images/MasterCard_Logo.png")} />
+          <Image style={styles.payment_logo} source={require("@/assets/images/MoMo_Logo.png")} />
+          <Image style={[styles.payment_logo, { width: 57 }]} source={require("@/assets/images/Visa_Logo.png")} />
+          <Image style={styles.payment_logo} source={require("@/assets/images/VNPay_Logo.png")} />
         </View>
         <View style={[styles.divider, { marginVertical: 30 }]} />
         <Text style={[styles.content_text, { textAlign: "justify" }]}>
@@ -498,6 +498,11 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     fontSize: 16,
     color: COLOR.primary_blue_100,
+  },
+
+  payment_logo: {
+    width: 32,
+    height: 32,
   },
 });
 

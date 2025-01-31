@@ -16,6 +16,24 @@ const BookingConfirmStackLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="booking-status"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="payment"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="payment-e-wallet"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

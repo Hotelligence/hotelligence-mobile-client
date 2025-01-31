@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import {
   View,
   Text,
@@ -138,7 +138,8 @@ const AmenitiesSection = ({ amenities, onViewAllPress }) => {
   );
 };
 
-const RoomBookingSection = ({
+const RoomBookingSection = forwardRef(
+  ({
   rooms,
   roomFilterSelected,
   onRoomFilterSelected,
@@ -146,9 +147,9 @@ const RoomBookingSection = ({
   totalRoom,
   handleDetailPress,
   handleSelectPress,
-}) => {
+}, ref) => {
   return (
-    <View style={styles.room_booking_container}>
+    <View ref={ref} style={styles.room_booking_container}>
       <Text style={styles.section_title_text}>Chọn phòng</Text>
       <DatePicker
         style={{ marginBottom: 10, marginTop: 15 }}
@@ -236,7 +237,7 @@ const RoomBookingSection = ({
       </View>
     </View>
   );
-};
+});
 
 const FeePolicySection = ({}) => {
   return (
@@ -306,6 +307,18 @@ const HotelDetail = () => {
   //   //fetch data from server
   // }, [])
 
+  //Animation for the header bar:
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 250, 260], // More control points
+    outputRange: [0, 0.5, 1],
+    extrapolate: "clamp",
+  });
+
+  //Animation to automatically scroll to room booking section:
+  const scrollViewRef = useRef(null);
+  const bookingSectionRef = useRef(null);
+
   const onFavoritePress = async () => {
     //send request to server to update favorite status
     setIsFavorite(!isFavorite);
@@ -363,12 +376,14 @@ const HotelDetail = () => {
     setPriceModalVisible(true);
   };
 
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 250, 260], // More control points
-    outputRange: [0, 0.5, 1],
-    extrapolate: "clamp",
-  });
+  const handleBookingPress = () => {
+    bookingSectionRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      scrollViewRef.current?.scrollTo({
+        y: pageY - 83, // Offset to account for header
+        animated: true
+      });
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -385,13 +400,19 @@ const HotelDetail = () => {
         onClose={() => onPriceModalClose()}
         onBookingPress={() => handlePriceBookingPress()}
       />
-      <Animated.View style={[styles.header_container, { opacity: headerOpacity }]}>
+      <Animated.View
+        style={[styles.header_container, { opacity: headerOpacity }]}
+      >
         <CircleButton
           Icon={ChevronLeft}
           onPress={onBackPress}
           style={styles.header_back_button}
         />
-        <Text ellipsizeMode="tail" numberOfLines={1} style={styles.header_title_text}>
+        <Text
+          ellipsizeMode="tail"
+          numberOfLines={1}
+          style={styles.header_title_text}
+        >
           {hotel?.hotelName}
         </Text>
       </Animated.View>
@@ -401,12 +422,15 @@ const HotelDetail = () => {
         style={{ position: "absolute", top: 56, left: 20, zIndex: 2 }}
       />
       <Animated.ScrollView
+        ref={scrollViewRef}
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 90 }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
+          {
+            useNativeDriver: true,
+          }
         )}
         scrollEventThrottle={16}
       >
@@ -440,6 +464,7 @@ const HotelDetail = () => {
           // onViewAllPress={}
         />
         <RoomBookingSection
+          ref={bookingSectionRef}
           displayedRoom={18}
           totalRoom={18}
           rooms={tempRooms}
@@ -458,7 +483,11 @@ const HotelDetail = () => {
         />
       </Animated.ScrollView>
       <View style={styles.submit_button_container}>
-        <SubmitButton text="Đặt phòng" style={{ width: "95%" }} />
+        <SubmitButton
+          text="Đặt phòng"
+          style={{ width: "95%" }}
+          onPress={handleBookingPress}
+        />
       </View>
     </View>
   );

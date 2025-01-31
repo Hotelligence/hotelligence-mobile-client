@@ -1,13 +1,25 @@
 import { COLOR } from '@/assets/colors/Colors'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 
-const SubmitButton = ({ text, style, disabled, isDisplayIcon, onPress }) => {
+const SubmitButton = ({
+  text,
+  fontSize = 18,
+  color = COLOR.primary_gold_100,
+  style,
+  disabled,
+  isDisplayIcon,
+  onPress,
+}) => {
   return (
-    <Pressable disabled={disabled} onPress={onPress} style={[styles.container, style, { opacity: disabled ? 0.6 : 1 }]}>
-      <Text style={styles.text}>{text}</Text>
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.container, style, { opacity: disabled ? 0.6 : 1, }]}
+    >
+      <Text style={[styles.text, { fontSize: fontSize, color: color }]}>{text}</Text>
     </Pressable>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -22,7 +34,6 @@ const styles = StyleSheet.create({
 
   text: {
     fontWeight: 700,
-    fontSize: 18,
     color: COLOR.primary_gold_100,
     textAlign: "center"
   },

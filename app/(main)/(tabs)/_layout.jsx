@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
+import { Platform } from "react-native";
 
 import { House, Search, Heart, History, User } from "lucide-react-native";
 
@@ -9,7 +10,7 @@ const MainTabsLayout = () => {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          height: 74,
+          height: Platform.OS === "ios" ? 70 : 60,
           paddingHorizontal: 8,
           // iOS shadow
           shadowOffset: {
@@ -25,7 +26,7 @@ const MainTabsLayout = () => {
         tabBarInactiveTintColor: COLOR.primary_blue_50,
         tabBarLabelStyle: {
           fontWeight: 500,
-          fontSize: 11,
+          fontSize: 12,
         },
       }}
     >

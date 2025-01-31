@@ -8,7 +8,6 @@ import { useCallback } from "react";
 
 const HomeScreen = () => {
   const router = useRouter();
-  const isHomeScreen = true;
 
   const onSearchPress = () => {
     //handle search logic
@@ -48,7 +47,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle={isHomeScreen && "light-content"}
+        barStyle={"light-content"}
         translucent={true}
         backgroundColor="transparent"
       />
@@ -124,7 +123,6 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     backgroundColor: COLOR.primary_white_100,
   },
 

@@ -11,6 +11,15 @@ const MainTabsLayout = () => {
         tabBarStyle: {
           height: 74,
           paddingHorizontal: 8,
+          // iOS shadow
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+          elevation: 5,
+          backgroundColor: COLOR.primary_white_100,
         },
         tabBarActiveTintColor: COLOR.primary_blue_100,
         tabBarInactiveTintColor: COLOR.primary_blue_50,

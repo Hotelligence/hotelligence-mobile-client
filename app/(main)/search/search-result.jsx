@@ -8,7 +8,6 @@ import {
 import { hotels, recentSearch } from "@/assets/TempData"; //Delete later
 import { useRouter } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
-import { useCallback } from "react";
 
 const SearchResult = () => {
   const router = useRouter();
@@ -24,27 +23,24 @@ const SearchResult = () => {
     });
   };
 
-  const renderSearchResult = useCallback(
-    ({ item }) => (
-      <HotelDetailCard
-        style={{ marginTop: 15 }}
-        hotelName={item?.hotelName}
-        imageURL={item?.images[2]}
-        city={item?.city}
-        ratingScore={item?.ratingScore.toFixed(1)}
-        ratingCategory={item?.ratingCategory}
-        numOfReviews={item?.numOfReviews}
-        originPrice={item?.originPrice}
-        discount={item?.discount}
-        discountPrice={item?.discountPrice}
-        // taxPrice={item?.taxPrice}
-        // extraFee={item?.extraFee}
-        totalPrice={item?.totalPrice}
-        isFavorite={item?.isFavorite}
-        onPress={() => handleOnHotelCardPress(item?.id)}
-      />
-    ),
-    []
+  const renderSearchResult = ({ item }) => (
+    <HotelDetailCard
+      style={{ marginTop: 15 }}
+      hotelName={item?.hotelName}
+      imageURL={item?.images[2]}
+      city={item?.city}
+      ratingScore={item?.ratingScore.toFixed(1)}
+      ratingCategory={item?.ratingCategory}
+      numOfReviews={item?.numOfReviews}
+      originPrice={item?.originPrice}
+      discount={item?.discount}
+      discountPrice={item?.discountPrice}
+      // taxPrice={item?.taxPrice}
+      // extraFee={item?.extraFee}
+      totalPrice={item?.totalPrice}
+      isFavorite={item?.isFavorite}
+      onPress={() => handleOnHotelCardPress(item?.id)}
+    />
   );
 
   return (

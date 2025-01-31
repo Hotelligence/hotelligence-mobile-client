@@ -1,5 +1,7 @@
 import { Stack, Slot, Redirect, useRouter } from "expo-router";
 import { useEffect } from "react";
+import { SafeAreaView, StatusBar, View } from "react-native";
+import { COLOR } from "@/assets/colors/Colors";
 
 const AppStackLayout = () => {
     // console.log('Hello app stack')
@@ -16,20 +18,22 @@ const AppStackLayout = () => {
     }, [isLoggedIn])
 
     return (
-      <Stack>
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(main)"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
+      <View style={{ flex: 1 }}>
+        <Stack>
+          <Stack.Screen
+            name="(auth)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="(main)"
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack>
+      </View>
     );
 }
 

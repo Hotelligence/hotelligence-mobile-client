@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native'
+import { StyleSheet, Text, View, StatusBar } from 'react-native'
 import { COLOR } from '@/assets/colors/Colors';
 import { ChevronLeft } from 'lucide-react-native';
 import { CircleButton } from './search';
@@ -19,7 +19,7 @@ const GeneralHeader = ({ title, style, onBackPress }) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    height: 83,
+    height: 93,
     borderBottomWidth: 1,
     borderBottomColor: COLOR.primary_blue_50,
     backgroundColor: COLOR.primary_white_100,

@@ -1,43 +1,35 @@
-import { Stack, Slot, Redirect, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { Stack, } from "expo-router";
 
-const MainStackLayout = () => {
-  // console.log("Hello Main stack");
+const BookingConfirmStackLayout = () => {
 
   return (
     <Stack>
       <Stack.Screen
-        name="home"
+        name="index"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="(tabs)"
+        name="booking-confirmation"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="search"
+        name="booking-status"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="hotels"
+        name="payment"
         options={{
           headerShown: false,
         }}
       />
       <Stack.Screen
-        name="rooms"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="booking"
+        name="payment-e-wallet"
         options={{
           headerShown: false,
         }}
@@ -46,4 +38,4 @@ const MainStackLayout = () => {
   );
 };
 
-export default MainStackLayout;
+export default BookingConfirmStackLayout;

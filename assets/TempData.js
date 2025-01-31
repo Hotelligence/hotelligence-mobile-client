@@ -668,3 +668,51 @@ export const bookingConfirmation = {
   isBreakfastProvided: true,
   numOfBreakfastProvided: 2,
 };
+
+export const bookingHistory = [
+  {
+    bookingID: "#123456789",
+    bookingTime: "2024-10-12T18:55:46.997",
+    hotelName: "Fusion Suites Vũng Tàu",
+    roomName: "Fusion Suites Twin Bed",
+    image:
+      "https://www.vn.kayak.com/rimg/himg/2b/85/04/ice-85672018-71957861_3XL-584000.jpg?width=968&height=607&crop=true",
+    city: "Vũng Tàu",
+    bookingTime: "2024-10-08T18:55:46.997",
+    checkinTime: "2024-10-12T18:55:46.997",
+    checkoutTime: "2024-10-14T18:55:46.997",
+    numOfGuests: 2,
+    numOfNights: 1,
+    status: "COMPLETED",
+  },
+  {
+    bookingID: "#123456789",
+    bookingTime: "2024-10-12T18:55:46.997",
+    hotelName: "Fusion Suites Vũng Tàu",
+    roomName: "Fusion Suites Twin Bed",
+    image:
+      "https://duan-sungroup.com/wp-content/uploads/2022/12/intercontinental-da-nang-sun-peninsula-resort-la-du-an-nghi-duong-dang-cap-quoc-te.png",
+    city: "Vũng Tàu",
+    bookingTime: "2024-10-08T18:55:46.997",
+    checkinTime: "2024-10-12T18:55:46.997",
+    checkoutTime: "2024-10-14T18:55:46.997",
+    numOfGuests: 2,
+    numOfNights: 1,
+    status: "PENDING",
+  },
+  {
+    bookingID: "#123456789",
+    bookingTime: "2024-10-12T18:55:46.997",
+    hotelName: "Fusion Suites Vũng Tàu",
+    roomName: "Fusion Suites Twin Bed",
+    image:
+      "https://cf.bstatic.com/xdata/images/hotel/max1024x768/416971941.jpg?k=47989e73957d65b5acbc12d2b62ed10579e28e9924cde30eea6a30ba0369febb&o=&hp=1",
+    city: "Vũng Tàu",
+    bookingTime: "2024-10-08T18:55:46.997",
+    checkinTime: "2024-10-12T18:55:46.997",
+    checkoutTime: "2024-10-14T18:55:46.997",
+    numOfGuests: 2,
+    numOfNights: 1,
+    status: "CANCELED",
+  },
+];

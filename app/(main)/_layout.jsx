@@ -36,6 +36,12 @@ const MainStackLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="booking"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

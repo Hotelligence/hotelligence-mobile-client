@@ -15,6 +15,7 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { formatVND } from "@/utils/ValueConverter";
 
 const DetailPriceModal = ({
+  buttonText = "Đặt",
   visible,
   onClose,
   priceDetails = [],
@@ -108,7 +109,7 @@ const DetailPriceModal = ({
               <Text style={styles.price_text}>{formatVND(2600000)}đ</Text>
             </View>
             <SubmitButton
-              text="Đặt"
+              text={buttonText}
               style={{ marginBottom: 20, marginTop: 40, }}
               onPress={() => onBookingPress()}
             />

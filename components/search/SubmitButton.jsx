@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native'
 
 const SubmitButton = ({ text, style, disabled, isDisplayIcon, onPress }) => {
   return (
-    <Pressable disabled={disabled} onPress={onPress} style={[styles.container, style]}>
+    <Pressable disabled={disabled} onPress={onPress} style={[styles.container, style, { opacity: disabled ? 0.6 : 1 }]}>
       <Text style={styles.text}>{text}</Text>
     </Pressable>
   )

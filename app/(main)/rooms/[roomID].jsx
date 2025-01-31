@@ -194,14 +194,17 @@ const RoomDetail = () => {
   };
 
   const handleBookingPress = async (selectedOption) => {
-    console.log("Selected index: ", selectedOption);
+    console.log("Selected additional options: ", selectedOption);
+    router.push({
+      pathname: "/booking",
+    })
   }
 
     const onPriceModalClose = () => {
       setPriceModalVisible(false);
     };
 
-    const handlePriceBookingPress = async () => {
+    const handlePriceClosePress = () => {
       setPriceModalVisible(false);
     };
 
@@ -217,7 +220,8 @@ const RoomDetail = () => {
       <DetailPriceModal
         visible={priceModalVisible}
         onClose={() => onPriceModalClose()}
-        onBookingPress={() => handlePriceBookingPress()}
+        onBookingPress={() => handlePriceClosePress()}
+        buttonText="Đóng"
       />
       <Animated.View
         style={[styles.header_container, { opacity: headerOpacity }]}

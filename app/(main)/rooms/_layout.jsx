@@ -10,12 +10,6 @@ const RoomStackLayout = () => {
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="booking"
-        options={{
-          headerShown: false,
-        }}
-      />
     </Stack>
   );
 };

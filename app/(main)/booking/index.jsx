@@ -346,6 +346,10 @@ const BookingConfirmation = () => {
     setSelectedOption("1");
   };
 
+  const handleConfirmBookingPress = async () => {
+    router.push("/booking/booking-confirmation");
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -379,7 +383,7 @@ const BookingConfirmation = () => {
           <SubmitButton
             text="Xác nhận đặt phòng"
             style={{ marginTop: 20 }}
-            onPress={() => {}}
+            onPress={() => handleConfirmBookingPress()}
           />
         </View>
       </ScrollView>

@@ -7,10 +7,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  Platform,
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { ThirdPartyButton, AuthInputField } from "@/components/authentication";
 import {
   SubmitButton,
   SecondaryButton,
@@ -22,8 +20,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 
 const OTPScreen = () => {
   const router = useRouter();
-
-  const type = "login"; //login, signup and forgotPassword
+  const { type } = useLocalSearchParams();
 
   const [otpInput, setOTPInput] = useState("");
   const [isAllowGetNewCode, setIsAllowGetNewCode] = useState(false);
@@ -51,14 +48,18 @@ const OTPScreen = () => {
     router.back();
   };
 
+  console.log(type)
+
   const handleLoginPress = async () => {};
 
   const handleSignUpPress = async () => {};
 
-  const handleResetPassPress = async () => {};
+  const handlePassRegisterPress = async () => {
+    router.replace("/password-register")
+  };
 
   const handleConfirmByPasswordPress = () => {
-    router.push("/login-password");
+    router.replace("/login-password");
   };
 
   const resendCode = async () => {
@@ -104,9 +105,9 @@ const OTPScreen = () => {
             type === "login"
               ? () => handleLoginPress()
               : type === "signup"
-              ? handleSignUpPress()
+              ? () => handleSignUpPress()
               : type === "forgotPassword"
-              ? handleResetPassPress
+              ? () => handlePassRegisterPress()
               : () => {}
           }
           style={{ width: "40%", marginTop: 40 }}
@@ -128,14 +129,16 @@ const OTPScreen = () => {
               : `Gửi lại mã sau ${delaySeconds} giây`}
           </Text>
         </Pressable>
-        <SecondaryButton
-          text="Xác nhận bằng mật khẩu"
+        {type !== "forgotPassword" && (
+          <SecondaryButton
+          text="Xác thực bằng mật khẩu"
           onPress={() => handleConfirmByPasswordPress()}
           style={{
             marginTop: 110,
             width: "80%",
           }}
         />
+        )}
       </ScrollView>
     </TouchableWithoutFeedback>
   );

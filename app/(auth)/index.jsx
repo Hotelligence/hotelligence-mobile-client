@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  ScrollView,
   Pressable,
   TouchableWithoutFeedback,
   Keyboard,
@@ -19,12 +20,27 @@ const AuthenticationScreen = () => {
   const [emailHelperText, setEmailHelperText] = useState(" ");
 
   const handleContinuePress = async () => {
-    router.push("/otp");
+    router.push({
+      pathname: "/otp",
+      params: { type: "login" },
+    });
+  };
+
+  const handleForgotPasswordPress = () => {
+    router.push({
+      pathname: "/otp",
+      params: { type: "forgotPassword" }
+    })
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+        style={{ flex: 1, backgroundColor: COLOR.primary_white_100 }}
+        keyboardDismissMode="interactive"
+      >
         <Text style={styles.title_text}>Đăng ký/Đăng nhập</Text>
         <View style={{ width: "100%", marginVertical: 40 }}>
           <ThirdPartyButton
@@ -39,7 +55,7 @@ const AuthenticationScreen = () => {
             isError={emailHelperText !== " "}
             helperText={emailHelperText}
           />
-          <Pressable>
+          <Pressable onPress={() => handleForgotPasswordPress()}>
             <Text
               style={[
                 styles.content_text,
@@ -64,18 +80,16 @@ const AuthenticationScreen = () => {
           </Text>{" "}
           của Hotelligence.
         </Text>
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: COLOR.primary_white_100,
-    justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 15,
+    paddingTop: 80,
   },
 
   title_text: {

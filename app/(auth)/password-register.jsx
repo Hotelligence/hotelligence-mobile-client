@@ -15,26 +15,24 @@ import {
   CircleButton,
 } from "@/components/search";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
-import { useRouter, } from "expo-router";
+import { useRouter } from "expo-router";
 
-const LoginByPassword = () => {
+const PasswordRegister = () => {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [emailHelperText, setEmailHelperText] = useState(" ");
   const [password, setPassword] = useState("");
   const [passwordHelperText, setPasswordHelperText] = useState(" ");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordHelperText, setConfirmPasswordHelperText] = useState(" ");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const onBackPress = () => {
     router.back();
   };
+  
+  const handleRegisterPassPress = async () => {
 
-  const handleConfirmByOTPPress = () => {
-    router.replace({
-      pathname: "/otp",
-      params: { type: "login" },
-    });
   };
 
   return (
@@ -50,15 +48,12 @@ const LoginByPassword = () => {
           onPress={() => onBackPress()}
           style={styles.back_button}
         />
-        <Text style={styles.title_text}>Xác thực bằng mật khẩu</Text>
+        <Text style={styles.title_text}>Tạo mật khẩu mới</Text>
+        <Text style={styles.content_text}>
+          Mật khẩu từ 8-32 kí tự, trong đó ít nhất có 01 chữ cái in hoa, 01 kí
+          tự đặc biệt và 01 chữ số.
+        </Text>
         <View style={{ width: "100%", marginTop: 25, gap: 5 }}>
-          <AuthInputField
-            label="Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            isError={emailHelperText !== " "}
-            helperText={emailHelperText}
-          />
           <AuthInputField
             secureTextEntry={!isPasswordVisible}
             label="Mật khẩu"
@@ -71,19 +66,23 @@ const LoginByPassword = () => {
               setIsPasswordVisible(!isPasswordVisible);
             }}
           />
+          <AuthInputField
+            secureTextEntry={!isConfirmPasswordVisible}
+            label="Nhập lại mật khẩu"
+            value={confirmPassword}
+            onChangeText={(text) => setConfirmPassword(text)}
+            isError={confirmPasswordHelperText !== " "}
+            helperText={confirmPasswordHelperText}
+            Icon={isConfirmPasswordVisible ? EyeOff : Eye}
+            onIconPress={() => {
+              setIsConfirmPasswordVisible(!isConfirmPasswordVisible);
+            }}
+          />
         </View>
         <SubmitButton
-          text="Đăng nhập"
-          onPress={() => {}}
+          text="Tạo"
+          onPress={() => handleRegisterPassPres()}
           style={{ width: "40%", marginTop: 40 }}
-        />
-        <SecondaryButton
-          text="Xác nhận bằng OTP qua Email"
-          onPress={() => handleConfirmByOTPPress()}
-          style={{
-            marginTop: 130,
-            width: "80%",
-          }}
         />
       </ScrollView>
     </TouchableWithoutFeedback>
@@ -108,6 +107,15 @@ const styles = StyleSheet.create({
     fontWeight: 500,
     color: COLOR.primary_blue_100,
   },
+
+  content_text: {
+    fontSize: 14,
+    fontWeight: 400,
+    color: COLOR.primary_blue_50,
+    textAlign: "center",
+    marginTop: 15,
+  },
+
 });
 
-export default LoginByPassword;
+export default PasswordRegister;

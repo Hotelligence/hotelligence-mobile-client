@@ -15,7 +15,9 @@ const AuthInputField = ({
   style,
   isError,
   helperText,
+  Icon,
   onChangeText,
+  onIconPress,
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -60,19 +62,26 @@ const AuthInputField = ({
   return (
     <View style={[styles.container, style]}>
       <Animated.Text style={labelStyle}>{label}</Animated.Text>
-      <TextInput
-        style={[
-          styles.input,
-          isFocused && styles.inputFocused,
-          isError && styles.inputError,
-          { paddingBottom: value || isFocused ? 0 : 15 },
-        ]}
-        value={value}
-        onChangeText={onChangeText}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        {...props}
-      />
+      <View style={[styles.input_container]}>
+        <TextInput
+          style={[
+            styles.input,
+            isFocused && styles.inputFocused,
+            isError && styles.inputError,
+            { paddingBottom: value || isFocused ? 0 : 15 },
+          ]}
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          {...props}
+        />
+        {Icon && (
+          <Pressable style={styles.icon_button} onPress={onIconPress}>
+            <Icon size={24} color={COLOR.primary_blue_100} strokeWidth={2.5} />
+          </Pressable>
+        )}
+      </View>
       {helperText && (
         <Text style={[styles.helper, isError && styles.error]}>
           {helperText}
@@ -87,15 +96,28 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-  input: {
+  input_container: {
+    flexDirection: "row",
     width: "100%",
     height: 56, //setting this make the label which has an absolute position to be at the center of the input when using IOS and a bit lower when using Android
-    padding: 15,
-    fontSize: 16,
-    color: COLOR.primary_blue_100,
     borderWidth: 1,
     borderColor: COLOR.primary_blue_50,
     borderRadius: 10,
+    paddingStart: 15,
+    paddingEnd: 10,
+  },
+
+  input: {
+    flex: 9,
+    fontSize: 16,
+    color: COLOR.primary_blue_100,
+    paddingVertical: 15,
+  },
+
+  icon_button: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   inputFocused: {

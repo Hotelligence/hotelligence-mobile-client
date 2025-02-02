@@ -11,13 +11,12 @@ import { COLOR } from "@/assets/colors/Colors";
 import { AuthInputField } from "@/components/authentication";
 import {
   SubmitButton,
-  SecondaryButton,
   CircleButton,
 } from "@/components/search";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-const PasswordRegister = () => {
+const PasswordReset = () => {
   const router = useRouter();
 
   const [password, setPassword] = useState("");
@@ -31,7 +30,7 @@ const PasswordRegister = () => {
     router.back();
   };
   
-  const handleRegisterPassPress = async () => {
+  const handleResetPassPress = async () => {
 
   };
 
@@ -81,7 +80,7 @@ const PasswordRegister = () => {
         </View>
         <SubmitButton
           text="Tạo"
-          onPress={() => handleRegisterPassPres()}
+          onPress={() => handleResetPassPress()}
           style={{ width: "40%", marginTop: 40 }}
         />
       </ScrollView>
@@ -118,4 +117,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default PasswordRegister;
+export default PasswordReset;

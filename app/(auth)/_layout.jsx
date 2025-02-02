@@ -23,7 +23,7 @@ const AuthStackLayout = () => {
           name="signup-create-password"
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="password-register" options={{ headerShown: false }} />
+        <Stack.Screen name="password-reset" options={{ headerShown: false }} />
       </Stack>
     </View>
   );

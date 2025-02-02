@@ -20,7 +20,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 
 const OTPScreen = () => {
   const router = useRouter();
-  const { type } = useLocalSearchParams();
+  // const { type } = useLocalSearchParams();
+  const type = "signup" //Delete later
 
   const [otpInput, setOTPInput] = useState("");
   const [isAllowGetNewCode, setIsAllowGetNewCode] = useState(false);
@@ -48,14 +49,14 @@ const OTPScreen = () => {
     router.back();
   };
 
-  console.log(type)
-
   const handleLoginPress = async () => {};
 
-  const handleSignUpPress = async () => {};
+  const handleSignUpPress = async () => {
+    router.replace("signup-create-name");
+  };
 
   const handlePassRegisterPress = async () => {
-    router.replace("/password-register")
+    router.replace("/password-reset")
   };
 
   const handleConfirmByPasswordPress = () => {

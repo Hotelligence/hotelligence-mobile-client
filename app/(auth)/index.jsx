@@ -10,10 +10,17 @@ import {
 import { COLOR } from "@/assets/colors/Colors";
 import { ThirdPartyButton, AuthInputField } from "@/components/authentication";
 import { SubmitButton } from "@/components/search";
+import { useRouter } from "expo-router";
 
 const AuthenticationScreen = () => {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [emailHelperText, setEmailHelperText] = useState(" ");
+
+  const handleContinuePress = async () => {
+    router.push("/otp");
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -45,7 +52,7 @@ const AuthenticationScreen = () => {
         </View>
         <SubmitButton
           text="Tiếp tục"
-          onPress={() => {}}
+          onPress={() => handleContinuePress()}
           style={{ width: "40%" }}
         />
         <Text

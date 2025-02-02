@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, StatusBar, ScrollView } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { HomeHeader } from "@/components/home";
 import { hotels, hotelHistory, bookingHistory } from "@/assets/TempData"; //Delete later
 import { HotelHistoryCard } from "@/components/history";
 import { isoStringToDate } from "@/utils/ValueConverter";
@@ -30,7 +29,6 @@ const HistoryScreen = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-      <HomeHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}

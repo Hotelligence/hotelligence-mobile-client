@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, StatusBar, Image } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { HomeHeader } from "@/components/home";
 import { BarButton } from "@/components/profile";
 
 const ProfileScreen = () => {
@@ -15,7 +14,6 @@ const ProfileScreen = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-      <HomeHeader />
       <View
         style={{
           paddingHorizontal: 20,

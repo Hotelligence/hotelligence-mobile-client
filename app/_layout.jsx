@@ -5,7 +5,7 @@ import { COLOR } from "@/assets/colors/Colors";
 
 const AppStackLayout = () => {
     // console.log('Hello app stack')
-    const isLoggedIn = true; //handle this later
+    const isLoggedIn = false; //handle this later
     const router = useRouter();
 
     //Check if user has logged in
@@ -18,22 +18,20 @@ const AppStackLayout = () => {
     }, [isLoggedIn])
 
     return (
-      <View style={{ flex: 1 }}>
-        <Stack>
-          <Stack.Screen
-            name="(auth)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="(main)"
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack>
-      </View>
+      <Stack>
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="(main)"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
     );
 }
 

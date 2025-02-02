@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, StatusBar } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { HomeHeader } from "@/components/home";
 import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
 
 const SearchScreen = () => {
@@ -11,7 +10,6 @@ const SearchScreen = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-      <HomeHeader />
       <View style={styles.search_section}>
         <Text style={styles.search_section_title}>Tìm kiếm khách sạn</Text>
         <SearchBar

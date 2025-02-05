@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Pressable,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
@@ -12,7 +11,7 @@ import { COLOR } from "@/assets/colors/Colors";
 import { ThirdPartyButton, AuthInputField } from "@/components/authentication";
 import { SubmitButton } from "@/components/search";
 import { useRouter } from "expo-router";
-import { useSignUp, useSignIn, useSSO, } from "@clerk/clerk-expo";
+import { useSignUp, useSignIn, useSSO } from "@clerk/clerk-expo";
 
 const AuthenticationScreen = () => {
   const { signUp } = useSignUp();
@@ -47,6 +46,7 @@ const AuthenticationScreen = () => {
         params: { type: "signup" },
       });
     } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
       const errorCode = err.errors[0].code;
       if (errorCode === "form_identifier_exists") {
         const { supportedFirstFactors } = await signIn.create({
@@ -77,28 +77,19 @@ const AuthenticationScreen = () => {
   }, []);
 
   const handleGoogleOAuthPress = useCallback(async () => {
-    try{
-      const { createdSessionId, setActive, } =
-        await startSSOFlow({
-          strategy: "oauth_google",
-        });
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+      });
 
       if (createdSessionId) {
-        setActive({ session: createdSessionId })
+        setActive({ session: createdSessionId });
         router.replace("/");
       }
-
-    } catch(err){
+    } catch (err) {
       console.error(JSON.stringify(err, null, 2));
     }
   }, []);
-
-  const handleForgotPasswordPress = () => {
-    router.push({
-      pathname: "/otp",
-      params: { type: "forgotPassword" },
-    });
-  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -126,19 +117,10 @@ const AuthenticationScreen = () => {
             isError={emailHelperText !== " "}
             helperText={emailHelperText}
           />
-          <Pressable onPress={() => handleForgotPasswordPress()}>
-            <Text
-              style={[
-                styles.content_text,
-                { marginTop: 20, textAlign: "right" },
-              ]}
-            >
-              Quên mật khẩu?
-            </Text>
-          </Pressable>
         </View>
         <SubmitButton
           text="Tiếp tục"
+          disabled={email.length <= 0}
           isLoading={buttonLoading}
           onPress={() => handleContinuePress(email)}
           style={{ width: "40%" }}

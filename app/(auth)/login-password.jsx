@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { AuthInputField } from "@/components/authentication";
@@ -64,6 +65,20 @@ const LoginByPassword = () => {
     }
   }, []);
 
+  const handleForgotPasswordPress = useCallback(async () => {
+    try {
+      const email = signIn.identifier;
+      await signIn?.create({
+        strategy: "reset_password_email_code",
+        identifier: email,
+      });
+
+      router.push("/forgot-password");
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
@@ -97,6 +112,16 @@ const LoginByPassword = () => {
               setIsPasswordVisible(!isPasswordVisible);
             }}
           />
+          <Pressable onPress={() => handleForgotPasswordPress()}>
+            <Text
+              style={[
+                styles.content_text,
+                { marginTop: 20, textAlign: "right" },
+              ]}
+            >
+              Quên mật khẩu?
+            </Text>
+          </Pressable>
         </View>
         <SubmitButton
           text="Đăng nhập"
@@ -106,7 +131,7 @@ const LoginByPassword = () => {
           style={{ width: "40%", marginTop: 40 }}
         />
         <SecondaryButton
-          text="Xác nhận bằng OTP qua Email"
+          text="Xác thực bằng OTP qua Email"
           onPress={handleConfirmByOTPPress}
           style={{
             marginTop: 130,

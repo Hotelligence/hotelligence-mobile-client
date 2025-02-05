@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, FlatList, StatusBar } from "react-native";
-import { HomeHeader, RecentSearchedCard, HotelTruncatedCard, LocationTruncatedCard } from "@/components/home";
+import { RecentSearchedCard, HotelTruncatedCard, LocationTruncatedCard } from "@/components/home";
 import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
@@ -51,7 +51,6 @@ const HomeScreen = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-      <HomeHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20 }}

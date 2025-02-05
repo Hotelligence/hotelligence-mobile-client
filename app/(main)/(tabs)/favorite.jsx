@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, StatusBar, ScrollView } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { HomeHeader } from "@/components/home";
 import { HotelDetailCard } from "@/components/search";
 import { hotels } from "@/assets/TempData"; //Delete later
 
@@ -16,7 +15,6 @@ const FavoriteScreen = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-      <HomeHeader />
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}

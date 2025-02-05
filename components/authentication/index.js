@@ -1,4 +1,2 @@
-//EXAMPLE
-
-// export { default as SubmitButton } from "./SubmitButton";
-// export { default as UtilityCard } from "./UtilityCard";
+export { default as ThirdPartyButton } from "./ThirdPartyButton";
+export { default as AuthInputField } from "./AuthInputField";

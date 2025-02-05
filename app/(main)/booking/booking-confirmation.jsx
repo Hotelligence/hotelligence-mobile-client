@@ -38,12 +38,16 @@ const BookingConfirmation = () => {
           focusColor={COLOR.secondary_green_100}
           onTextChange={(text) => setOTPInput(text)}
           theme={{
-            containerStyle: { marginTop: 30, },
-            pinCodeContainerStyle: { backgroundColor: "#D9D9D9", },
+            containerStyle: { marginTop: 30 },
+            pinCodeContainerStyle: {
+              backgroundColor: "#D9D9D9",
+              width: 55,
+              height: 65,
+            },
           }}
         />
         <SubmitButton
-          text="Tiếp tục" 
+          text="Tiếp tục"
           onPress={() => handleVerifyOTPPress()}
           style={{ marginTop: 40, width: "40%" }}
           disabled={otpInput.length < 6}

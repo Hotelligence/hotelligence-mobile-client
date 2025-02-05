@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -17,16 +17,20 @@ import {
 import { OtpInput } from "react-native-otp-entry";
 import { ArrowLeft } from "lucide-react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useSignIn, useSignUp } from "@clerk/clerk-expo";
 
 const OTPScreen = () => {
   const router = useRouter();
-  // const { type } = useLocalSearchParams();
-  const type = "signup" //Delete later,
+  const { type } = useLocalSearchParams();
   //"signup", "login" and "forgotPassword"
+  const { signUp } = useSignUp();
+  const { signIn, setActive } = useSignIn();
 
   const [otpInput, setOTPInput] = useState("");
+  const [helperText, setHelperText] = useState(" ");
   const [isAllowGetNewCode, setIsAllowGetNewCode] = useState(false);
   const [delaySeconds, setDelaySeconds] = useState(30);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   useEffect(() => {
     if (!isAllowGetNewCode) {
@@ -50,18 +54,65 @@ const OTPScreen = () => {
     router.back();
   };
 
-  const handleLoginPress = async () => {};
-
-  const handleSignUpPress = async () => {
-    router.replace("signup-create-name");
+  const handleOTPErrorDisplay = (err) => {
+    if (err.errors[0]?.code === "form_code_incorrect") {
+      setHelperText("Mã OTP không chính xác, vui lòng kiểm tra lại");
+    } else {
+      setHelperText(
+        "Mã OTP đã hết hạn, vui lòng nhấn Gửi lại mã OTP để lấy một mã khác"
+      );
+    }
   };
 
+  const handleLoginPress = useCallback(async (otpInput) => {
+    setButtonLoading(true);
+    try {
+      const signInAttempt = await signIn.attemptFirstFactor({
+        strategy: "email_code",
+        code: otpInput,
+      });
+
+      if (signInAttempt.status === "complete") {
+        await setActive({ session: signInAttempt.createdSessionId });
+        console.log("Login success"); //
+
+        router.replace("/");
+      }
+    } catch (err) {
+      handleOTPErrorDisplay(err);
+      console.log(JSON.stringify(err, null, 2));
+    } finally {
+      setButtonLoading(false);
+    }
+  }, []);
+
+  const handleSignUpPress = useCallback(async (otpInput) => {
+    setButtonLoading(true);
+    try {
+      await signUp.attemptEmailAddressVerification({
+        code: otpInput,
+      });
+
+      //If the email is verified, navigate to this screen, else it will jump to the catch block to handle error display
+      router.push({
+        pathname: "/signup-create-name",
+      });
+    } catch (err) {
+      handleOTPErrorDisplay(err);
+      console.log(JSON.stringify(err, null, 2));
+    } finally {
+      setButtonLoading(false);
+    }
+  }, []);
+
   const handlePassRegisterPress = async () => {
-    router.replace("/password-reset")
+    router.replace("/password-reset");
   };
 
   const handleConfirmByPasswordPress = () => {
-    router.replace("/login-password");
+    router.replace({
+      pathname: "/login-password",
+    });
   };
 
   const resendCode = async () => {
@@ -90,26 +141,35 @@ const OTPScreen = () => {
         <OtpInput
           numberOfInputs={6}
           focusColor={COLOR.secondary_green_100}
-          onTextChange={(text) => setOTPInput(text)}
+          onTextChange={(text) => {
+            setOTPInput(text);
+            setHelperText(" ");
+          }}
           theme={{
             containerStyle: { marginTop: 30 },
             pinCodeContainerStyle: {
               backgroundColor: "#D9D9D9",
               width: 55,
               height: 65,
+              borderColor:
+                helperText !== " "
+                  ? COLOR.tertiary_red_100
+                  : COLOR.primary_white_100,
             },
           }}
         />
+        <Text style={styles.helper_text}>{helperText}</Text>
         <SubmitButton
           disabled={otpInput.length < 6}
+          isLoading={buttonLoading}
           text="Tiếp tục"
           onPress={
             type === "login"
-              ? () => handleLoginPress()
+              ? () => handleLoginPress(otpInput)
               : type === "signup"
-              ? () => handleSignUpPress()
+              ? () => handleSignUpPress(otpInput)
               : type === "forgotPassword"
-              ? () => handlePassRegisterPress()
+              ? () => handlePassRegisterPress(otpInput)
               : () => {}
           }
           style={{ width: "40%", marginTop: 40 }}
@@ -133,13 +193,13 @@ const OTPScreen = () => {
         </Pressable>
         {type !== "forgotPassword" && (
           <SecondaryButton
-          text="Xác thực bằng mật khẩu"
-          onPress={() => handleConfirmByPasswordPress()}
-          style={{
-            marginTop: 110,
-            width: "80%",
-          }}
-        />
+            text="Xác thực bằng mật khẩu"
+            onPress={() => handleConfirmByPasswordPress()}
+            style={{
+              marginTop: 110,
+              width: "80%",
+            }}
+          />
         )}
       </ScrollView>
     </TouchableWithoutFeedback>
@@ -163,6 +223,14 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 500,
     color: COLOR.primary_blue_100,
+  },
+
+  helper_text: {
+    marginTop: 10,
+    marginLeft: 15,
+    fontSize: 14,
+    color: COLOR.tertiary_red_100,
+    alignSelf: "flex-start",
   },
 
   content_text: {

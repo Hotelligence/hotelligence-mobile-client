@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet, StatusBar, Image } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { BarButton } from "@/components/profile";
-import { useClerk } from "@clerk/clerk-expo";
+import { useClerk, useUser } from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
 
 const ProfileScreen = () => {
   const { signOut } = useClerk();
+  const { user } = useUser();
 
   const handleLogoutPress = async () => {
     try {
@@ -34,7 +35,7 @@ const ProfileScreen = () => {
             source={require("@/assets/images/avatar.png")}
             style={styles.avatar}
           />
-          <Text style={styles.user_name_text}>Trần Võ Sơn Tùng</Text>
+          <Text style={styles.user_name_text}>{user.firstName}</Text>
         </View>
       </View>
       <View style={{ marginTop: 30, paddingHorizontal: 20 }}>

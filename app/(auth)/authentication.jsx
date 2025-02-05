@@ -74,11 +74,11 @@ const AuthenticationScreen = () => {
     } finally {
       setButtonLoading(false);
     }
-  });
+  }, []);
 
   const handleGoogleOAuthPress = useCallback(async () => {
     try{
-      const { createdSessionId, setActive, signIn, signUp } =
+      const { createdSessionId, setActive, } =
         await startSSOFlow({
           strategy: "oauth_google",
         });
@@ -91,7 +91,7 @@ const AuthenticationScreen = () => {
     } catch(err){
       console.error(JSON.stringify(err, null, 2));
     }
-  });
+  }, []);
 
   const handleForgotPasswordPress = () => {
     router.push({

@@ -62,7 +62,7 @@ const AuthInputField = ({
   return (
     <View style={[styles.container, style]}>
       <Animated.Text style={labelStyle}>{label}</Animated.Text>
-      <View style={[styles.input_container]}>
+      <View style={[styles.input_container, { borderColor: isError ? COLOR.secondary_red_100 : COLOR.primary_blue_50}]}>
         <TextInput
           style={[
             styles.input,
@@ -101,7 +101,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 56, //setting this make the label which has an absolute position to be at the center of the input when using IOS and a bit lower when using Android
     borderWidth: 1,
-    borderColor: COLOR.primary_blue_50,
     borderRadius: 10,
     paddingStart: 15,
     paddingEnd: 10,

@@ -1,5 +1,11 @@
-import { COLOR } from '@/assets/colors/Colors'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { COLOR } from "@/assets/colors/Colors";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 
 const SubmitButton = ({
   text,
@@ -8,15 +14,22 @@ const SubmitButton = ({
   style,
   disabled,
   isDisplayIcon,
+  isLoading,
   onPress,
 }) => {
   return (
     <Pressable
-      disabled={disabled}
+      disabled={disabled || isLoading}
       onPress={onPress}
-      style={[styles.container, style, { opacity: disabled ? 0.6 : 1, }]}
+      style={[styles.container, style, { opacity: disabled || isLoading ? 0.6 : 1 }]}
     >
-      <Text style={[styles.text, { fontSize: fontSize, color: color }]}>{text}</Text>
+      {isLoading ? (
+        <ActivityIndicator size="small" color={COLOR.primary_gold_120} />
+      ) : (
+        <Text style={[styles.text, { fontSize: fontSize, color: color }]}>
+          {text}
+        </Text>
+      )}
     </Pressable>
   );
 };
@@ -35,10 +48,10 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: 700,
     color: COLOR.primary_gold_100,
-    textAlign: "center"
+    textAlign: "center",
   },
 
   icon: {},
 });
 
-export default SubmitButton
+export default SubmitButton;

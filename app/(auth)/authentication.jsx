@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,25 +12,92 @@ import { COLOR } from "@/assets/colors/Colors";
 import { ThirdPartyButton, AuthInputField } from "@/components/authentication";
 import { SubmitButton } from "@/components/search";
 import { useRouter } from "expo-router";
+import { useSignUp, useSignIn, useSSO, } from "@clerk/clerk-expo";
 
 const AuthenticationScreen = () => {
+  const { signUp } = useSignUp();
+  const { signIn } = useSignIn();
+  const { startSSOFlow } = useSSO();
+
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [emailHelperText, setEmailHelperText] = useState(" ");
+  const [buttonLoading, setButtonLoading] = useState(false);
 
-  const handleContinuePress = async () => {
-    router.push({
-      pathname: "/otp",
-      params: { type: "login" },
-    });
+  const handleEmailErrorDisplay = (err) => {
+    if (err.errors[0]?.code === "form_param_nil") {
+      setEmailHelperText("Vui lòng nhập email");
+    } else if (err.errors[0].code === "form_param_format_invalid") {
+      setEmailHelperText("Emai không hợp lệ");
+    } else {
+      setEmailHelperText("Đã xảy ra lỗi, vui lòng thử lại");
+    }
   };
+
+  const handleContinuePress = useCallback(async (email) => {
+    setEmailHelperText(" ");
+    setButtonLoading(true);
+    try {
+      await signUp.create({ emailAddress: email });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+
+      router.push({
+        pathname: "/otp",
+        params: { type: "signup" },
+      });
+    } catch (err) {
+      const errorCode = err.errors[0].code;
+      if (errorCode === "form_identifier_exists") {
+        const { supportedFirstFactors } = await signIn.create({
+          identifier: email,
+        });
+
+        const firstEmailFactor = supportedFirstFactors.find((factor) => {
+          return factor.strategy === "email_code";
+        });
+
+        const { emailAddressId } = firstEmailFactor;
+
+        await signIn.prepareFirstFactor({
+          strategy: "email_code",
+          emailAddressId,
+        });
+
+        router.push({
+          pathname: "/otp",
+          params: { type: "login" },
+        });
+      } else {
+        handleEmailErrorDisplay(err);
+      }
+    } finally {
+      setButtonLoading(false);
+    }
+  });
+
+  const handleGoogleOAuthPress = useCallback(async () => {
+    try{
+      const { createdSessionId, setActive, signIn, signUp } =
+        await startSSOFlow({
+          strategy: "oauth_google",
+        });
+
+      if (createdSessionId) {
+        setActive({ session: createdSessionId })
+        router.replace("/");
+      }
+
+    } catch(err){
+      console.error(JSON.stringify(err, null, 2));
+    }
+  });
 
   const handleForgotPasswordPress = () => {
     router.push({
       pathname: "/otp",
-      params: { type: "forgotPassword" }
-    })
+      params: { type: "forgotPassword" },
+    });
   };
 
   return (
@@ -46,12 +113,16 @@ const AuthenticationScreen = () => {
           <ThirdPartyButton
             text="Đăng nhập với Google"
             logo={require("@/assets/images/google-logo.png")}
+            onPress={handleGoogleOAuthPress}
           />
           <Text style={styles.split_text}>Hoặc</Text>
           <AuthInputField
             label="Email"
             value={email}
-            onChangeText={(text) => setEmail(text)}
+            onChangeText={(text) => {
+              setEmailHelperText(" ");
+              setEmail(text);
+            }}
             isError={emailHelperText !== " "}
             helperText={emailHelperText}
           />
@@ -68,7 +139,8 @@ const AuthenticationScreen = () => {
         </View>
         <SubmitButton
           text="Tiếp tục"
-          onPress={() => handleContinuePress()}
+          isLoading={buttonLoading}
+          onPress={() => handleContinuePress(email)}
           style={{ width: "40%" }}
         />
         <Text

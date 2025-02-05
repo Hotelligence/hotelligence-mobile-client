@@ -1,10 +1,19 @@
 import { View, Text, StyleSheet, StatusBar, Image } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { BarButton } from "@/components/profile";
+import { useClerk } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking";
 
 const ProfileScreen = () => {
+  const { signOut } = useClerk();
+
   const handleLogoutPress = async () => {
-    console.log("Logout Pressed");
+    try {
+      await signOut();
+      Linking.openURL(Linking.createURL("/"));
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    }
   };
 
   return (

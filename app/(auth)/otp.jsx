@@ -21,7 +21,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 const OTPScreen = () => {
   const router = useRouter();
   // const { type } = useLocalSearchParams();
-  const type = "signup" //Delete later
+  const type = "signup" //Delete later,
+  //"signup", "login" and "forgotPassword"
 
   const [otpInput, setOTPInput] = useState("");
   const [isAllowGetNewCode, setIsAllowGetNewCode] = useState(false);

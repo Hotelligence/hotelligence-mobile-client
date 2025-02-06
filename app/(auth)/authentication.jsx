@@ -46,7 +46,7 @@ const AuthenticationScreen = () => {
         params: { type: "signup" },
       });
     } catch (err) {
-      console.log(JSON.stringify(err, null, 2));
+      //Catch the case when Email is already exist => start to sign in
       const errorCode = err.errors[0].code;
       if (errorCode === "form_identifier_exists") {
         const { supportedFirstFactors } = await signIn.create({
@@ -56,7 +56,6 @@ const AuthenticationScreen = () => {
         const firstEmailFactor = supportedFirstFactors.find((factor) => {
           return factor.strategy === "email_code";
         });
-
         const { emailAddressId } = firstEmailFactor;
 
         await signIn.prepareFirstFactor({
@@ -70,6 +69,7 @@ const AuthenticationScreen = () => {
         });
       } else {
         handleEmailErrorDisplay(err);
+        console.log(JSON.stringify(err, null, 2));
       }
     } finally {
       setButtonLoading(false);

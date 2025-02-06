@@ -90,9 +90,27 @@ const PasswordReset = () => {
     }
   }, []);
 
-  const resendCode = async () => {
-    setIsAllowGetNewCode(false);
-    setDelaySeconds(30);
+  const handleResendCodePress = async () => {
+    try {
+      const { supportedFirstFactors } = await signIn.create({
+        identifier: signIn.identifier,
+      });
+
+      const firstEmailFactor = supportedFirstFactors.find((factor) => {
+        return factor.strategy === "email_code";
+      });
+      const { emailAddressId } = firstEmailFactor;
+
+      await signIn.prepareFirstFactor({
+        strategy: "email_code",
+        emailAddressId,
+      });
+
+      setIsAllowGetNewCode(false);
+      setDelaySeconds(30);
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
   };
 
   return (
@@ -134,7 +152,7 @@ const PasswordReset = () => {
           }}
         />
         <Text style={styles.helper_text}>{otpHelperText}</Text>
-        <Pressable style={{ marginTop: 25 }} onPress={() => resendCode()}>
+        <Pressable style={{ marginTop: 25 }} onPress={handleResendCodePress}>
           <Text
             style={[
               styles.resend_text,

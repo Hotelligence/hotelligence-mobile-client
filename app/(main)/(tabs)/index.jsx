@@ -1,13 +1,23 @@
+import { useCallback, useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, FlatList, StatusBar } from "react-native";
 import { RecentSearchedCard, HotelTruncatedCard, LocationTruncatedCard } from "@/components/home";
 import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
+import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
-import { useCallback } from "react";
 
 const HomeScreen = () => {
   const router = useRouter();
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000)
+  }, []);
 
   const onSearchPress = () => {
     //handle search logic
@@ -43,6 +53,10 @@ const HomeScreen = () => {
       imageURL={item?.images[1]}
     />
   ), []);
+
+  if(loading){
+    return <ScreenSpinner />
+  }
 
   return (
     <View style={styles.container}>

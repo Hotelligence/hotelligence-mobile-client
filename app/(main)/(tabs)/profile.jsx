@@ -1,10 +1,20 @@
 import { View, Text, StyleSheet, StatusBar, Image } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { BarButton } from "@/components/profile";
+import { useClerk, useUser } from "@clerk/clerk-expo";
+import * as Linking from "expo-linking";
 
 const ProfileScreen = () => {
+  const { signOut } = useClerk();
+  const { user } = useUser();
+
   const handleLogoutPress = async () => {
-    console.log("Logout Pressed");
+    try {
+      await signOut();
+      Linking.openURL(Linking.createURL("/"));
+    } catch (err) {
+      console.error(JSON.stringify(err, null, 2));
+    }
   };
 
   return (
@@ -25,7 +35,7 @@ const ProfileScreen = () => {
             source={require("@/assets/images/avatar.png")}
             style={styles.avatar}
           />
-          <Text style={styles.user_name_text}>Trần Võ Sơn Tùng</Text>
+          <Text style={styles.user_name_text}>{`${user.lastName} ${user.firstName}`}</Text>
         </View>
       </View>
       <View style={{ marginTop: 30, paddingHorizontal: 20 }}>
@@ -50,6 +60,7 @@ const styles = StyleSheet.create({
   user_name_text: {
     fontSize: 22,
     fontWeight: 500,
+    marginTop: 10,
   },
 });
 

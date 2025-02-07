@@ -1,48 +1,114 @@
-import { View, Text, StyleSheet, ScrollView, FlatList, StatusBar } from "react-native";
-import { RecentSearchedCard, HotelTruncatedCard, LocationTruncatedCard } from "@/components/home";
-import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
+import { useCallback, useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  StatusBar,
+  Platform,
+} from "react-native";
+import {
+  RecentSearchedCard,
+  HotelTruncatedCard,
+  LocationTruncatedCard,
+} from "@/components/home";
+import {
+  SearchBar,
+  DatePicker,
+  GuestNumberPicker,
+  SubmitButton,
+} from "@/components/search";
+import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
-import { useCallback } from "react";
 
 const HomeScreen = () => {
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
+
+  const [searchValue, setSearchValue] = useState("");
+
+  const [fromDatePickerVisible, setFromDatePickerVisible] = useState(false);
+  const [selectedFromDate, setSelectedFromDate] = useState(null);
+  const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
+  const [selectedToDate, setSelectedToDate] = useState(null);
+
+  const [guestNumberPickerVisible, setGuestNumberPickerVisible] = useState(false);
+  const [numOfAdult, setNumOfAdult] = useState(0);
+  const [numOfChild, setNumOfChild] = useState(0);
+
+  useEffect(() => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
+
   const onSearchPress = () => {
     //handle search logic
-    router.push("/search/search-result")
+    router.push("/search/search-result");
+  };
+
+  const handleOutsideModalPress = (adults, children) => {
+    setNumOfAdult(adults);
+    setNumOfChild(children);
+    setGuestNumberPickerVisible(false);
+  };
+
+  const renderRecentSearched = useCallback(
+    ({ item }) => (
+      <RecentSearchedCard
+        style={{ marginStart: 10 }}
+        searchKeyword={item?.title}
+        period={item?.period}
+        numOfGuestRoom={item?.numOfGuestRoom}
+      />
+    ),
+    []
+  );
+
+  const renderHotels = useCallback(
+    ({ item }) => (
+      <HotelTruncatedCard
+        style={{ marginStart: 10 }}
+        hotelName={item?.hotelName}
+        city={item?.city}
+        ratingScore={item?.ratingScore}
+        numOfReviews={item?.numOfReviews}
+        imageURL={item?.images[0]}
+        isFavorite={item?.isFavorite}
+      />
+    ),
+    []
+  );
+
+  const renderLocations = useCallback(
+    ({ item }) => (
+      <LocationTruncatedCard
+        style={{ marginStart: 10 }}
+        city={item?.city}
+        province={item?.province}
+        imageURL={item?.images[1]}
+      />
+    ),
+    []
+  );
+  
+  if (loading) {
+    return (
+      <>
+        <StatusBar
+          barStyle={"light-content"}
+          translucent={true}
+          backgroundColor="transparent"
+        />
+        <ScreenSpinner />
+      </>
+    );
   }
-
-  const renderRecentSearched = useCallback(({ item }) => (
-    <RecentSearchedCard
-      style={{ marginStart: 10 }}
-      searchKeyword={item?.title}
-      period={item?.period}
-      numOfGuestRoom={item?.numOfGuestRoom}
-    />
-  ), []);
-
-  const renderHotels = useCallback(({ item }) => (
-    <HotelTruncatedCard
-      style={{ marginStart: 10 }}
-      hotelName={item?.hotelName}
-      city={item?.city}
-      ratingScore={item?.ratingScore}
-      numOfReviews={item?.numOfReviews}
-      imageURL={item?.images[0]}
-      isFavorite={item?.isFavorite}
-    />
-  ), []);
-
-  const renderLocations = useCallback(({ item }) => (
-     <LocationTruncatedCard
-      style={{ marginStart: 10 }}
-      city={item?.city}
-      province={item?.province}
-      imageURL={item?.images[1]}
-    />
-  ), []);
 
   return (
     <View style={styles.container}>
@@ -58,16 +124,73 @@ const HomeScreen = () => {
         <View style={styles.search_section}>
           <Text style={styles.search_section_title}>Bạn muốn đi đâu?</Text>
           <SearchBar
-            style={{ marginBottom: 10 }}
+            value={searchValue}
             placeholder="Tìm địa điểm, khách sạn, v.v."
-          />
-          <DatePicker
+            onChangeText={(value) => setSearchValue(value)}
             style={{ marginBottom: 10 }}
-            placeholder="29 thg 3 - 30 thg 3"
           />
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+            }}
+          >
+            <DatePicker
+              label="Chọn ngày đi"
+              placeholder="29 thg 3"
+              value={selectedFromDate}
+              display={Platform.OS === "ios" ? "inline" : "default"}
+              datePickerVisible={fromDatePickerVisible}
+              onChange={(e, selectedDate) => {
+                setSelectedFromDate(selectedDate);
+                setFromDatePickerVisible(!fromDatePickerVisible);
+              }}
+              onPress={() => {
+                setFromDatePickerVisible(!fromDatePickerVisible);
+              }}
+              onOutsideModalPress={() =>
+                setFromDatePickerVisible(!fromDatePickerVisible)
+              }
+              style={{ marginBottom: 10, flex: 1 }}
+              minimumDate={new Date()}
+            />
+            <View
+              style={{
+                height: 2,
+                width: "2%",
+                backgroundColor: COLOR.primary_blue_50,
+                alignSelf: "center",
+                marginHorizontal: 10,
+              }}
+            />
+            <DatePicker
+              label="Chọn ngày về"
+              placeholder="30 thg 3"
+              value={selectedToDate}
+              display={Platform.OS === "ios" ? "inline" : "default"}
+              datePickerVisible={toDatePickerVisible}
+              onChange={(e, selectedDate) => {
+                setSelectedToDate(selectedDate);
+                setToDatePickerVisible(!toDatePickerVisible);
+              }}
+              onPress={() => {
+                setToDatePickerVisible(!toDatePickerVisible);
+              }}
+              onOutsideModalPress={() =>
+                setToDatePickerVisible(!toDatePickerVisible)
+              }
+              style={{ marginBottom: 10, flex: 1 }}
+              minimumDate={selectedFromDate}
+            />
+          </View>
           <GuestNumberPicker
             style={{ marginBottom: 10 }}
-            placeholder="2 khách, 1 phòng"
+            placeholder="2 người lớn, 1 trẻ em"
+            modalVisible={guestNumberPickerVisible}
+            onPress={() => setGuestNumberPickerVisible(!guestNumberPickerVisible)}
+            onOutsideModalPress={(adults, children) => handleOutsideModalPress(adults, children)}
+            numOfAdult={numOfAdult}
+            numOfChild={numOfChild}
           />
           <SubmitButton
             onPress={() => onSearchPress()}
@@ -103,9 +226,7 @@ const HomeScreen = () => {
         </View>
         {/* Suggested Famous Location */}
         <View style={styles.general_searched_section}>
-          <Text style={styles.general_section_title}>
-            Tìm kiếm gần đây của bạn
-          </Text>
+          <Text style={styles.general_section_title}>Các địa điểm nổi bật</Text>
           <FlatList
             contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
             horizontal

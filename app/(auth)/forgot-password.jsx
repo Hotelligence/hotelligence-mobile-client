@@ -3,33 +3,36 @@ import {
   View,
   Text,
   StyleSheet,
-  Pressable,
   TouchableWithoutFeedback,
   Keyboard,
+  Pressable,
   ScrollView,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import {
-  SubmitButton,
-  SecondaryButton,
-  CircleButton,
-} from "@/components/search";
+import { AuthInputField } from "@/components/authentication";
+import { SubmitButton, CircleButton } from "@/components/search";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
 import { OtpInput } from "react-native-otp-entry";
-import { ArrowLeft } from "lucide-react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useSignIn, useSignUp } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
+import { useSignIn } from "@clerk/clerk-expo";
 
-const OTPScreen = () => {
+const PasswordReset = () => {
   const router = useRouter();
-  const { type } = useLocalSearchParams();
-  //"signup" and "login"
-  const { signUp } = useSignUp();
   const { signIn, setActive } = useSignIn();
 
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordHelperText, setNewPasswordHelperText] = useState(" ");
+  useState(" ");
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
+  useState(false);
+
   const [otpInput, setOTPInput] = useState("");
-  const [helperText, setHelperText] = useState(" ");
+  const [otpHelperText, setOTPHelperText] = useState(" ");
   const [isAllowGetNewCode, setIsAllowGetNewCode] = useState(false);
   const [delaySeconds, setDelaySeconds] = useState(30);
+
   const [buttonLoading, setButtonLoading] = useState(false);
 
   useEffect(() => {
@@ -54,61 +57,38 @@ const OTPScreen = () => {
     router.back();
   };
 
-  const handleOTPErrorDisplay = (err) => {
-    if (err.errors[0]?.code === "form_code_incorrect") {
-      setHelperText("Mã OTP không chính xác, vui lòng kiểm tra lại");
-    } else {
-      setHelperText(
-        "Mã OTP đã hết hạn, vui lòng nhấn Gửi lại mã OTP để lấy một mã khác"
-      );
-    }
-  };
-
-  const handleLoginPress = useCallback(async (otpInput) => {
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,32}$/;
+  const handleResetPassPress = useCallback(async (otpInput, newPassword) => {
     setButtonLoading(true);
     try {
-      const signInAttempt = await signIn.attemptFirstFactor({
-        strategy: "email_code",
-        code: otpInput,
-      });
+      if (!passwordRegex.test(newPassword)) {
+        setNewPasswordHelperText("Mật khẩu không hợp lệ, vui lòng kiểm tra");
+      } else {
+        const resetPass = await signIn.attemptFirstFactor({
+          strategy: "reset_password_email_code",
+          code: otpInput,
+          password: newPassword,
+        });
 
-      if (signInAttempt.status === "complete") {
-        await setActive({ session: signInAttempt.createdSessionId });
-
-        router.replace("/");
+        if (resetPass.status === "complete") {
+          await setActive({ session: resetPass.createdSessionId });
+          router.replace("/");
+        }
       }
     } catch (err) {
-      handleOTPErrorDisplay(err);
+      if (err.errors[0]?.code === "form_password_pwned") {
+        setNewPasswordHelperText("Mật khẩu yếu, hãy chọn một mật khẩu khác");
+      } else if (err.errors[0]?.code === "form_code_incorrect") {
+        setOTPHelperText("Mã OTP không chính xác, vui lòng kiểm tra lại");
+      } else {
+        setNewPasswordHelperText("Đã có lỗi xảy ra, vui lòng thử lại");
+        setOTPHelperText("Đã có lỗi xảy ra, vui lòng thử lại");
+      }
       console.log(JSON.stringify(err, null, 2));
     } finally {
       setButtonLoading(false);
     }
   }, []);
-
-  const handleSignUpPress = useCallback(async (otpInput) => {
-    setButtonLoading(true);
-    try {
-      await signUp.attemptEmailAddressVerification({
-        code: otpInput,
-      });
-
-      //If the email is verified, navigate to this screen, else it will jump to the catch block to handle error display
-      router.push({
-        pathname: "/signup-create-name",
-      });
-    } catch (err) {
-      handleOTPErrorDisplay(err);
-      console.log(JSON.stringify(err, null, 2));
-    } finally {
-      setButtonLoading(false);
-    }
-  }, []);
-
-  const handleConfirmByPasswordPress = () => {
-    router.replace({
-      pathname: "/login-password",
-    });
-  };
 
   const handleResendCodePress = async () => {
     try {
@@ -146,7 +126,7 @@ const OTPScreen = () => {
           onPress={() => onBackPress()}
           style={styles.back_button}
         />
-        <Text style={styles.title_text}>Xác thực OTP</Text>
+        <Text style={styles.title_text}>Quên mật khẩu</Text>
         <Text style={styles.content_text}>
           Hãy nhập mã bảo mật chúng tôi đã gửi qua email. Nếu không thấy email
           này trong hộp thư đến, hãy kiểm tra hộp thư rác
@@ -156,7 +136,7 @@ const OTPScreen = () => {
           focusColor={COLOR.secondary_green_100}
           onTextChange={(text) => {
             setOTPInput(text);
-            setHelperText(" ");
+            setOTPHelperText(" ");
           }}
           theme={{
             containerStyle: { marginTop: 30 },
@@ -165,26 +145,13 @@ const OTPScreen = () => {
               width: 55,
               height: 65,
               borderColor:
-                helperText !== " "
+                otpHelperText !== " "
                   ? COLOR.tertiary_red_100
                   : COLOR.primary_white_100,
             },
           }}
         />
-        <Text style={styles.helper_text}>{helperText}</Text>
-        <SubmitButton
-          disabled={otpInput.length < 6}
-          isLoading={buttonLoading}
-          text="Tiếp tục"
-          onPress={
-            type === "login"
-              ? () => handleLoginPress(otpInput)
-              : type === "signup"
-              ? () => handleSignUpPress(otpInput)
-              : () => {}
-          }
-          style={{ width: "40%", marginTop: 40 }}
-        />
+        <Text style={styles.helper_text}>{otpHelperText}</Text>
         <Pressable style={{ marginTop: 25 }} onPress={handleResendCodePress}>
           <Text
             style={[
@@ -202,16 +169,34 @@ const OTPScreen = () => {
               : `Gửi lại mã sau ${delaySeconds} giây`}
           </Text>
         </Pressable>
-        {type === "login" && (
-          <SecondaryButton
-            text="Xác thực bằng mật khẩu"
-            onPress={handleConfirmByPasswordPress}
-            style={{
-              marginTop: 110,
-              width: "80%",
+        <Text style={styles.content_text}>
+          Mật khẩu từ 8-32 kí tự, trong đó ít nhất có 01 chữ cái in hoa, 01 kí
+          tự đặc biệt và 01 chữ số.
+        </Text>
+        <View style={{ width: "100%", marginTop: 25, gap: 5 }}>
+          <AuthInputField
+            secureTextEntry={!isNewPasswordVisible}
+            label="Mật khẩu mới"
+            value={newPassword}
+            onChangeText={(text) => {
+              setNewPassword(text);
+              setNewPasswordHelperText(" ");
+            }}
+            isError={newPasswordHelperText !== " "}
+            helperText={newPasswordHelperText}
+            Icon={isNewPasswordVisible ? EyeOff : Eye}
+            onIconPress={() => {
+              setIsNewPasswordVisible(!isNewPasswordVisible);
             }}
           />
-        )}
+        </View>
+        <SubmitButton
+          disabled={newPassword.length === 0 || otpInput.length < 6}
+          isLoading={buttonLoading}
+          text="Đổi mật khẩu"
+          onPress={() => handleResetPassPress(otpInput, newPassword)}
+          style={{ width: "50%", marginTop: 40 }}
+        />
       </ScrollView>
     </TouchableWithoutFeedback>
   );
@@ -221,7 +206,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     paddingHorizontal: 15,
-    paddingTop: 100,
+    paddingTop: 70,
   },
 
   back_button: {
@@ -236,14 +221,6 @@ const styles = StyleSheet.create({
     color: COLOR.primary_blue_100,
   },
 
-  helper_text: {
-    marginTop: 10,
-    marginLeft: 15,
-    fontSize: 14,
-    color: COLOR.tertiary_red_100,
-    alignSelf: "flex-start",
-  },
-
   content_text: {
     fontSize: 14,
     fontWeight: 400,
@@ -252,10 +229,18 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
 
+  helper_text: {
+    marginLeft: 15,
+    fontSize: 14,
+    color: COLOR.tertiary_red_100,
+    alignSelf: "flex-start",
+  },
+
   resend_text: {
     fontSize: 16,
     fontWeight: 500,
+    marginBottom: 20,
   },
 });
 
-export default OTPScreen;
+export default PasswordReset;

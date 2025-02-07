@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,26 +9,39 @@ import {
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { AuthInputField } from "@/components/authentication";
-import {
-  SubmitButton,
-  CircleButton,
-} from "@/components/search";
-import { ArrowLeft, } from "lucide-react-native";
+import { SubmitButton, CircleButton } from "@/components/search";
+import { ArrowLeft } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useSignUp } from "@clerk/clerk-expo";
 
 const SignUpCreateName = () => {
   const router = useRouter();
+  const { signUp } = useSignUp();
 
   const [name, setName] = useState("");
   const [nameHelperText, setNameHelperText] = useState(" ");
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const onBackPress = () => {
     router.back();
   };
 
-  const handleContinuePress = async () => {
-    router.push("/signup-create-password");
-  };
+  const handleContinuePress = useCallback(async (name) => {
+    setButtonLoading(true);
+    try {
+      if (name.length > 50) {
+        setNameHelperText("Tên tài khoản chỉ được phép chứa tối đa 50 kí tự");
+      } else {
+        await signUp.update({ firstName: name });
+        router.push("/signup-create-password");
+      }
+    } catch (err) {
+      setNameHelperText("Đã có lỗi xảy ra, vui lòng thử lại");
+      console.log(JSON.stringify(err, null, 2));
+    } finally {
+      setButtonLoading(false);
+    }
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -48,18 +61,23 @@ const SignUpCreateName = () => {
           Tên tài khoản của Quý khách phải giống với tên trên giấy tờ tùy thân
           (như Căn cước công dân, Hộ chiếu)
         </Text>
-        <View style={{ width: "100%", marginTop: 25, }}>
+        <View style={{ width: "100%", marginTop: 25 }}>
           <AuthInputField
             label="Họ và tên"
             value={name}
-            onChangeText={(text) => setName(text)}
+            onChangeText={(text) => {
+              setName(text);
+              setNameHelperText(" ");
+            }}
             isError={nameHelperText !== " "}
             helperText={nameHelperText}
           />
         </View>
         <SubmitButton
+          disabled={name.length <= 0}
+          isLoading={buttonLoading}
           text="Tiếp tục"
-          onPress={() => handleContinuePress()}
+          onPress={() => handleContinuePress(name)}
           style={{ width: "40%", marginTop: 40 }}
         />
       </ScrollView>

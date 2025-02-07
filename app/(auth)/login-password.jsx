@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { AuthInputField } from "@/components/authentication";
@@ -15,16 +16,17 @@ import {
   CircleButton,
 } from "@/components/search";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react-native";
-import { useRouter, } from "expo-router";
+import { useRouter } from "expo-router";
+import { useSignIn } from "@clerk/clerk-expo";
 
 const LoginByPassword = () => {
   const router = useRouter();
+  const { signIn, setActive } = useSignIn();
 
-  const [email, setEmail] = useState("");
-  const [emailHelperText, setEmailHelperText] = useState(" ");
   const [password, setPassword] = useState("");
   const [passwordHelperText, setPasswordHelperText] = useState(" ");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const onBackPress = () => {
     router.back();
@@ -36,6 +38,46 @@ const LoginByPassword = () => {
       params: { type: "login" },
     });
   };
+
+  const onSignInPress = useCallback(async (password) => {
+    setButtonLoading(true);
+    try {
+      const signInAttempt = await signIn.attemptFirstFactor({
+        strategy: "password",
+        password,
+      });
+
+      if (signInAttempt.status === "complete") {
+        await setActive({ session: signInAttempt.createdSessionId });
+        router.replace("/");
+      }
+    } catch (err) {
+      if (err.errors[0]?.code === "form_password_incorrect") {
+        setPasswordHelperText(
+          "Mật khẩu đã nhập không chính xác, vui lòng kiểm tra"
+        );
+      } else {
+        setPasswordHelperText("Đã có lỗi xảy ra, vui lòng thử lại");
+      }
+      console.log(JSON.stringify(err, null, 2));
+    } finally {
+      setButtonLoading(false);
+    }
+  }, []);
+
+  const handleForgotPasswordPress = useCallback(async () => {
+    try {
+      const email = signIn.identifier;
+      await signIn?.create({
+        strategy: "reset_password_email_code",
+        identifier: email,
+      });
+
+      router.push("/forgot-password");
+    } catch (err) {
+      console.log(JSON.stringify(err, null, 2));
+    }
+  }, []);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -54,10 +96,9 @@ const LoginByPassword = () => {
         <View style={{ width: "100%", marginTop: 25, gap: 5 }}>
           <AuthInputField
             label="Email"
-            value={email}
-            onChangeText={(text) => setEmail(text)}
-            isError={emailHelperText !== " "}
-            helperText={emailHelperText}
+            editable={false}
+            value={signIn.identifier}
+            helperText={" "}
           />
           <AuthInputField
             secureTextEntry={!isPasswordVisible}
@@ -71,15 +112,27 @@ const LoginByPassword = () => {
               setIsPasswordVisible(!isPasswordVisible);
             }}
           />
+          <Pressable onPress={() => handleForgotPasswordPress()}>
+            <Text
+              style={[
+                styles.content_text,
+                { marginTop: 20, textAlign: "right" },
+              ]}
+            >
+              Quên mật khẩu?
+            </Text>
+          </Pressable>
         </View>
         <SubmitButton
           text="Đăng nhập"
-          onPress={() => {}}
+          disabled={password.length <= 0}
+          isLoading={buttonLoading}
+          onPress={() => onSignInPress(password)}
           style={{ width: "40%", marginTop: 40 }}
         />
         <SecondaryButton
-          text="Xác nhận bằng OTP qua Email"
-          onPress={() => handleConfirmByOTPPress()}
+          text="Xác thực bằng OTP qua Email"
+          onPress={handleConfirmByOTPPress}
           style={{
             marginTop: 130,
             width: "80%",

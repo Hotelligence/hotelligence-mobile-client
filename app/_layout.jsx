@@ -1,38 +1,36 @@
-import { Stack, Slot, Redirect, useRouter } from "expo-router";
-import { useEffect } from "react";
-import { SafeAreaView, StatusBar, View } from "react-native";
-import { COLOR } from "@/assets/colors/Colors";
+import { Slot } from "expo-router";
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
+import { tokenCache } from "@/utils/ExpoSecureStore";
 
 const AppStackLayout = () => {
-    // console.log('Hello app stack')
-    const isLoggedIn = false; //handle this later
-    const router = useRouter();
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-    //Check if user has logged in
-    useEffect(() => {
-      if(isLoggedIn) {
-        router.replace("/(main)/(tabs)")
-      } else{
-        router.replace("/(auth)");
-      }
-    }, [isLoggedIn])
+  if (!publishableKey) {
+    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to the .env file");
+  }
 
-    return (
-      <Stack>
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(main)"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
-    );
-}
+  return (
+    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+      <ClerkLoaded>
+        <Slot />
+      </ClerkLoaded>
+    </ClerkProvider>
+  );
+
+  // <Stack>
+  //   <Stack.Screen
+  //     name="(auth)"
+  //     options={{
+  //       headerShown: false,
+  //     }}
+  //   />
+  //   <Stack.Screen
+  //     name="(main)"
+  //     options={{
+  //       headerShown: false,
+  //     }}
+  //   />
+  // </Stack>;
+};
 
 export default AppStackLayout;

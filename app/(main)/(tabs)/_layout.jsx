@@ -1,12 +1,17 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { Platform, View } from "react-native";
 import { HomeHeader } from "@/components/home";
-
 import { House, Search, Heart, History, User } from "lucide-react-native";
+import { useAuth } from "@clerk/clerk-expo";
 
 const MainTabsLayout = () => {
-  // console.log("Hello Main tabs");
+  const { isSignedIn } = useAuth();
+  
+  if(!isSignedIn) {
+    return <Redirect href={"/authentication"} />
+  }
+
   return (
     <View style={{ flex: 1, }}>
       <HomeHeader />

@@ -151,6 +151,23 @@ export function isoStringToDate(value) {
   }
 }
 
+export function isoStringToTruncatedDate(value) {
+  // 2021-09-01T00:00:00.000Z to 21 tháng 9, 2021
+  try {
+    // Parse the ISOString date time into a Date object
+    const date = new Date(value);
+    // Extract and format date components according to your custom format
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Add leading zero if needed
+    const day = String(date.getDate()).padStart(2, "0");
+
+    const result = `${day} thg ${month}`;
+    return result;
+  } catch (error) {
+    console.error("Error parsing Date object:", error);
+    return null; // Return None on parsing errors
+  }
+}
+
 export function isoStringToFullDateTime(value) { // Parse the ISOString date time into a fully date time string
   try {
     const date = new Date(value);

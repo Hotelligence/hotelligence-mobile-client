@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  Platform,
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { ThirdPartyButton, AuthInputField } from "@/components/authentication";

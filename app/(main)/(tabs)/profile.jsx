@@ -35,7 +35,7 @@ const ProfileScreen = () => {
             source={require("@/assets/images/avatar.png")}
             style={styles.avatar}
           />
-          <Text style={styles.user_name_text}>{user.firstName}</Text>
+          <Text style={styles.user_name_text}>{`${user.lastName} ${user.firstName}`}</Text>
         </View>
       </View>
       <View style={{ marginTop: 30, paddingHorizontal: 20 }}>
@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   user_name_text: {
     fontSize: 22,
     fontWeight: 500,
+    marginTop: 10,
   },
 });
 

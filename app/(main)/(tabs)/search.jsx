@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, StatusBar } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { SearchBar, DatePicker, GuestNumberPicker, SubmitButton } from "@/components/search";
+import { SearchBar, SubmitButton } from "@/components/search";
 
 const SearchScreen = () => {
   return (
@@ -15,14 +15,6 @@ const SearchScreen = () => {
         <SearchBar
           style={{ marginBottom: 10 }}
           placeholder="Tìm địa điểm, khách sạn, v.v."
-        />
-        <DatePicker
-          style={{ marginBottom: 10 }}
-          placeholder="29 thg 3 - 30 thg 3"
-        />
-        <GuestNumberPicker
-          style={{ marginBottom: 10 }}
-          placeholder="2 khách, 1 phòng"
         />
         <SubmitButton
           onPress={() => onSearchPress()}

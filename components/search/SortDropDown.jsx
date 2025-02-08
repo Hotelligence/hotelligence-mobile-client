@@ -43,7 +43,7 @@ const SortDropDown = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: COLOR.primary_blue_100,
     borderRadius: 10,
     width: "100%",

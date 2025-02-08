@@ -13,16 +13,30 @@ import {
   HotelDetailCard,
   FilterSelection,
   SortDropDown,
+  PriceRangePicker,
 } from "@/components/search";
 import { hotels, recentSearch } from "@/assets/TempData"; //Delete later
 import { useRouter } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
-import { priceFilterOptions } from "@/assets/FilterSortOptions";
+import {
+  priceFilterOptions,
+  ratingFilterOptions,
+  starFilterOptions,
+} from "@/assets/FilterSortOptions";
+import { PriceSliderModal } from "@/components/modal";
+import { formatVND } from "@/utils/ValueConverter";
+import { Circle, Star } from "lucide-react-native";
 
 const SearchResult = () => {
   const router = useRouter();
 
   const [selectedSortOption, setSelectedSortOption] = useState("");
+
+  const [priceRange, setPriceRange] = useState([100000, 5000000]);
+  const [priceSliderVisible, setPriceSliderVisible] = useState(false);
+
+  const [selectedRating, setSelectedRating] = useState();
+  const [selectedStar, setSelectedStar] = useState();
 
   const onBackPress = () => {
     //clear something before navigate back
@@ -38,6 +52,19 @@ const SearchResult = () => {
 
   const handleSortOptionChange = (value) => {
     setSelectedSortOption(value);
+  };
+
+  const handleOutsideModalPress = (values) => {
+    setPriceSliderVisible(false);
+    setPriceRange(values);
+  };
+
+  const handleSelectedRating = (value) => {
+    setSelectedRating(value);
+  };
+
+  const handleSelectedStar = (value) => {
+    setSelectedStar(value);
   };
 
   const renderSearchResult = ({ item }) => (
@@ -60,6 +87,38 @@ const SearchResult = () => {
     />
   );
 
+  const renderRatingItem = (item, selected) => (
+    <View style={styles.item}>
+      <Circle
+        size={16}
+        color={COLOR.primary_blue_100}
+        fill={selected ? COLOR.primary_blue_100 : "transparent"}
+        style={{ marginRight: 8 }}
+      />
+      <Text style={styles.text_item}>{item.label}</Text>
+    </View>
+  );
+
+  const renderStarItem = (item, selected) => (
+    <View style={styles.item}>
+      <Circle
+        size={16}
+        color={COLOR.primary_blue_100}
+        fill={selected ? COLOR.primary_blue_100 : "transparent"}
+        style={{ marginRight: 8 }}
+      />
+      <Text style={styles.text_item}>{item.label}</Text>
+      {item.value !== "" && (
+        <Star
+          size={14}
+          color={COLOR.primary_blue_100}
+          fill={COLOR.primary_blue_100}
+          style={{ marginStart: 3 }}
+        />
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -77,19 +136,34 @@ const SearchResult = () => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginBottom: 15, height: "8%", width: "100%" }}
+        style={{ marginBottom: 15, height: "6%", width: "100%" }}
         contentContainerStyle={{ paddingStart: 12, paddingEnd: 20 }}
       >
-        <FilterSelection
-          numOfFilters={1}
-          filterCategory={"Phổ biến"}
+        <PriceRangePicker
+          filterCategory={"Giá"}
+          filterTruncatedContent={`${formatVND(priceRange[0])}đ - ${formatVND(
+            priceRange[1]
+          )}đ`}
           style={{ marginStart: 8 }}
+          onPress={() => setPriceSliderVisible(true)}
         />
-        <FilterSelection filterCategory={"Giá"} style={{ marginStart: 8 }} />
         <FilterSelection
-          numOfFilters={2}
-          filterCategory={"Đánh giá"}
+          label="Đánh giá"
+          data={ratingFilterOptions}
+          value={selectedRating}
+          onSelect={(value) => handleSelectedRating(value)}
           style={{ marginStart: 8 }}
+          renderItem={renderRatingItem}
+          minWidth={140}
+        />
+        <FilterSelection
+          label="Xếp hạng Sao"
+          data={starFilterOptions}
+          value={selectedStar}
+          onSelect={(value) => handleSelectedStar(value)}
+          style={{ marginStart: 8 }}
+          renderItem={renderStarItem}
+          minWidth={90}
         />
       </ScrollView>
       <View style={{ width: "100%", paddingHorizontal: 15 }}>
@@ -100,6 +174,11 @@ const SearchResult = () => {
           style={styles.drop_down}
         />
       </View>
+      <PriceSliderModal
+        visible={priceSliderVisible}
+        values={priceRange}
+        onOutsideModalPress={(values) => handleOutsideModalPress(values)}
+      />
       <FlatList
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
@@ -134,6 +213,18 @@ const styles = StyleSheet.create({
   drop_down: {
     marginBottom: 15,
     alignSelf: "flex-end",
+  },
+
+  item: {
+    paddingHorizontal: 5,
+    paddingVertical: 15,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  text_item: {
+    fontSize: 14,
+    color: COLOR.primary_blue_100,
   },
 });
 

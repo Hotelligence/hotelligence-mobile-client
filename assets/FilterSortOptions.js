@@ -24,3 +24,53 @@ export const priceFilterOptions = [
     label: "Đánh giá thấp nhất",
   },
 ];
+
+export const ratingFilterOptions = [
+  {
+    value: "",
+    label: "Tất cả",
+  },
+  {
+    value: "9",
+    label: "Tuyệt vời 9+",
+  },
+  {
+    value: "8",
+    label: "Xuất sắc 8+",
+  },
+  {
+    value: "7",
+    label: "Tốt 7+",
+  },
+  {
+    value: "6",
+    label: "Khá 6+",
+  },
+];
+
+export const starFilterOptions = [
+  {
+    value: "",
+    label: "Tất cả",
+  },
+  {
+    value: "5",
+    label: "5",
+  },
+  {
+    value: "4",
+    label: "4",
+  },
+  {
+    value: "3",
+    label: "3",
+  },
+  {
+    value: "2",
+    label: "2",
+  },
+  {
+    value: "1",
+    label: "1",
+  },
+];

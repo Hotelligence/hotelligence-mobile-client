@@ -11,10 +11,11 @@ import { COLOR } from "@/assets/colors/Colors";
 import { Plus } from "lucide-react-native";
 import { rooms } from "@/assets/TempData";
 import { formatVND } from "@/utils/ValueConverter";
-import { NoImage } from "@/components/search";
+import { NoImage, CircleButton } from "@/components/search";
+import { X } from "lucide-react-native";
 
 const ComparisonScreen = () => {
-  const [compareRooms, setCompareRooms] = useState(rooms.slice(0, 0));
+  const [compareRooms, setCompareRooms] = useState(rooms.slice(0, 2));
 
   const categories = [
     "Tên phòng",
@@ -33,18 +34,28 @@ const ComparisonScreen = () => {
     const [imageError, setImageError] = useState(false);
 
     return (
-      <View key={index} style={styles.room_column}>
-        {imageError ? (
-          <NoImage style={styles.room_image} />
-        ) : (
-          <Image
-            style={styles.room_image}
-            source={{
-              uri: room?.images[0],
+      <View style={styles.room_column}>
+        <View style={{ height: 120, paddingTop: 10 }}>
+          <CircleButton
+            Icon={X}
+            size={20}
+            style={styles.delete_button}
+            onPress={() => {
+              setCompareRooms((prev) => prev.filter((_, i) => i !== index));
             }}
-            onError={() => setImageError(true)}
           />
-        )}
+          {imageError ? (
+            <NoImage style={styles.room_image} />
+          ) : (
+            <Image
+              style={styles.room_image}
+              source={{
+                uri: room?.images[0],
+              }}
+              onError={() => setImageError(true)}
+            />
+          )}
+        </View>
         <View style={styles.cell}>
           <Text style={styles.room_name}>{room?.roomName}</Text>
         </View>
@@ -110,7 +121,7 @@ const ComparisonScreen = () => {
             <View style={styles.table_container}>
               {/* Room columns */}
               {compareRooms.slice(0, 2).map((room, index) => (
-                <TableColumn room={room} index={index} />
+                <TableColumn key={index} room={room} index={index} />
               ))}
 
               {/* Add room button */}
@@ -217,7 +228,7 @@ const styles = StyleSheet.create({
 
   room_image: {
     width: "90%",
-    height: 120,
+    height: "100%",
     borderRadius: 8,
     resizeMode: "cover",
     alignSelf: "center",
@@ -239,6 +250,24 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     color: COLOR.primary_blue_100,
+  },
+
+  delete_button: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    zIndex: 999,
+    backgroundColor: COLOR.primary_white_100,
+    // iOS shadow
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    // Android shadow
+    elevation: 5,
   },
 });
 

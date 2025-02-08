@@ -42,6 +42,12 @@ const MainStackLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="reviews"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

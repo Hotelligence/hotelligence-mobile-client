@@ -1,13 +1,20 @@
 import { View, Text, StyleSheet, StatusBar, ScrollView } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { hotels, hotelHistory, bookingHistory } from "@/assets/TempData"; //Delete later
+import { bookingHistory } from "@/assets/TempData"; //Delete later
 import { HotelHistoryCard } from "@/components/history";
 import { isoStringToDate } from "@/utils/ValueConverter";
+import { useRouter } from "expo-router";
 
 const HistoryScreen = () => {
 
-  const handleRatingPress = (hotelID) => {
-    console.log("Rating pressed: ", hotelID);
+  const router = useRouter();
+
+  const handleRatingPress = (roomID) => {
+    console.log("Rating pressed: ", roomID);
+    router.push({
+      pathname: "/reviews/[roomID]",
+      params: { roomID: roomID },
+    })
   };
 
   const handleCancelPress = (hotelID) => {

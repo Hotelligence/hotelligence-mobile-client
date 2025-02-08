@@ -29,7 +29,7 @@ const SearchInfoCard = ({ searchKeyword, period, numOfGuestRoom, style, disabled
           </Text>
         </View>
       </View>
-      <Pencil strokeWidth={2.5} color={COLOR.primary_blue_100} style={{ marginStart: "auto" }} />
+      {/* <Pencil strokeWidth={2.5} color={COLOR.primary_blue_100} style={{ marginStart: "auto" }} /> */}
     </Pressable>
   );
 };

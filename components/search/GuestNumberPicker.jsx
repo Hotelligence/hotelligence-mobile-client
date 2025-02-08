@@ -155,8 +155,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
 
   content_container: {
@@ -172,12 +172,12 @@ const styles = StyleSheet.create({
   },
 
   placeholder_text: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLOR.primary_blue_50,
   },
 
   text: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLOR.primary_blue_100,
   },
 

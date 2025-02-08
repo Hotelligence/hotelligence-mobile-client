@@ -11,7 +11,7 @@ const SearchScreen = () => {
         backgroundColor="transparent"
       />
       <View style={styles.search_section}>
-        <Text style={styles.search_section_title}>Tìm kiếm khách sạn</Text>
+        <Text style={styles.search_section_title}>So sánh phòng</Text>
         <SearchBar
           style={{ marginBottom: 10 }}
           placeholder="Tìm địa điểm, khách sạn, v.v."

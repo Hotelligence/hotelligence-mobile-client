@@ -1,16 +1,29 @@
-import { View, Text, StyleSheet, FlatList, ScrollView, StatusBar } from "react-native";
+import { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import GeneralHeader from "@/components/GeneralHeader";
 import {
   SearchInfoCard,
   HotelDetailCard,
   FilterSelection,
+  SortDropDown,
 } from "@/components/search";
 import { hotels, recentSearch } from "@/assets/TempData"; //Delete later
 import { useRouter } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
+import { priceFilterOptions } from "@/assets/FilterSortOptions";
 
 const SearchResult = () => {
   const router = useRouter();
+
+  const [selectedSortOption, setSelectedSortOption] = useState("");
+
   const onBackPress = () => {
     //clear something before navigate back
     router.back();
@@ -21,6 +34,10 @@ const SearchResult = () => {
       pathname: "/hotels/[hotelID]",
       params: { hotelID: hotelID },
     });
+  };
+
+  const handleSortOptionChange = (value) => {
+    setSelectedSortOption(value);
   };
 
   const renderSearchResult = ({ item }) => (
@@ -60,7 +77,7 @@ const SearchResult = () => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginBottom: 15, height: "5%", width: "100%" }}
+        style={{ marginBottom: 15, height: "8%", width: "100%" }}
         contentContainerStyle={{ paddingStart: 12, paddingEnd: 20 }}
       >
         <FilterSelection
@@ -75,13 +92,24 @@ const SearchResult = () => {
           style={{ marginStart: 8 }}
         />
       </ScrollView>
+      <View style={{ width: "100%", paddingHorizontal: 15 }}>
+        <SortDropDown
+          options={priceFilterOptions}
+          placeholder="Sắp xếp theo"
+          onChange={(value) => handleSortOptionChange(value)}
+          style={styles.drop_down}
+        />
+      </View>
       <FlatList
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}  
+        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
         data={hotels}
         ListHeaderComponent={
           <Text style={styles.num_of_result_text}>
-            {hotels.length} kết quả trả về cho tìm kiếm của bạn
+            <Text style={{ color: COLOR.primary_gold_120, fontWeight: 600 }}>
+              {hotels.length}
+            </Text>{" "}
+            kết quả trả về cho tìm kiếm của bạn
           </Text>
         }
         renderItem={renderSearchResult}
@@ -101,6 +129,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLOR.primary_blue_100,
     alignSelf: "center",
+  },
+
+  drop_down: {
+    marginBottom: 15,
+    alignSelf: "flex-end",
   },
 });
 

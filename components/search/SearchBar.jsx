@@ -28,14 +28,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
 
   input: {
     marginHorizontal: 6,
     flex: 1,
-    fontSize: 18,
+    fontSize: 16,
     color: COLOR.primary_blue_100,
   },
 });

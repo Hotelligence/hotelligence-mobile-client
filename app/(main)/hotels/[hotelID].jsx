@@ -151,14 +151,14 @@ const RoomBookingSection = forwardRef(
   return (
     <View ref={ref} style={styles.room_booking_container}>
       <Text style={styles.section_title_text}>Chọn phòng</Text>
-      <DatePicker
+      {/* <DatePicker
         style={{ marginBottom: 10, marginTop: 15 }}
         placeholder="29 thg 3 - 30 thg 3"
       />
       <GuestNumberPicker
         style={{ marginBottom: 10 }}
         placeholder="2 khách, 1 phòng"
-      />
+      /> */}
       <View style={{ flexDirection: "row", alignContent: "center", gap: 10 }}>
         <Pressable
           onPress={() => onRoomFilterSelected(0)}

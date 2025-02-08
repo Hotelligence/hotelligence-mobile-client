@@ -52,7 +52,7 @@ const MainTabsLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="search"
+          name="comparison"
           options={{
             headerShown: false,
             title: "So sánh",

@@ -107,7 +107,7 @@ const SearchResult = () => {
         fill={selected ? COLOR.primary_blue_100 : "transparent"}
         style={{ marginRight: 8 }}
       />
-      <Text style={styles.text_item}>{item.label}</Text>
+      <Text style={styles.text_item}>{item.value === "" ? item.label : item.value}</Text>
       {item.value !== "" && (
         <Star
           size={14}

@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef } from "react";
+import { useState, useRef, forwardRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,13 +13,12 @@ import {
   StarDisplay,
   RatingScoreTag,
   AmenityDisplay,
-  DatePicker,
-  GuestNumberPicker,
   RoomDetailCard,
   DetailReviewPoint,
   CommentDisplay,
   SubmitButton,
 } from "@/components/search";
+import ScreenSpinner from "@/components/ScreenSpinner";
 import { BookingAdditionalModal, DetailPriceModal } from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
 import { hotels, rooms, reviews, amenities } from "@/assets/TempData"; //Delete later
@@ -27,6 +26,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { ChevronLeft, MapPin, ChevronRight } from "lucide-react-native";
 import { isoStringToDate } from "@/utils/ValueConverter";
+import { HttpStatusCode } from "axios";
+import { getHotelByID_API } from "@/api/HotelServices";
+import { getRoomsInHotelAPI } from "@/api/RoomServices";
+import { getReviewsByHotelID_API } from "@/api/ReviewServices";
 
 const IntroSection = ({
   hotelName,
@@ -139,127 +142,215 @@ const AmenitiesSection = ({ amenities, onViewAllPress }) => {
 };
 
 const RoomBookingSection = forwardRef(
-  ({
-  rooms,
-  roomFilterSelected,
-  onRoomFilterSelected,
-  displayedRoom,
-  totalRoom,
-  handleDetailPress,
-  handleSelectPress,
-}, ref) => {
-  return (
-    <View ref={ref} style={styles.room_booking_container}>
-      <Text style={styles.section_title_text}>Chọn phòng</Text>
-      {/* <DatePicker
-        style={{ marginBottom: 10, marginTop: 15 }}
-        placeholder="29 thg 3 - 30 thg 3"
-      />
-      <GuestNumberPicker
-        style={{ marginBottom: 10 }}
-        placeholder="2 khách, 1 phòng"
-      /> */}
-      <View style={{ flexDirection: "row", alignContent: "center", gap: 10 }}>
-        <Pressable
-          onPress={() => onRoomFilterSelected(0)}
-          style={[
-            styles.filter_button,
-            {
-              backgroundColor:
-                roomFilterSelected === 0
-                  ? COLOR.tertiary_blue_40
-                  : COLOR.primary_white_100,
-            },
-          ]}
+  (
+    {
+      rooms,
+      roomFilterSelected,
+      onRoomFilterSelected,
+      displayedRoom,
+      totalRoom,
+      handleDetailPress,
+      handleSelectPress,
+    },
+    ref
+  ) => {
+    return (
+      <View ref={ref} style={styles.room_booking_container}>
+        <Text style={styles.section_title_text}>Chọn phòng</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignContent: "center",
+            gap: 10,
+            marginTop: 10,
+          }}
         >
-          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
-            Tất cả phòng
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => onRoomFilterSelected(1)}
-          style={[
-            styles.filter_button,
-            {
-              backgroundColor:
-                roomFilterSelected === 1
-                  ? COLOR.tertiary_blue_40
-                  : COLOR.primary_white_100,
-            },
-          ]}
+          <Pressable
+            onPress={() => onRoomFilterSelected(0)}
+            style={[
+              styles.filter_button,
+              {
+                backgroundColor:
+                  roomFilterSelected === 0
+                    ? COLOR.tertiary_blue_40
+                    : COLOR.primary_white_100,
+              },
+            ]}
+          >
+            <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+              Tất cả phòng
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => onRoomFilterSelected(1)}
+            style={[
+              styles.filter_button,
+              {
+                backgroundColor:
+                  roomFilterSelected === 1
+                    ? COLOR.tertiary_blue_40
+                    : COLOR.primary_white_100,
+              },
+            ]}
+          >
+            <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+              1 giường
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => onRoomFilterSelected(2)}
+            style={[
+              styles.filter_button,
+              {
+                backgroundColor:
+                  roomFilterSelected === 2
+                    ? COLOR.tertiary_blue_40
+                    : COLOR.primary_white_100,
+              },
+            ]}
+          >
+            <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+              2 giường
+            </Text>
+          </Pressable>
+        </View>
+        <Text
+          style={{
+            color: COLOR.primary_blue_100,
+            fontSize: 16,
+            marginVertical: 10,
+          }}
         >
-          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
-            1 giường
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => onRoomFilterSelected(2)}
-          style={[
-            styles.filter_button,
-            {
-              backgroundColor:
-                roomFilterSelected === 2
-                  ? COLOR.tertiary_blue_40
-                  : COLOR.primary_white_100,
-            },
-          ]}
-        >
-          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
-            2 giường
-          </Text>
-        </Pressable>
+          Hiển thị {displayedRoom} trên {totalRoom} phòng
+        </Text>
+        <View style={{ gap: 15 }}>
+          {rooms.map((room) => (
+            <RoomDetailCard
+              key={room?.id}
+              roomName={room?.roomName}
+              imageURL={room?.images[0]}
+              originPrice={room?.originPrice}
+              discountPercentage={room?.discountPercentage}
+              discountedPrice={room?.discountedPrice}
+              // taxPrice={room?.taxPrice}
+              // extraFee={room?.extraFee}
+              totalPrice={room?.totalPrice}
+              onDetailPress={() => handleDetailPress(room?.id)}
+              onSelectPress={() => handleSelectPress(room?.id)}
+            />
+          ))}
+        </View>
       </View>
-      <Text
-        style={{
-          color: COLOR.primary_blue_100,
-          fontSize: 16,
-          marginVertical: 10,
-        }}
-      >
-        Hiển thị {displayedRoom} trên {totalRoom} phòng
-      </Text>
-      <View style={{ gap: 15 }}>
-        {rooms.map((room) => (
-          <RoomDetailCard
-            key={room?.id}
-            roomName={room?.roomName}
-            imageURL={room?.images[0]}
-            originPrice={room?.originPrice}
-            discountPercentage={room?.discountPercentage}
-            discountedPrice={room?.discountedPrice}
-            // taxPrice={room?.taxPrice}
-            // extraFee={room?.extraFee}
-            totalPrice={room?.totalPrice}
-            onDetailPress={() => handleDetailPress(room?.id)}
-            onSelectPress={() => handleSelectPress(room?.id)}
-          />
-        ))}
-      </View>
-    </View>
-  );
-});
+    );
+  }
+);
 
-const FeePolicySection = ({}) => {
+const FeePolicySection = ({ optionalFees, policies }) => {
   return (
     <View style={styles.fee_policy_section}>
       <Text style={styles.section_title_text}>Phí và chính sách</Text>
+      <View style={{ marginTop: 10 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 500,
+            color: COLOR.primary_blue_100,
+          }}
+        >
+          Phí tùy chọn
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {optionalFees !== "" && (
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 10,
+                backgroundColor: COLOR.primary_blue_100,
+                marginHorizontal: 10,
+              }}
+            />
+          )}
+          <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
+            style={{
+              flex: 1,
+              fontSize: 16,
+              fontWeight: 400,
+              color: COLOR.primary_blue_100,
+            }}
+          >
+            {optionalFees !== "" ? optionalFees : "Không."}
+          </Text>
+        </View>
+      </View>
+      <View style={{ marginTop: 10 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 500,
+            color: COLOR.primary_blue_100,
+          }}
+        >
+          Chính sách
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {policies !== "" && (
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 10,
+                backgroundColor: COLOR.primary_blue_100,
+                marginHorizontal: 10,
+              }}
+            />
+          )}
+          <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
+            style={{
+              flex: 1,
+              fontSize: 16,
+              fontWeight: 400,
+              color: COLOR.primary_blue_100,
+            }}
+          >
+            {policies !== "" ? policies : "Không."}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 };
 
-const ReviewSection = ({ reviews, reviewPoints, onViewAllReviewPress }) => {
+const ReviewSection = ({
+  reviews,
+  reviewCount,
+  reviewCategory,
+  reviewPoints = {
+    overall: 0.0,
+    cleanliness: 0.0,
+    comfort: 0.0,
+    staff: 0.0,
+    facilities: 0.0,
+    environmentFriendly: 0.0,
+  },
+  onViewAllReviewPress,
+}) => {
   return (
     <View style={styles.review_section}>
       <Text style={styles.section_title_text}>Đánh giá</Text>
       <DetailReviewPoint
-        overallPoint={8.8}
-        reviewCount="59"
-        pointCategory="Rất tốt"
-        cleanPoint={8.8}
-        servicePoint={9}
-        staffPoint={8.6}
-        facilityPoint={8.4}
-        environmentPoint={8.6}
+        overallPoint={reviewPoints?.overall}
+        reviewCount={reviewCount}
+        pointCategory={reviewCategory}
+        cleanPoint={reviewPoints?.cleanliness}
+        servicePoint={reviewPoints?.comfort}
+        staffPoint={reviewPoints?.staff}
+        facilityPoint={reviewPoints?.facilities}
+        environmentPoint={reviewPoints?.environmentFriendly}
       />
       <View style={{ gap: 10, marginTop: 20 }}>
         {reviews.map((review) => (
@@ -291,21 +382,67 @@ const ReviewSection = ({ reviews, reviewPoints, onViewAllReviewPress }) => {
 const HotelDetail = () => {
   const router = useRouter();
 
-  const hotel = hotels[1]; //adjust this later
+  // const hotel = hotels[1]; //adjust this later
   const tempRooms = rooms.slice(0, 6);
 
-  // const { hotelID } = useLocalSearchParams();
+  const { hotelID } = useLocalSearchParams();
+  const [hotelInfo, setHotelInfo] = useState(null);
+  const [roomsInHotel, setRoomsInHotel] = useState([]);
+  const [hotelReviews, setHotelReviews] = useState([]);
 
   const [wallpaperError, setWallpaperError] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(hotel?.isFavorite); //adjust this later
+  const [isFavorite, setIsFavorite] = useState(false); //adjust this later
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
 
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
 
-  // useEffect(() => {
-  //   //fetch data from server
-  // }, [])
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getHotelByID = async (hotelID) => {
+      try {
+        const response = await getHotelByID_API(hotelID);
+        if (response.status === HttpStatusCode.Ok) {
+          setHotelInfo(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const getRoomsInHotel = async (hotelID) => {
+      try {
+        const response = await getRoomsInHotelAPI(hotelID);
+        if (response.status === HttpStatusCode.Ok) {
+          setRoomsInHotel(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const getReviewsOfHotel = async (hotelID) => {
+      try {
+        const response = await getReviewsByHotelID_API(hotelID);
+        if (response.status === HttpStatusCode.Ok) {
+          setHotelReviews(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    const fetchData = async (hotelID) => {
+      setLoading(true);
+      await getHotelByID(hotelID);
+      await getRoomsInHotel(hotelID);
+      await getReviewsOfHotel(hotelID);
+      setLoading(false);
+    };
+
+    fetchData(hotelID);
+  }, []);
 
   //Animation for the header bar:
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -337,7 +474,7 @@ const HotelDetail = () => {
     router.push({
       pathname: "/rooms/[roomID]",
       params: { roomID: roomID },
-    })
+    });
   };
 
   const handleSelectPress = (roomID) => {
@@ -356,7 +493,7 @@ const HotelDetail = () => {
     router.push({
       pathname: "/booking",
       // params: { selectedOption: selectedOption },
-    })
+    });
   };
 
   const onPriceModalClose = () => {
@@ -380,7 +517,7 @@ const HotelDetail = () => {
     bookingSectionRef.current?.measure((x, y, width, height, pageX, pageY) => {
       scrollViewRef.current?.scrollTo({
         y: pageY - 83, // Offset to account for header
-        animated: true
+        animated: true,
       });
     });
   };
@@ -400,95 +537,119 @@ const HotelDetail = () => {
         onClose={() => onPriceModalClose()}
         onBookingPress={() => handlePriceBookingPress()}
       />
-      <Animated.View
-        style={[styles.header_container, { opacity: headerOpacity }]}
-      >
-        <CircleButton
-          Icon={ChevronLeft}
-          onPress={onBackPress}
-          style={styles.header_back_button}
-        />
-        <Text
-          ellipsizeMode="tail"
-          numberOfLines={1}
-          style={styles.header_title_text}
-        >
-          {hotel?.hotelName}
-        </Text>
-      </Animated.View>
-      <CircleButton
-        Icon={ChevronLeft}
-        onPress={onBackPress}
-        style={{ position: "absolute", top: 56, left: 20, zIndex: 2 }}
-      />
-      <Animated.ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 90 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          {
-            useNativeDriver: true,
-          }
-        )}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.image}>
-          {wallpaperError ? (
-            <NoImage style={{ borderBottomWidth: 1 }} />
-          ) : (
-            <Image
-              style={{ width: "100%", height: "100%" }}
-              source={{
-                uri: hotel?.images[2],
-              }}
-              resizeMode="cover"
-              onError={() => setWallpaperError(true)}
+      {loading ? (
+        <ScreenSpinner />
+      ) : (
+        <>
+          <Animated.View
+            style={[styles.header_container, { opacity: headerOpacity }]}
+          >
+            <CircleButton
+              Icon={ChevronLeft}
+              onPress={onBackPress}
+              style={styles.header_back_button}
             />
-          )}
-        </View>
-        <IntroSection
-          hotelName={hotel?.hotelName}
-          star={hotel?.star}
-          ratingScore={hotel?.ratingScore.toFixed(1)}
-          ratingCategory={hotel?.ratingCategory}
-          numOfReviews={hotel?.numOfReviews}
-          isFavorite={isFavorite}
-          onFavoritePress={() => onFavoritePress()}
-          address={hotel?.address}
-          description={hotel?.description}
-        />
-        <AmenitiesSection
-          amenities={amenities}
-          // onViewAllPress={}
-        />
-        <RoomBookingSection
-          ref={bookingSectionRef}
-          displayedRoom={18}
-          totalRoom={18}
-          rooms={tempRooms}
-          roomFilterSelected={roomFilterSelected}
-          onRoomFilterSelected={(selectedFilter) =>
-            onFilterSelected(selectedFilter)
-          }
-          handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
-          handleSelectPress={(roomID) => handleSelectPress(roomID)} //This is a 4 layer deep function, caution when maintaining
-        />
-        <FeePolicySection />
-        <ReviewSection
-          reviews={reviews}
-          // reviewPoints={reviewPoints}
-          onViewAllReviewPress={() => handleViewAllReviewPress()}
-        />
-      </Animated.ScrollView>
-      <View style={styles.submit_button_container}>
-        <SubmitButton
-          text="Đặt phòng"
-          style={{ width: "95%" }}
-          onPress={handleBookingPress}
-        />
-      </View>
+            <Text
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              style={styles.header_title_text}
+            >
+              {hotelInfo?.hotelName}
+            </Text>
+          </Animated.View>
+          <CircleButton
+            Icon={ChevronLeft}
+            onPress={onBackPress}
+            style={{ position: "absolute", top: 56, left: 20, zIndex: 2 }}
+          />
+          <Animated.ScrollView
+            ref={scrollViewRef}
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 90 }}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              {
+                useNativeDriver: true,
+              }
+            )}
+            scrollEventThrottle={16}
+          >
+            <View style={styles.image}>
+              {wallpaperError ? (
+                <NoImage style={{ borderBottomWidth: 1 }} />
+              ) : (
+                <Image
+                  style={{ width: "100%", height: "100%" }}
+                  source={{
+                    uri: hotelInfo?.images[0],
+                  }}
+                  resizeMode="cover"
+                  onError={() => setWallpaperError(true)}
+                />
+              )}
+            </View>
+            <IntroSection
+              hotelName={hotelInfo?.hotelName}
+              star={hotelInfo?.star}
+              ratingScore={
+                hotelInfo?.reviewAverageOverallPoint !== "NaN"
+                  ? hotelInfo?.reviewAverageOverallPoint
+                  : "0.0"
+              }
+              ratingCategory={hotelInfo?.reviewAveragePointCategory}
+              numOfReviews={hotelInfo?.reviewCount}
+              isFavorite={isFavorite}
+              onFavoritePress={() => onFavoritePress()}
+              address={hotelInfo?.address}
+              description={hotelInfo?.description}
+            />
+            <AmenitiesSection
+              amenities={amenities} //hard-coded data here
+              // onViewAllPress={}
+            />
+            <RoomBookingSection
+              ref={bookingSectionRef}
+              displayedRoom={hotelInfo?.roomCount}
+              totalRoom={hotelInfo?.roomCount}
+              rooms={roomsInHotel}
+              roomFilterSelected={roomFilterSelected}
+              onRoomFilterSelected={(selectedFilter) =>
+                onFilterSelected(selectedFilter)
+              }
+              handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
+              handleSelectPress={(roomID) => handleSelectPress(roomID)} //This is a 4 layer deep function, caution when maintaining
+            />
+            <FeePolicySection
+              policies={hotelInfo?.policies ? hotelInfo?.policies : ""}
+              optionalFees={
+                hotelInfo?.optionalFees ? hotelInfo?.optionalFees : ""
+              }
+            />
+            <ReviewSection
+              reviews={hotelReviews}
+              reviewCount={hotelInfo?.reviewCount}
+              reviewCategory={hotelInfo?.reviewAveragePointCategory}
+              reviewPoints={{
+                overall: hotelInfo?.reviewAverageOverallPoint,
+                cleanliness: hotelInfo?.reviewAverageCleanPoint,
+                comfort: hotelInfo?.reviewAverageServicePoint,
+                staff: hotelInfo?.reviewAverageStaffPoint,
+                facilities: hotelInfo?.reviewAverageFacilityPoint,
+                environmentFriendly: hotelInfo?.reviewAverageEnvironmentPoint,
+              }}
+              onViewAllReviewPress={() => handleViewAllReviewPress()}
+            />
+          </Animated.ScrollView>
+          <View style={styles.submit_button_container}>
+            <SubmitButton
+              text="Đặt phòng"
+              style={{ width: "95%" }}
+              onPress={handleBookingPress}
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 };

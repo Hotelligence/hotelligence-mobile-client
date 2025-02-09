@@ -1,6 +1,9 @@
 import MyAxios from "@/utils/MyAxios";
 
-const endpoints = "/hotels/searchResult";
+const endpoints = {
+  SEARCH: "/hotels/searchResult",
+  GET_HOTEL: "/hotels/getHotelById",
+};
 
 export const getSearchResultAPI = async (
   query,
@@ -14,7 +17,7 @@ export const getSearchResultAPI = async (
   sortOrder,
 ) => {
   try {
-    const response = await MyAxios.get(endpoints, {
+    const response = await MyAxios.get(endpoints.SEARCH, {
       params: {
         query,
         from,
@@ -31,5 +34,14 @@ export const getSearchResultAPI = async (
     return response;
   } catch (error) {
     console.log("Error in getSearchResultAPI: ", error);
+  }
+};
+
+export const getHotelByID_API = async (hotelID) => {
+  try {
+    const response = await MyAxios.get(`${endpoints.GET_HOTEL}/${hotelID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in getHotelByID: ", error);
   }
 };

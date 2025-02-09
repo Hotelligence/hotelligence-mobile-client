@@ -27,7 +27,7 @@ import { formatVND, dateStringToTruncatedDate } from "@/utils/ValueConverter";
 import { Circle, Star, SearchX } from "lucide-react-native";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { HttpStatusCode } from "axios";
-import { getSearchResultAPI } from "@/api/SearchServices";
+import { getSearchResultAPI } from "@/api/HotelServices";
 
 const SearchResult = () => {
   const router = useRouter();
@@ -325,7 +325,7 @@ const SearchResult = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: COLOR.primary_white_100,
   },
 
   num_of_result_text: {

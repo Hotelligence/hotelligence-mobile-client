@@ -28,10 +28,10 @@ const HotelDetailCard = ({
   return (
     <Pressable style={[styles.container, style]} onPress={onPress}>
       <View style={styles.image_container}>
-        <FavoriteButton
+        {/* <FavoriteButton
           style={styles.favorite_button}
           isFavorite={isFavorite}
-        />
+        /> */}
         {imageError ? (
           <NoImage
             style={{ borderTopLeftRadius: 14, borderBottomLeftRadius: 14 }}

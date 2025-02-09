@@ -50,20 +50,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderColor: COLOR.primary_blue_50,
     backgroundColor: COLOR.primary_white_100,
-    alignItems: "center",
     justifyContent: "center",
   },
 
   dropdown: {
     padding: 12,
     minWidth: 130,
-    alignItems: "center",
-  },
-
-  item: {
-    paddingHorizontal: 5,
-    paddingVertical: 15,
-    flexDirection: "row",
     alignItems: "center",
   },
 });

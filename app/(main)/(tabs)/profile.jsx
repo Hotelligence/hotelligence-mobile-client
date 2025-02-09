@@ -35,11 +35,28 @@ const ProfileScreen = () => {
             source={require("@/assets/images/avatar.png")}
             style={styles.avatar}
           />
-          <Text style={styles.user_name_text}>{`${user.lastName} ${user.firstName}`}</Text>
+          <Text
+            style={styles.user_name_text}
+          >{`${user.lastName} ${user.firstName}`}</Text>
         </View>
       </View>
-      <View style={{ marginTop: 30, paddingHorizontal: 20 }}>
-        <BarButton onPress={() => handleLogoutPress()} color={COLOR.secondary_red_100} iconName="LogOut" text="Đăng xuất" />
+      <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
+        <BarButton
+          onPress={() => handleLogoutPress()}
+          iconName="MessageCircle"
+          text="FAQ"
+        />
+        <BarButton
+          onPress={() => handleLogoutPress()}
+          iconName="Info"
+          text="Về chúng tôi"
+        />
+        <BarButton
+          onPress={() => handleLogoutPress()}
+          color={COLOR.secondary_red_100}
+          iconName="LogOut"
+          text="Đăng xuất"
+        />
       </View>
     </View>
   );

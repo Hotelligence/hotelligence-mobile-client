@@ -17,16 +17,16 @@ const PriceRangePicker = ({
         styles.container,
         style,
         {
-          backgroundColor: filterTruncatedContent
+          backgroundColor: filterTruncatedContent !== ""
             ? COLOR.tertiary_blue_40
             : COLOR.primary_white_100,
         },
       ]}
     >
-      <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+      <Text style={[styles.filter_text, { marginHorizontal: 5, }]}>
         {filterCategory}
       </Text>
-      {filterTruncatedContent && (
+      {filterTruncatedContent !== "" && (
         <Text style={styles.filter_text}>({filterTruncatedContent})</Text>
       )}
       <ChevronDown size={20} color={COLOR.primary_blue_100} strokeWidth={2.5} />
@@ -39,8 +39,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderRadius: 30,
+    borderRadius: 20,
     paddingHorizontal: 10,
+    paddingVertical: 0,
   },
 
   filter_text: {

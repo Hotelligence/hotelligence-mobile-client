@@ -152,7 +152,7 @@ export function isoStringToDate(value) {
 }
 
 export function isoStringToTruncatedDate(value) {
-  // 2021-09-01T00:00:00.000Z to 21 tháng 9, 2021
+  // 2021-09-01T00:00:00.000Z to 21 thg 9, 2021
   try {
     // Parse the ISOString date time into a Date object
     const date = new Date(value);
@@ -193,6 +193,29 @@ export function isoStringToFullDateTime(value) { // Parse the ISOString date tim
     return `${dayOfWeek}, ngày ${day} tháng ${month} năm ${year} (${hours}:${minutes})`;
   } catch (error) {
     console.error("Error parsing Date object:", error);
+    return null;
+  }
+}
+
+export function dateObjectToDateString(date) {
+  try {
+    const year = date.getFullYear().toString().slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error("Error converting date:", error);
+    return null;
+  }
+}
+
+export function dateStringToTruncatedDate(dateStr) {
+  try {
+    const [year, month, day] = dateStr.split("-");
+    return `${day} thg ${month}`;
+  } catch (error) {
+    console.error("Error parsing date string:", error);
     return null;
   }
 }

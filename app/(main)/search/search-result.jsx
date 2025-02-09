@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,8 +15,7 @@ import {
   SortDropDown,
   PriceRangePicker,
 } from "@/components/search";
-import { hotels, recentSearch } from "@/assets/TempData"; //Delete later
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import {
   priceFilterOptions,
@@ -24,19 +23,93 @@ import {
   starFilterOptions,
 } from "@/assets/FilterSortOptions";
 import { PriceSliderModal } from "@/components/modal";
-import { formatVND } from "@/utils/ValueConverter";
-import { Circle, Star } from "lucide-react-native";
+import { formatVND, dateStringToTruncatedDate } from "@/utils/ValueConverter";
+import { Circle, Star, SearchX } from "lucide-react-native";
+import ScreenSpinner from "@/components/ScreenSpinner";
+import { HttpStatusCode } from "axios";
+import { getSearchResultAPI } from "@/api/SearchServices";
 
 const SearchResult = () => {
   const router = useRouter();
+  const { query, from, to, guests } = useLocalSearchParams();
+  // console.log(query, from, to, guests);
 
-  const [selectedSortOption, setSelectedSortOption] = useState("");
+  let period;
+  if (!from && !to) {
+    period = "";
+  } else if (!from) {
+    period = `Hôm nay - ${dateStringToTruncatedDate(to)}`;
+  } else if (!to) {
+    period = `${dateStringToTruncatedDate(from)}`;
+  } else {
+    period = `${dateStringToTruncatedDate(from)} - ${dateStringToTruncatedDate(
+      to
+    )}`;
+  }
 
-  const [priceRange, setPriceRange] = useState([100000, 5000000]);
+  const [selectedSortOption, setSelectedSortOption] = useState(null);
+
+  const [priceRange, setPriceRange] = useState(null);
   const [priceSliderVisible, setPriceSliderVisible] = useState(false);
 
-  const [selectedRating, setSelectedRating] = useState();
-  const [selectedStar, setSelectedStar] = useState();
+  const [selectedRating, setSelectedRating] = useState(null);
+  const [selectedStar, setSelectedStar] = useState(null);
+
+  const [searchResult, setSearchResult] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getSearchResult = async (
+      query,
+      from,
+      to,
+      guests,
+      // priceRange,
+      // minRatingScore,
+      stars
+      // sortOption,
+    ) => {
+      setLoading(true);
+      try {
+        // const tempPriceRange = priceRange ? priceRange : [0, 20000000];
+        // const tempMinRatingScore = minRatingScore ? minRatingScore : "";
+        const tempStars = stars ? stars.value : "";
+        // const sortBy = sortOption ? sortOption.sortBy : "";
+        // const sortOrder = sortOption ? sortOption.sortOrder : "";
+        const response = await getSearchResultAPI(
+          query,
+          from,
+          to,
+          guests,
+          // tempPriceRange,
+          // tempMinRatingScore,
+          "",
+          "",
+          tempStars
+          // sortBy,
+          // sortOrder
+        );
+        if (response.status === HttpStatusCode.Ok) {
+          setSearchResult(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSearchResult(
+      query,
+      from,
+      to,
+      guests,
+      // priceRange,
+      // selectedRating,
+      selectedStar
+      // selectedSortOption
+    );
+  }, [query, from, to, guests, selectedStar]);
 
   const onBackPress = () => {
     //clear something before navigate back
@@ -71,18 +144,22 @@ const SearchResult = () => {
     <HotelDetailCard
       style={{ marginTop: 15 }}
       hotelName={item?.hotelName}
-      imageURL={item?.images[2]}
+      imageURL={item?.images ? item?.images[0] : "temp_string"} //setting temp string here to make the image error to be true and display the image placeholder
       city={item?.city}
-      ratingScore={item?.ratingScore.toFixed(1)}
-      ratingCategory={item?.ratingCategory}
-      numOfReviews={item?.numOfReviews}
-      originPrice={item?.originPrice}
-      discount={item?.discount}
-      discountPrice={item?.discountPrice}
+      ratingScore={
+        item?.reviewAverageOverallPoint === "NaN"
+          ? "0.0"
+          : item?.reviewAverageOverallPoint.toFixed(1)
+      }
+      ratingCategory={item?.reviewAveragePointCategory}
+      numOfReviews={item?.reviewCount}
+      originPrice={item?.roomLowestOriginPrice || 0}
+      discount={item?.roomLowestDiscountPercentage || 0}
+      discountPrice={item?.roomLowestDiscountedPrice || 0}
       // taxPrice={item?.taxPrice}
       // extraFee={item?.extraFee}
-      totalPrice={item?.totalPrice}
-      isFavorite={item?.isFavorite}
+      totalPrice={item?.roomLowestTotalPrice || 0}
+      isFavorite={true}
       onPress={() => handleOnHotelCardPress(item?.id)}
     />
   );
@@ -107,7 +184,9 @@ const SearchResult = () => {
         fill={selected ? COLOR.primary_blue_100 : "transparent"}
         style={{ marginRight: 8 }}
       />
-      <Text style={styles.text_item}>{item.value === "" ? item.label : item.value}</Text>
+      <Text style={styles.text_item}>
+        {item.value === "" ? item.label : item.value}
+      </Text>
       {item.value !== "" && (
         <Star
           size={14}
@@ -126,47 +205,63 @@ const SearchResult = () => {
         translucent={true}
         backgroundColor="transparent"
       />
-      <GeneralHeader title={"Vũng Tàu"} onBackPress={() => onBackPress()} />
-      <SearchInfoCard
-        style={{ marginHorizontal: 20, marginVertical: 15 }}
-        searchKeyword={recentSearch[0]?.title}
-        period={recentSearch[0].period}
-        numOfGuestRoom={recentSearch[0].numOfGuestRoom}
+      <PriceSliderModal
+        visible={priceSliderVisible}
+        values={priceRange}
+        onOutsideModalPress={(values) => handleOutsideModalPress(values)}
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ marginBottom: 15, height: "6%", width: "100%" }}
-        contentContainerStyle={{ paddingStart: 12, paddingEnd: 20 }}
-      >
-        <PriceRangePicker
-          filterCategory={"Giá"}
-          filterTruncatedContent={`${formatVND(priceRange[0])}đ - ${formatVND(
-            priceRange[1]
-          )}đ`}
-          style={{ marginStart: 8 }}
-          onPress={() => setPriceSliderVisible(true)}
+      <GeneralHeader title={query} onBackPress={() => onBackPress()} />
+      {!from && !to && guests === "0" ? null : (
+        <SearchInfoCard
+          style={{ marginHorizontal: 20, marginTop: 15 }}
+          searchKeyword={query}
+          period={period}
+          numOfGuest={guests}
+          onEditPress={onBackPress}
         />
-        <FilterSelection
-          label="Đánh giá"
-          data={ratingFilterOptions}
-          value={selectedRating}
-          onSelect={(value) => handleSelectedRating(value)}
-          style={{ marginStart: 8 }}
-          renderItem={renderRatingItem}
-          minWidth={140}
-        />
-        <FilterSelection
-          label="Xếp hạng Sao"
-          data={starFilterOptions}
-          value={selectedStar}
-          onSelect={(value) => handleSelectedStar(value)}
-          style={{ marginStart: 8 }}
-          renderItem={renderStarItem}
-          minWidth={90}
-        />
-      </ScrollView>
-      <View style={{ width: "100%", paddingHorizontal: 15 }}>
+      )}
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginBottom: 15 }}
+          contentContainerStyle={{
+            paddingStart: 12,
+            paddingEnd: 20,
+            marginTop: 15,
+          }}
+        >
+          <PriceRangePicker
+            filterCategory={"Giá"}
+            filterTruncatedContent={
+              priceRange == null
+                ? ""
+                : `${formatVND(priceRange[0])}đ - ${formatVND(priceRange[1])}đ`
+            }
+            style={{ marginStart: 8 }}
+            onPress={() => setPriceSliderVisible(true)}
+          />
+          <FilterSelection
+            label="Đánh giá"
+            data={ratingFilterOptions}
+            value={selectedRating}
+            onSelect={(value) => handleSelectedRating(value)}
+            style={{ marginStart: 8 }}
+            renderItem={renderRatingItem}
+            minWidth={140}
+          />
+          <FilterSelection
+            label="Xếp hạng Sao"
+            data={starFilterOptions}
+            value={selectedStar}
+            onSelect={(value) => handleSelectedStar(value)}
+            style={{ marginStart: 8 }}
+            renderItem={renderStarItem}
+            minWidth={90}
+          />
+        </ScrollView>
+      </View>
+      <View style={{ width: "100%", paddingHorizontal: 20 }}>
         <SortDropDown
           options={priceFilterOptions}
           placeholder="Sắp xếp theo"
@@ -174,25 +269,55 @@ const SearchResult = () => {
           style={styles.drop_down}
         />
       </View>
-      <PriceSliderModal
-        visible={priceSliderVisible}
-        values={priceRange}
-        onOutsideModalPress={(values) => handleOutsideModalPress(values)}
-      />
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 20 }}
-        data={hotels}
-        ListHeaderComponent={
-          <Text style={styles.num_of_result_text}>
-            <Text style={{ color: COLOR.primary_gold_120, fontWeight: 600 }}>
-              {hotels.length}
-            </Text>{" "}
-            kết quả trả về cho tìm kiếm của bạn
-          </Text>
-        }
-        renderItem={renderSearchResult}
-      />
+      {loading ? (
+        <ScreenSpinner />
+      ) : (
+        <>
+          {searchResult.length > 0 ? (
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              style={{ flex: 1 }}
+              contentContainerStyle={{
+                paddingBottom: 20,
+                paddingHorizontal: 20,
+              }}
+              data={searchResult}
+              ListHeaderComponent={
+                <Text style={styles.num_of_result_text}>
+                  <Text
+                    style={{ color: COLOR.primary_gold_120, fontWeight: 600 }}
+                  >
+                    {searchResult.length}
+                  </Text>{" "}
+                  kết quả trả về cho tìm kiếm của bạn
+                </Text>
+              }
+              renderItem={renderSearchResult}
+            />
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingHorizontal: 20,
+              }}
+            >
+              <SearchX size={48} color={COLOR.primary_blue_100} />
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: COLOR.primary_blue_100,
+                  textAlign: "center",
+                  marginTop: 20,
+                }}
+              >
+                Rất tiếc, hiện tại không tìm thấy khách sạn nào thỏa các tùy chọn của Quý khách
+              </Text>
+            </View>
+          )}
+        </>
+      )}
     </View>
   );
 };

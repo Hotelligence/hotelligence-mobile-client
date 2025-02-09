@@ -64,7 +64,7 @@ const PriceSliderModal = ({
           <PriceSlider
             minValue={minValue}
             maxValue={maxValue}
-            values={priceRange}
+            values={priceRange ? priceRange : [minValue, maxValue]}
             onValuesChange={handleValuesChange}
           />
         </View>

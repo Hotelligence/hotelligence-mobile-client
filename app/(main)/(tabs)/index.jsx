@@ -23,11 +23,13 @@ import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
+import { dateObjectToDateString } from "@/utils/ValueConverter";
 
 const HomeScreen = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const [searchValue, setSearchValue] = useState("");
 
@@ -36,7 +38,8 @@ const HomeScreen = () => {
   const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
   const [selectedToDate, setSelectedToDate] = useState(null);
 
-  const [guestNumberPickerVisible, setGuestNumberPickerVisible] = useState(false);
+  const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
+    useState(false);
   const [numOfAdult, setNumOfAdult] = useState(0);
   const [numOfChild, setNumOfChild] = useState(0);
 
@@ -47,9 +50,19 @@ const HomeScreen = () => {
     }, 1000);
   }, []);
 
-  const onSearchPress = () => {
-    //handle search logic
-    router.push("/search/search-result");
+  const onSearchPress = async (query, from, to, guests) => {
+    setButtonLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 200)); // delay UI for 200ms
+    setButtonLoading(false);
+    router.push({
+      pathname: "/search/search-result",
+      params: {
+        query,
+        from: from ? dateObjectToDateString(from) : "",
+        to: to ? dateObjectToDateString(to) : "",
+        guests,
+      },
+    });
   };
 
   const handleOutsideModalPress = (adults, children) => {
@@ -96,7 +109,7 @@ const HomeScreen = () => {
     ),
     []
   );
-  
+
   if (loading) {
     return (
       <>
@@ -187,13 +200,28 @@ const HomeScreen = () => {
             style={{ marginBottom: 10 }}
             placeholder="2 người lớn, 1 trẻ em"
             modalVisible={guestNumberPickerVisible}
-            onPress={() => setGuestNumberPickerVisible(!guestNumberPickerVisible)}
-            onOutsideModalPress={(adults, children) => handleOutsideModalPress(adults, children)}
+            onPress={() =>
+              setGuestNumberPickerVisible(!guestNumberPickerVisible)
+            }
+            onOutsideModalPress={(adults, children) =>
+              handleOutsideModalPress(adults, children)
+            }
             numOfAdult={numOfAdult}
             numOfChild={numOfChild}
           />
           <SubmitButton
-            onPress={() => onSearchPress()}
+            isLoading={buttonLoading}
+            disabled={
+              searchValue === ""
+            }
+            onPress={() =>
+              onSearchPress(
+                searchValue,
+                selectedFromDate,
+                selectedToDate,
+                numOfChild + numOfAdult
+              )
+            }
             style={{ marginTop: 5 }}
             text="Tìm"
           />

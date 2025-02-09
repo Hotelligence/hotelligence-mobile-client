@@ -36,6 +36,9 @@ const SortDropDown = ({
           </View>
         )}
         style={styles.dropdown}
+        containerStyle={{
+          borderWidth: 1,
+        }}
       />
     </View>
   );
@@ -56,6 +59,7 @@ const styles = StyleSheet.create({
 
   dropdown: {
     padding: 10,
+    marginHorizontal: 10,
   },
 
   item: {

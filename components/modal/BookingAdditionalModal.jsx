@@ -23,7 +23,8 @@ const BookingAdditionalModal = ({
   onViewPriceDetailPress,
 }) => {
 
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null); 
   const [additionalFee, setAdditionalFee] = useState(0);
 
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -44,13 +45,15 @@ const BookingAdditionalModal = ({
     }
   }, [visible]);
 
-  const handleOptionSelect = (index, optionPrice) => {
-    if(selectedOption === index){
+  const handleOptionSelect = (index, option) => {
+    if(selectedOptionIndex === index){
+      setSelectedOptionIndex(null);
       setSelectedOption(null);
       setAdditionalFee(0);
     } else{
-      setSelectedOption(index);
-      setAdditionalFee(optionPrice);
+      setSelectedOptionIndex(index);
+      setSelectedOption(option);
+      setAdditionalFee(option.optionPrice);
     }
   }
 
@@ -109,10 +112,8 @@ const BookingAdditionalModal = ({
                       size={20}
                       fillColor={COLOR.primary_blue_100}
                       useBuiltInState={false}
-                      isChecked={selectedOption === index}
-                      onPress={() =>
-                        handleOptionSelect(index, option.optionPrice)
-                      }
+                      isChecked={selectedOptionIndex === index}
+                      onPress={() => handleOptionSelect(index, option)}
                     />
                     <Text
                       ellipsizeMode="tail"

@@ -5,7 +5,7 @@ import GeneralHeader from "@/components/GeneralHeader";
 import { SubmitButton, SecondaryButton } from "@/components/search";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
-const BookingConfirmation = () => {
+const BookingStatus = () => {
   const router = useRouter();
   const { isSuccess } = useLocalSearchParams();
   const bookingSuccess = isSuccess === "true";
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookingConfirmation;
+export default BookingStatus;

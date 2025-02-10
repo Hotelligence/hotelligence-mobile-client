@@ -139,6 +139,22 @@ export function isoStringToDateTime(value) {
   }
 }
 
+//date object to date time format
+export function dateObjectToDateTime(date, hour, minute) {
+  try {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0"); //Adjust the params to use the date object's time
+    const minutes = String(date.getMinutes()).padStart(2, "0"); //Adjust the params to use the date object's time
+
+    return `${hour}:${minute} - ${day}/${month}/${year}`;
+  } catch (error) {
+    console.error("Error parsing Date object in dateObjectToDateTime:", error);
+    return null; // Return None on parsing errors
+  }
+}
+
 export function isoStringToDate(value) {
   // 2021-09-01T00:00:00.000Z to 21 tháng 9, 2021
   try {
@@ -209,6 +225,36 @@ export function isoStringToFullDateTime(value) { // Parse the ISOString date tim
   }
 }
 
+export function dateObjectToFullDateTime(date, hour, minute) { //Parse the Date time object into a fully date time string
+  try {
+    // Vietnamese days of week
+    const daysOfWeek = [
+      "Chủ nhật",
+      "Thứ hai",
+      "Thứ ba",
+      "Thứ tư",
+      "Thứ năm",
+      "Thứ sáu",
+      "Thứ bảy",
+    ];
+
+    const dayOfWeek = daysOfWeek[date.getDay()];
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0"); //replace the params with this if wanna use the date object's time
+
+    return `${dayOfWeek}, ngày ${day} tháng ${month} năm ${year} (${hour}:${minute})`;
+  } catch (error) {
+    console.error(
+      "Error parsing Date object in dateObjectToFullDateTime:",
+      error
+    );
+    return null;
+  }
+}
+
 export function dateObjectToDateString(date) {
   try {
     const year = date.getFullYear().toString().slice(-2);
@@ -259,3 +305,5 @@ export function isoStringToDateString(isoString) {
     return null;
   }
 }
+
+//date object to ISOString

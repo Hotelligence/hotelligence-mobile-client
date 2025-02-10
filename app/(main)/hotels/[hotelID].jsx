@@ -332,6 +332,7 @@ const RoomBookingSection = forwardRef(
               onSelectPress={() =>
                 handleSelectPress(
                   //This function is different from the one in HotelDetail, use params number to distinguish them (1)
+                  room?.id,
                   {
                     originPrice: room?.originPrice,
                     discountedPrice: room?.discountedPrice,
@@ -339,7 +340,7 @@ const RoomBookingSection = forwardRef(
                     totalPrice: room?.totalPrice,
                   },
                   { fromDate: selectedFromDate, toDate: selectedToDate },
-                  { numOfAdults: numOfAdult, numOfChild: numOfChild }
+                  { numOfAdults: numOfAdult, numOfChild: numOfChild },
                 )
               }
             />
@@ -487,10 +488,11 @@ const ReviewSection = ({
 const HotelDetail = () => {
   const router = useRouter();
 
-  const { hotelID, fromDate, toDate, numOfChild, numOfAdults } = useLocalSearchParams();
+  const { hotelID, fromDate, toDate, numOfChild, numOfAdults } =
+    useLocalSearchParams();
 
-  const from = fromDate ? new Date(fromDate) : null;
-  const to = toDate ? new Date(toDate) : null;
+  const from = fromDate ? new Date(fromDate) : null; //from date passed from the prev screen
+  const to = toDate ? new Date(toDate) : null; //to date passed from the prev screen
 
   //API fetched states
   const [hotelInfo, setHotelInfo] = useState(null);
@@ -503,6 +505,9 @@ const HotelDetail = () => {
   const [loading, setLoading] = useState(false);
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
   const [selectedRoomPriceInfo, setSelectedRoomPriceInfo] = useState(null);
+  const [selectedRoomID, setSelectedRoomID] = useState(null);
+  const [stayPeriod, setStayPeriod] = useState(null);
+  const [guests, setGuests] = useState(null);
 
   //Modal visibility states
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
@@ -586,15 +591,26 @@ const HotelDetail = () => {
     });
   };
 
-  const handleSelectPress = (extraOptions, priceInfo, stayPeriod, guests,) => {
+  const handleSelectPress = (roomID, extraOptions, priceInfo, stayPeriod, guests) => {
     //(4)
-    console.log(stayPeriod);
-    console.log(guests);
     if (extraOptions) {
       setAdditionalModalVisible(true);
       setSelectedRoomPriceInfo(priceInfo);
+      setSelectedRoomID(roomID);
+      setStayPeriod(stayPeriod);
+      setGuests(guests);
     } else {
-      console.log("No extra option, navigate to confirm booking screen");
+      router.push({
+        pathname: "/booking",
+        params: {
+          roomID: roomID,
+          hotelName: hotelInfo?.hotelName,
+          checkinDate: stayPeriod.fromDate,
+          checkoutDate: stayPeriod.toDate,
+          guestNumber: guests.numOfAdults + guests.numOfChild,
+          extraOptionsName: extraOptions?.optionName,
+        },
+      });
     }
   };
 
@@ -604,11 +620,18 @@ const HotelDetail = () => {
     setAdditionalModalVisible(false);
   };
 
-  const handleAdditionalBookingPress = async (selectedOption) => {
+  const handleAdditionalBookingPress = async (selectedOption, roomID, stayPeriod, guests) => {
     setAdditionalModalVisible(false);
     router.push({
       pathname: "/booking",
-      // params: { selectedOption: selectedOption },
+      params: {
+        roomID: roomID,
+        hotelName: hotelInfo?.hotelName,
+        checkinDate: stayPeriod.fromDate,
+        checkoutDate: stayPeriod.toDate,
+        guestNumber: guests.numOfAdults + guests.numOfChild,
+        extraOptionsName: selectedOption?.optionName,
+      },
     });
   };
 
@@ -646,7 +669,7 @@ const HotelDetail = () => {
         priceInfo={selectedRoomPriceInfo}
         onClose={() => onAdditionalModalClose()}
         onBookingPress={(selectedOption) =>
-          handleAdditionalBookingPress(selectedOption)
+          handleAdditionalBookingPress(selectedOption, selectedRoomID, stayPeriod, guests)
         }
         onViewPriceDetailPress={handleViewPricePress}
       />
@@ -741,15 +764,19 @@ const HotelDetail = () => {
               }
               handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
               handleSelectPress={(
+                roomID,
                 priceInfo,
                 stayPeriod,
-                guests, //(3)
+                guests,
+                roomName, //(3)
               ) =>
                 handleSelectPress(
+                  roomID,
                   hotelInfo?.extraOptions,
                   priceInfo,
                   stayPeriod,
-                  guests
+                  guests,
+                  roomName,
                 )
               } //This is a 4 layer deep function, caution when maintaining
             />

@@ -17,32 +17,17 @@ import { formatVND } from "@/utils/ValueConverter";
 const BookingAdditionalModal = ({
   visible,
   onClose,
-  additionalOptions = [],
+  additionalOptions,
+  priceInfo,
   onBookingPress,
   onViewPriceDetailPress,
 }) => {
+
   const [selectedOption, setSelectedOption] = useState(null);
+  const [additionalFee, setAdditionalFee] = useState(0);
+
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
-  const tempOptions = [
-    //use additionalOptions instead of tempOptions later
-    {
-      id: "0",
-      name: "Bữa sáng",
-      price: 1000000,
-    },
-    {
-      id: "1",
-      name: "Bữa sáng cho 2 người",
-      price: 2000000,
-    },
-    {
-      id: "2",
-      name: "Bữa tối",
-      price: 15000000,
-    },
-  ];
 
   useEffect(() => {
     if (visible) {
@@ -58,6 +43,16 @@ const BookingAdditionalModal = ({
       }).start();
     }
   }, [visible]);
+
+  const handleOptionSelect = (index, optionPrice) => {
+    if(selectedOption === index){
+      setSelectedOption(null);
+      setAdditionalFee(0);
+    } else{
+      setSelectedOption(index);
+      setAdditionalFee(optionPrice);
+    }
+  }
 
   return (
     <Modal
@@ -103,35 +98,38 @@ const BookingAdditionalModal = ({
                 Giá mỗi đêm
               </Text>
             </View>
-            {tempOptions.map((option) => (
-              <View
-                key={option?.id}
-                style={{ flexDirection: "row", marginVertical: 5 }}
-              >
-                <View style={{ flexDirection: "row", width: "55%" }}>
-                  <BouncyCheckbox
-                    size={20}
-                    fillColor={COLOR.primary_blue_100}
-                    useBuiltInState={false}
-                    isChecked={selectedOption === option?.id}
-                    onPress={() => setSelectedOption(option?.id)}
-                  />
-                  <Text
-                    ellipsizeMode="tail"
-                    numberOfLines={1}
-                    style={styles.option_text}
-                  >
-                    {option?.name}
+            {additionalOptions &&
+              additionalOptions.map((option, index) => (
+                <View
+                  key={index}
+                  style={{ flexDirection: "row", marginVertical: 5 }}
+                >
+                  <View style={{ flexDirection: "row", width: "55%" }}>
+                    <BouncyCheckbox
+                      size={20}
+                      fillColor={COLOR.primary_blue_100}
+                      useBuiltInState={false}
+                      isChecked={selectedOption === index}
+                      onPress={() =>
+                        handleOptionSelect(index, option.optionPrice)
+                      }
+                    />
+                    <Text
+                      ellipsizeMode="tail"
+                      numberOfLines={1}
+                      style={styles.option_text}
+                    >
+                      {option?.optionName}
+                    </Text>
+                  </View>
+                  <Text style={styles.price_text}>
+                    + {formatVND(option.optionPrice)}đ
                   </Text>
                 </View>
-                <Text style={styles.price_text}>
-                  + {formatVND(option.price)}đ
-                </Text>
-              </View>
-            ))}
+              ))}
             <View style={styles.divider} />
             <DiscountTag
-              discount={10}
+              discount={priceInfo?.discountPercentage}
               style={{ alignSelf: "flex-start", marginTop: 5 }}
             />
             <View
@@ -139,11 +137,16 @@ const BookingAdditionalModal = ({
             >
               <View style={{ width: "75%" }}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.discount_price_text}>1.171.678đ</Text>
-                  <Text style={styles.origin_price_text}>1.371.678đ</Text>
+                  <Text style={styles.discount_price_text}>
+                    {formatVND(priceInfo?.discountedPrice + additionalFee)}đ
+                  </Text>
+                  <Text style={styles.origin_price_text}>
+                    {formatVND(priceInfo?.originPrice + additionalFee)}đ
+                  </Text>
                 </View>
                 <Text style={styles.total_price_text}>
-                  Tổng 2.678.125đ bao gồm thuế và phí
+                  Tổng {formatVND(priceInfo?.totalPrice + additionalFee)}đ bao
+                  gồm thuế và phí
                 </Text>
                 <Pressable
                   onPress={onViewPriceDetailPress}

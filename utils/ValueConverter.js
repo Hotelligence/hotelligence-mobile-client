@@ -68,7 +68,10 @@ export function dateStringToISOString(dateString) { //convert "yyyy-mm-dd" to "y
     // Return the ISO string representation of the date
     return date.toISOString();
   } catch (error) {
-    console.error("Error converting date string to ISOString:", error);
+    console.error(
+      "Error converting date string to ISOString in dateStringToISOString:",
+      error
+    );
     return null; // Return null on errors
   }
 }
@@ -90,7 +93,10 @@ export function dateTimeStringToISOString(dateTimeString) { //convert "yyyy-mm-d
 
     return date.toISOString();
   } catch (error) {
-    console.error("Error converting datetime string to ISOString:", error);
+    console.error(
+      "Error converting datetime string to ISOString in dateTimeStringToISOString:",
+      error
+    );
     return null;
   }
 }
@@ -108,7 +114,7 @@ export function isoStringToTime(value) {
     const result = `${hours}:${minutes}`;
     return result;
   } catch (error) {
-    console.error("Error parsing ISOString date:", error);
+    console.error("Error parsing ISOString date in isoStringToTime:", error);
     return null; // Return None on parsing errors
   }
 }
@@ -128,7 +134,7 @@ export function isoStringToDateTime(value) {
     const result = `${hours}:${minutes} - ${day}/${month}/${year}`;
     return result;
   } catch (error) {
-    console.error("Error parsing Date object:", error);
+    console.error("Error parsing Date object in isoStringToDateTime:", error);
     return null; // Return None on parsing errors
   }
 }
@@ -146,7 +152,7 @@ export function isoStringToDate(value) {
     const result = `${day} tháng ${month}, ${year}`;
     return result;
   } catch (error) {
-    console.error("Error parsing Date object:", error);
+    console.error("Error parsing Date object in isoStringToDate:", error);
     return null; // Return None on parsing errors
   }
 }
@@ -163,7 +169,10 @@ export function isoStringToTruncatedDate(value) {
     const result = `${day} thg ${month}`;
     return result;
   } catch (error) {
-    console.error("Error parsing Date object:", error);
+    console.error(
+      "Error parsing Date object in isoStringToTruncatedDate:",
+      error
+    );
     return null; // Return None on parsing errors
   }
 }
@@ -192,7 +201,10 @@ export function isoStringToFullDateTime(value) { // Parse the ISOString date tim
 
     return `${dayOfWeek}, ngày ${day} tháng ${month} năm ${year} (${hours}:${minutes})`;
   } catch (error) {
-    console.error("Error parsing Date object:", error);
+    console.error(
+      "Error parsing Date object in isoStringToFullDateTime:",
+      error
+    );
     return null;
   }
 }
@@ -205,7 +217,7 @@ export function dateObjectToDateString(date) {
     
     return `${year}-${month}-${day}`;
   } catch (error) {
-    console.error("Error converting date:", error);
+    console.error("Error converting date in dateObjectToDateString:", error);
     return null;
   }
 }
@@ -215,7 +227,35 @@ export function dateStringToTruncatedDate(dateStr) {
     const [year, month, day] = dateStr.split("-");
     return `${day} thg ${month}`;
   } catch (error) {
-    console.error("Error parsing date string:", error);
+    console.error(
+      "Error parsing date string in dateStringToTruncatedDate:",
+      error
+    );
+    return null;
+  }
+}
+
+export function dateObjectToTruncatedDate(date) {
+  try {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${day} thg ${month}`;
+  } catch (error) {
+    console.error("Error converting date in dateObjectToTruncatedDate:", error);
+    return null;
+  }
+}
+
+export function isoStringToDateString(isoString) {
+  try {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error("Error converting date in isoStringToDateString:", error);
     return null;
   }
 }

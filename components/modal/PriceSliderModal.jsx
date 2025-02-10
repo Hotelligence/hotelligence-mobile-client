@@ -47,7 +47,7 @@ const PriceSlider = ({
 const PriceSliderModal = ({
   visible,
   minValue = 0,
-  maxValue = 20000000,
+  maxValue = 10000000,
   values,
   onOutsideModalPress,
 }) => {

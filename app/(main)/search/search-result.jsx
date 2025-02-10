@@ -23,7 +23,11 @@ import {
   starFilterOptions,
 } from "@/assets/FilterSortOptions";
 import { PriceSliderModal } from "@/components/modal";
-import { formatVND, dateStringToTruncatedDate } from "@/utils/ValueConverter";
+import {
+  formatVND,
+  isoStringToDateString,
+  dateObjectToTruncatedDate,
+} from "@/utils/ValueConverter";
 import { Circle, Star, SearchX } from "lucide-react-native";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { HttpStatusCode } from "axios";
@@ -31,23 +35,32 @@ import { getSearchResultAPI } from "@/api/HotelServices";
 
 const SearchResult = () => {
   const router = useRouter();
-  const { query, from, to, guests } = useLocalSearchParams();
+  const { query, fromDate, toDate, numOfChild, numOfAdults } = useLocalSearchParams();
   // console.log(query, from, to, guests);
+
+  const guests = parseInt(numOfChild) + parseInt(numOfAdults);
+  const from = fromDate ? new Date(fromDate) : null;
+  const to = toDate ? new Date(toDate) : null;
 
   let period;
   if (!from && !to) {
     period = "";
   } else if (!from) {
-    period = `Hôm nay - ${dateStringToTruncatedDate(to)}`;
+    period = `Hôm nay - ${dateObjectToTruncatedDate(to)}`;
   } else if (!to) {
-    period = `${dateStringToTruncatedDate(from)}`;
+    period = `${dateObjectToTruncatedDate(from)}`;
   } else {
-    period = `${dateStringToTruncatedDate(from)} - ${dateStringToTruncatedDate(
+    period = `${dateObjectToTruncatedDate(from)} - ${dateObjectToTruncatedDate(
       to
     )}`;
   }
 
-  const [selectedSortOption, setSelectedSortOption] = useState(null);
+  const [selectedSortOption, setSelectedSortOption] = useState({
+    value: "priceUp",
+    sortBy: "discountPrice",
+    sortOrder: "asc",
+    label: "Giá thấp đến cao",
+  },);
 
   const [priceRange, setPriceRange] = useState(null);
   const [priceSliderVisible, setPriceSliderVisible] = useState(false);
@@ -64,30 +77,28 @@ const SearchResult = () => {
       from,
       to,
       guests,
-      // priceRange,
-      // minRatingScore,
-      stars
-      // sortOption,
+      priceRange,
+      minRatingScore,
+      stars,
+      sortOption
     ) => {
       setLoading(true);
       try {
-        // const tempPriceRange = priceRange ? priceRange : [0, 20000000];
-        // const tempMinRatingScore = minRatingScore ? minRatingScore : "";
+        const tempPriceRange = priceRange ? priceRange : [0, 10000000];
+        const tempMinRatingScore = minRatingScore ? minRatingScore.value : "";
         const tempStars = stars ? stars.value : "";
-        // const sortBy = sortOption ? sortOption.sortBy : "";
-        // const sortOrder = sortOption ? sortOption.sortOrder : "";
+        const sortBy = sortOption ? sortOption.sortBy : "";
+        const sortOrder = sortOption ? sortOption.sortOrder : "";
         const response = await getSearchResultAPI(
           query,
           from,
           to,
           guests,
-          // tempPriceRange,
-          // tempMinRatingScore,
-          "",
-          "",
-          tempStars
-          // sortBy,
-          // sortOrder
+          tempPriceRange,
+          tempMinRatingScore,
+          tempStars,
+          sortBy,
+          sortOrder
         );
         if (response.status === HttpStatusCode.Ok) {
           setSearchResult(response.data);
@@ -101,25 +112,31 @@ const SearchResult = () => {
 
     getSearchResult(
       query,
-      from,
-      to,
+      isoStringToDateString(from),
+      isoStringToDateString(to),
       guests,
-      // priceRange,
-      // selectedRating,
-      selectedStar
-      // selectedSortOption
+      priceRange,
+      selectedRating,
+      selectedStar,
+      selectedSortOption
     );
-  }, [query, from, to, guests, selectedStar]);
+  }, [query, fromDate, toDate, guests, priceRange, selectedRating, selectedStar, selectedSortOption]);
 
   const onBackPress = () => {
     //clear something before navigate back
     router.back();
   };
 
-  const handleOnHotelCardPress = (hotelID) => {
+  const handleOnHotelCardPress = (hotelID, from, to, numOfChild, numOfAdults) => {
     router.push({
       pathname: "/hotels/[hotelID]",
-      params: { hotelID: hotelID },
+      params: {
+        hotelID: hotelID,
+        fromDate: from,
+        toDate: to,
+        numOfChild: numOfChild,
+        numOfAdults: numOfAdults,
+      },
     });
   };
 
@@ -160,7 +177,7 @@ const SearchResult = () => {
       // extraFee={item?.extraFee}
       totalPrice={item?.roomLowestTotalPrice || 0}
       isFavorite={true}
-      onPress={() => handleOnHotelCardPress(item?.id)}
+      onPress={() => handleOnHotelCardPress(item?.id, from, to, numOfChild, numOfAdults)}
     />
   );
 

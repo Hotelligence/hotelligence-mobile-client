@@ -96,8 +96,8 @@ const GuestNumberPicker = ({
   onOutsideModalPress,
 }) => {
   //The parents of this component is very large, so managing increment state locally will reduce the re-rendering of them.
-  const [adults, setAdults] = useState(0);
-  const [children, setChildren] = useState(0);
+  const [adults, setAdults] = useState(numOfAdult);
+  const [children, setChildren] = useState(numOfChild);
 
   const handleAdultDecrement = () => {
     if (adults !== 0) setAdults(adults - 1);

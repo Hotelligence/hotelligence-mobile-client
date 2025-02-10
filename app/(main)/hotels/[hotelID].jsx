@@ -6,6 +6,7 @@ import {
   Image,
   Pressable,
   Animated,
+  Platform,
 } from "react-native";
 import {
   CircleButton,
@@ -17,15 +18,21 @@ import {
   DetailReviewPoint,
   CommentDisplay,
   SubmitButton,
+  DatePicker,
+  GuestNumberPicker,
 } from "@/components/search";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { BookingAdditionalModal, DetailPriceModal } from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
-import { hotels, rooms, reviews, amenities } from "@/assets/TempData"; //Delete later
+import { rooms, amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { ChevronLeft, MapPin, ChevronRight } from "lucide-react-native";
-import { isoStringToDate } from "@/utils/ValueConverter";
+import {
+  dateObjectToTruncatedDate,
+  isoStringToDate,
+  dateObjectToDateString,
+} from "@/utils/ValueConverter";
 import { HttpStatusCode } from "axios";
 import { getHotelByID_API } from "@/api/HotelServices";
 import { getRoomsInHotelAPI } from "@/api/RoomServices";
@@ -59,7 +66,7 @@ const IntroSection = ({
           paddingVertical: 10,
         }}
       >
-        <RatingScoreTag ratingScore={ratingScore} />
+        <RatingScoreTag ratingScore={ratingScore?.toFixed(1)} />
         <View style={{ marginStart: 4 }}>
           <Text style={styles.numOf_reviews_text}>
             ({numOfReviews} đánh giá)
@@ -149,14 +156,100 @@ const RoomBookingSection = forwardRef(
       onRoomFilterSelected,
       displayedRoom,
       totalRoom,
+      fromDate,
+      toDate,
+      child,
+      adults,
       handleDetailPress,
-      handleSelectPress,
+      handleSelectPress, //(2)
     },
     ref
   ) => {
+    const [fromDatePickerVisible, setFromDatePickerVisible] = useState(false);
+    const [selectedFromDate, setSelectedFromDate] = useState(fromDate);
+    const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
+    const [selectedToDate, setSelectedToDate] = useState(toDate);
+
+    const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
+      useState(false);
+    const [numOfAdult, setNumOfAdult] = useState(parseInt(adults));
+    const [numOfChild, setNumOfChild] = useState(parseInt(child));
+
+    const handleOutsideModalPress = (adults, children) => {
+      setNumOfAdult(adults);
+      setNumOfChild(children);
+      setGuestNumberPickerVisible(false);
+    };
+
     return (
       <View ref={ref} style={styles.room_booking_container}>
         <Text style={styles.section_title_text}>Chọn phòng</Text>
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            marginTop: 15,
+          }}
+        >
+          <DatePicker
+            label="Chọn ngày đi"
+            placeholder={dateObjectToTruncatedDate(new Date())}
+            value={selectedFromDate}
+            display={Platform.OS === "ios" ? "inline" : "default"}
+            datePickerVisible={fromDatePickerVisible}
+            onChange={(e, selectedDate) => {
+              setSelectedFromDate(selectedDate);
+              setFromDatePickerVisible(!fromDatePickerVisible);
+            }}
+            onPress={() => {
+              setFromDatePickerVisible(!fromDatePickerVisible);
+            }}
+            onOutsideModalPress={() =>
+              setFromDatePickerVisible(!fromDatePickerVisible)
+            }
+            style={{ marginBottom: 10, flex: 1 }}
+            minimumDate={new Date()}
+          />
+          <View
+            style={{
+              height: 2,
+              width: "2%",
+              backgroundColor: COLOR.primary_blue_50,
+              alignSelf: "center",
+              marginHorizontal: 10,
+            }}
+          />
+          <DatePicker
+            label="Chọn ngày về"
+            placeholder={dateObjectToTruncatedDate(new Date())}
+            value={selectedToDate}
+            display={Platform.OS === "ios" ? "inline" : "default"}
+            datePickerVisible={toDatePickerVisible}
+            onChange={(e, selectedDate) => {
+              setSelectedToDate(selectedDate);
+              setToDatePickerVisible(!toDatePickerVisible);
+            }}
+            onPress={() => {
+              setToDatePickerVisible(!toDatePickerVisible);
+            }}
+            onOutsideModalPress={() =>
+              setToDatePickerVisible(!toDatePickerVisible)
+            }
+            style={{ marginBottom: 10, flex: 1 }}
+            minimumDate={selectedFromDate}
+          />
+        </View>
+        <GuestNumberPicker
+          style={{ marginBottom: 10 }}
+          placeholder="2 người lớn, 1 trẻ em"
+          modalVisible={guestNumberPickerVisible}
+          onPress={() => setGuestNumberPickerVisible(!guestNumberPickerVisible)}
+          onOutsideModalPress={(adults, children) =>
+            handleOutsideModalPress(adults, children)
+          }
+          numOfAdult={numOfAdult}
+          numOfChild={numOfChild}
+        />
         <View
           style={{
             flexDirection: "row",
@@ -236,7 +329,19 @@ const RoomBookingSection = forwardRef(
               // extraFee={room?.extraFee}
               totalPrice={room?.totalPrice}
               onDetailPress={() => handleDetailPress(room?.id)}
-              onSelectPress={() => handleSelectPress(room?.id)}
+              onSelectPress={() =>
+                handleSelectPress(
+                  //This function is different from the one in HotelDetail, use params number to distinguish them (1)
+                  {
+                    originPrice: room?.originPrice,
+                    discountedPrice: room?.discountedPrice,
+                    discountPercentage: room?.discountPercentage,
+                    totalPrice: room?.totalPrice,
+                  },
+                  { fromDate: selectedFromDate, toDate: selectedToDate },
+                  { numOfAdults: numOfAdult, numOfChild: numOfChild }
+                )
+              }
             />
           ))}
         </View>
@@ -382,22 +487,26 @@ const ReviewSection = ({
 const HotelDetail = () => {
   const router = useRouter();
 
-  // const hotel = hotels[1]; //adjust this later
-  const tempRooms = rooms.slice(0, 6);
+  const { hotelID, fromDate, toDate, numOfChild, numOfAdults } = useLocalSearchParams();
 
-  const { hotelID } = useLocalSearchParams();
+  const from = fromDate ? new Date(fromDate) : null;
+  const to = toDate ? new Date(toDate) : null;
+
+  //API fetched states
   const [hotelInfo, setHotelInfo] = useState(null);
   const [roomsInHotel, setRoomsInHotel] = useState([]);
   const [hotelReviews, setHotelReviews] = useState([]);
 
+  //Other states
   const [wallpaperError, setWallpaperError] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false); //adjust this later
+  const [loading, setLoading] = useState(false);
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
+  const [selectedRoomPriceInfo, setSelectedRoomPriceInfo] = useState(null);
 
+  //Modal visibility states
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
-
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getHotelByID = async (hotelID) => {
@@ -431,7 +540,7 @@ const HotelDetail = () => {
       } catch (err) {
         console.log(err);
       }
-    }
+    };
 
     const fetchData = async (hotelID) => {
       setLoading(true);
@@ -477,9 +586,16 @@ const HotelDetail = () => {
     });
   };
 
-  const handleSelectPress = (roomID) => {
-    //navigate to room detail page
-    setAdditionalModalVisible(true);
+  const handleSelectPress = (extraOptions, priceInfo, stayPeriod, guests,) => {
+    //(4)
+    console.log(stayPeriod);
+    console.log(guests);
+    if (extraOptions) {
+      setAdditionalModalVisible(true);
+      setSelectedRoomPriceInfo(priceInfo);
+    } else {
+      console.log("No extra option, navigate to confirm booking screen");
+    }
   };
 
   const handleViewAllReviewPress = () => {};
@@ -526,6 +642,8 @@ const HotelDetail = () => {
     <View style={styles.container}>
       <BookingAdditionalModal
         visible={additionalModalVisible}
+        additionalOptions={hotelInfo?.extraOptions}
+        priceInfo={selectedRoomPriceInfo}
         onClose={() => onAdditionalModalClose()}
         onBookingPress={(selectedOption) =>
           handleAdditionalBookingPress(selectedOption)
@@ -610,15 +728,30 @@ const HotelDetail = () => {
             />
             <RoomBookingSection
               ref={bookingSectionRef}
+              rooms={roomsInHotel}
               displayedRoom={hotelInfo?.roomCount}
               totalRoom={hotelInfo?.roomCount}
-              rooms={roomsInHotel}
+              fromDate={from ? from : new Date()}
+              toDate={to ? to : new Date()}
+              child={numOfChild}
+              adults={numOfAdults}
               roomFilterSelected={roomFilterSelected}
               onRoomFilterSelected={(selectedFilter) =>
                 onFilterSelected(selectedFilter)
               }
               handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
-              handleSelectPress={(roomID) => handleSelectPress(roomID)} //This is a 4 layer deep function, caution when maintaining
+              handleSelectPress={(
+                priceInfo,
+                stayPeriod,
+                guests, //(3)
+              ) =>
+                handleSelectPress(
+                  hotelInfo?.extraOptions,
+                  priceInfo,
+                  stayPeriod,
+                  guests
+                )
+              } //This is a 4 layer deep function, caution when maintaining
             />
             <FeePolicySection
               policies={hotelInfo?.policies ? hotelInfo?.policies : ""}
@@ -631,12 +764,13 @@ const HotelDetail = () => {
               reviewCount={hotelInfo?.reviewCount}
               reviewCategory={hotelInfo?.reviewAveragePointCategory}
               reviewPoints={{
-                overall: hotelInfo?.reviewAverageOverallPoint,
-                cleanliness: hotelInfo?.reviewAverageCleanPoint,
-                comfort: hotelInfo?.reviewAverageServicePoint,
-                staff: hotelInfo?.reviewAverageStaffPoint,
-                facilities: hotelInfo?.reviewAverageFacilityPoint,
-                environmentFriendly: hotelInfo?.reviewAverageEnvironmentPoint,
+                overall: hotelInfo?.reviewAverageOverallPoint?.toFixed(1),
+                cleanliness: hotelInfo?.reviewAverageCleanPoint?.toFixed(1),
+                comfort: hotelInfo?.reviewAverageServicePoint?.toFixed(1),
+                staff: hotelInfo?.reviewAverageStaffPoint?.toFixed(1),
+                facilities: hotelInfo?.reviewAverageFacilityPoint?.toFixed(1),
+                environmentFriendly:
+                  hotelInfo?.reviewAverageEnvironmentPoint?.toFixed(1),
               }}
               onViewAllReviewPress={() => handleViewAllReviewPress()}
             />
@@ -679,7 +813,6 @@ const styles = StyleSheet.create({
     right: 0,
     height: 90,
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: "center",
   },
 

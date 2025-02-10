@@ -23,10 +23,12 @@ import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
-import { dateObjectToDateString } from "@/utils/ValueConverter";
+import { dateObjectToDateString, dateObjectToTruncatedDate } from "@/utils/ValueConverter";
 
 const HomeScreen = () => {
   const router = useRouter();
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const [loading, setLoading] = useState(false);
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -34,9 +36,9 @@ const HomeScreen = () => {
   const [searchValue, setSearchValue] = useState("");
 
   const [fromDatePickerVisible, setFromDatePickerVisible] = useState(false);
-  const [selectedFromDate, setSelectedFromDate] = useState(null);
+  const [selectedFromDate, setSelectedFromDate] = useState(new Date());
   const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
-  const [selectedToDate, setSelectedToDate] = useState(null);
+  const [selectedToDate, setSelectedToDate] = useState(new Date(tomorrow));
 
   const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
     useState(false);
@@ -50,7 +52,7 @@ const HomeScreen = () => {
     }, 1000);
   }, []);
 
-  const onSearchPress = async (query, from, to, guests) => {
+  const onSearchPress = async (query, from, to, numOfChild, numOfAdults) => {
     setButtonLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 200)); // delay UI for 200ms
     setButtonLoading(false);
@@ -58,9 +60,10 @@ const HomeScreen = () => {
       pathname: "/search/search-result",
       params: {
         query,
-        from: from ? dateObjectToDateString(from) : "",
-        to: to ? dateObjectToDateString(to) : "",
-        guests,
+        fromDate: from || "",
+        toDate: to || "",
+        numOfChild: numOfChild,
+        numOfAdults: numOfAdults,
       },
     });
   };
@@ -150,8 +153,8 @@ const HomeScreen = () => {
           >
             <DatePicker
               label="Chọn ngày đi"
-              placeholder="29 thg 3"
-              value={selectedFromDate}
+              placeholder={dateObjectToTruncatedDate(new Date())}
+              value={selectedFromDate ? new Date(selectedFromDate) : new Date()}
               display={Platform.OS === "ios" ? "inline" : "default"}
               datePickerVisible={fromDatePickerVisible}
               onChange={(e, selectedDate) => {
@@ -178,8 +181,8 @@ const HomeScreen = () => {
             />
             <DatePicker
               label="Chọn ngày về"
-              placeholder="30 thg 3"
-              value={selectedToDate}
+              placeholder={dateObjectToTruncatedDate(new Date())}
+              value={selectedToDate ? new Date(selectedToDate) : new Date(tomorrow)}
               display={Platform.OS === "ios" ? "inline" : "default"}
               datePickerVisible={toDatePickerVisible}
               onChange={(e, selectedDate) => {
@@ -193,7 +196,9 @@ const HomeScreen = () => {
                 setToDatePickerVisible(!toDatePickerVisible)
               }
               style={{ marginBottom: 10, flex: 1 }}
-              minimumDate={selectedFromDate}
+              minimumDate={
+                selectedFromDate ? new Date(selectedFromDate) : new Date()
+              }
             />
           </View>
           <GuestNumberPicker
@@ -211,15 +216,14 @@ const HomeScreen = () => {
           />
           <SubmitButton
             isLoading={buttonLoading}
-            disabled={
-              searchValue === ""
-            }
+            disabled={searchValue === ""}
             onPress={() =>
               onSearchPress(
                 searchValue,
                 selectedFromDate,
                 selectedToDate,
-                numOfChild + numOfAdult
+                numOfChild,
+                numOfAdult,
               )
             }
             style={{ marginTop: 5 }}

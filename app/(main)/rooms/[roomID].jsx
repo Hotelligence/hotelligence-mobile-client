@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,11 @@ import {
 import {
   CircleButton,
   NoImage,
-  AmenityDisplay,
   SubmitButton,
   AmenityDetailDisplay,
   DiscountTag,
 } from "@/components/search";
+import ScreenSpinner from "@/components/ScreenSpinner";
 import { DetailPriceModal } from "@/components/modal";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { rooms } from "@/assets/TempData"; //Delete later
@@ -22,20 +22,50 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { formatVND } from "@/utils/ValueConverter";
+import { getRoomByID_API } from "@/api/RoomServices";
+import { HttpStatusCode } from "axios";
 
-const IntroSection = ({ roomName, amenities }) => {
+const IntroSection = ({
+  roomName,
+  description,
+  roomType,
+  numOfBeds,
+  bedType,
+  maxAdults,
+  maxChildren,
+}) => {
   return (
     <View style={styles.intro_section_container}>
       <Text style={styles.room_name_text}>{roomName}</Text>
-      <View style={{ marginVertical: 20 }}>
-        {amenities.map((amenity, index) => (
-          <AmenityDisplay
-            key={index}
-            iconName={amenity.amenityIconName}
-            label={amenity.amenityType}
-            style={{ marginVertical: 5 }}
-          />
-        ))}
+      <Text
+        style={{
+          color: COLOR.primary_blue_100,
+          fontSize: 16,
+          marginBottom: 20,
+          marginTop: 5,
+        }}
+      >
+        {description}
+      </Text>
+      <Text style={styles.section_title_text}>Thông tin phòng</Text>
+      <View style={{ marginBottom: 20, marginTop: 5 }}>
+        <Text style={styles.content_text}>
+          Loại phòng: <Text style={{ fontWeight: 400 }}>{roomType}</Text>
+        </Text>
+        <Text style={styles.content_text}>
+          Số lượng giường: <Text style={{ fontWeight: 400 }}>{numOfBeds}</Text>
+        </Text>
+        <Text style={styles.content_text}>
+          Loại giường: <Text style={{ fontWeight: 400 }}>{bedType}</Text>
+        </Text>
+        <Text style={styles.content_text}>
+          Số lượng người lớn tối đa:{" "}
+          <Text style={{ fontWeight: 400 }}>{maxAdults}</Text>
+        </Text>
+        <Text style={styles.content_text}>
+          Số lượng trẻ em tối đa:{" "}
+          <Text style={{ fontWeight: 400 }}>{maxChildren}</Text>
+        </Text>
       </View>
     </View>
   );
@@ -63,52 +93,75 @@ const BottomSection = ({
 
   return (
     <View style={styles.bottom_section_container}>
-      <Text style={{ color: COLOR.primary_blue_100, fontSize: 20, fontWeight: 600, }}>Tùy chọn thêm</Text>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: 15,
-          marginBottom: 5,
-        }}
+      <Text
+        style={{ color: COLOR.primary_blue_100, fontSize: 20, fontWeight: 600 }}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: 500,
-            color: COLOR.primary_blue_100,
-          }}
-        >
-          Bổ sung
-        </Text>
-        <Text style={{ fontSize: 12, color: COLOR.primary_blue_100 }}>
-          Giá mỗi đêm
-        </Text>
-      </View>
-      {extraOptions.map((option, index) => (
-        <View key={index} style={{ flexDirection: "row", marginVertical: 5 }}>
-          <View style={{ flexDirection: "row", width: "55%" }}>
-            <BouncyCheckbox
-              size={20}
-              fillColor={COLOR.primary_blue_100}
-              useBuiltInState={false}
-              isChecked={selectedOption === index}
-              onPress={() => setSelectedOption(index)}
-            />
+        Tùy chọn thêm
+      </Text>
+      {extraOptions ? (
+        <>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: 15,
+              marginBottom: 5,
+            }}
+          >
             <Text
-              ellipsizeMode="tail"
-              numberOfLines={1}
-              style={styles.option_text}
+              style={{
+                fontSize: 16,
+                fontWeight: 500,
+                color: COLOR.primary_blue_100,
+              }}
             >
-              {option?.optionName}
+              Bổ sung
+            </Text>
+            <Text style={{ fontSize: 12, color: COLOR.primary_blue_100 }}>
+              Giá mỗi đêm
             </Text>
           </View>
-          <Text style={styles.price_text}>
-            + {formatVND(option?.optionPrice)}đ
-          </Text>
-        </View>
-      ))}
+          {extraOptions.map((option, index) => (
+            <View
+              key={index}
+              style={{ flexDirection: "row", marginVertical: 5 }}
+            >
+              <View style={{ flexDirection: "row", width: "55%" }}>
+                <BouncyCheckbox
+                  size={20}
+                  fillColor={COLOR.primary_blue_100}
+                  useBuiltInState={false}
+                  isChecked={selectedOption === index}
+                  onPress={() => setSelectedOption(index)}
+                />
+                <Text
+                  ellipsizeMode="tail"
+                  numberOfLines={1}
+                  style={styles.option_text}
+                >
+                  {option?.optionName}
+                </Text>
+              </View>
+              <Text style={styles.price_text}>
+                + {formatVND(option?.optionPrice)}đ
+              </Text>
+            </View>
+          ))}
+        </>
+      ) : (
+        <Text
+          style={{
+            flex: 1,
+            fontSize: 16,
+            fontWeight: 400,
+            color: COLOR.primary_blue_100,
+            marginTop: 5,
+          }}
+        >
+          Không.
+        </Text>
+      )}
       <View style={styles.divider} />
       <DiscountTag
         discount={discountPercentage}
@@ -156,7 +209,7 @@ const BottomSection = ({
 const RoomDetail = () => {
   const router = useRouter();
 
-  // const { roomID } = useLocalSearchParams();
+  const { roomID } = useLocalSearchParams();
   const room = rooms[1];
   const amenities = [
     {
@@ -183,10 +236,27 @@ const RoomDetail = () => {
 
   const [wallpaperError, setWallpaperError] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
+  const [roomInfo, setRoomInfo] = useState(null);
 
-  // useEffect(() => {
-  //   //fetch data from server
-  // }, [])
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getRoomInfo = async (roomID) => {
+      setLoading(true);
+      try {
+        const response = await getRoomByID_API(roomID);
+        if (response.status === HttpStatusCode.Ok) {
+          setRoomInfo(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getRoomInfo(roomID);
+  }, []);
 
   const onBackPress = () => {
     //clear something before navigate back
@@ -197,16 +267,16 @@ const RoomDetail = () => {
     console.log("Selected additional options: ", selectedOption);
     router.push({
       pathname: "/booking",
-    })
-  }
+    });
+  };
 
-    const onPriceModalClose = () => {
-      setPriceModalVisible(false);
-    };
+  const onPriceModalClose = () => {
+    setPriceModalVisible(false);
+  };
 
-    const handlePriceClosePress = () => {
-      setPriceModalVisible(false);
-    };
+  const handlePriceClosePress = () => {
+    setPriceModalVisible(false);
+  };
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const headerOpacity = scrollY.interpolate({
@@ -223,66 +293,80 @@ const RoomDetail = () => {
         onBookingPress={() => handlePriceClosePress()}
         buttonText="Đóng"
       />
-      <Animated.View
-        style={[styles.header_container, { opacity: headerOpacity }]}
-      >
-        <CircleButton
-          Icon={ChevronLeft}
-          onPress={onBackPress}
-          style={styles.header_back_button}
-        />
-        <Text
-          ellipsizeMode="tail"
-          numberOfLines={1}
-          style={styles.header_title_text}
-        >
-          {room?.roomName}
-        </Text>
-      </Animated.View>
-      <CircleButton
-        Icon={ChevronLeft}
-        onPress={onBackPress}
-        style={{ position: "absolute", top: 46, left: 20, zIndex: 2 }}
-      />
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.image}>
-          {wallpaperError ? (
-            <NoImage style={{ borderBottomWidth: 1 }} />
-          ) : (
-            <Image
-              style={{ width: "100%", height: "100%" }}
-              source={{
-                uri: room?.images[0],
-              }}
-              resizeMode="cover"
-              onError={() => setWallpaperError(true)}
+      {loading ? (
+        <ScreenSpinner />
+      ) : (
+        <>
+          <Animated.View
+            style={[styles.header_container, { opacity: headerOpacity }]}
+          >
+            <CircleButton
+              Icon={ChevronLeft}
+              onPress={onBackPress}
+              style={styles.header_back_button}
             />
-          )}
-        </View>
-        <IntroSection roomName={room?.roomName} amenities={amenities} />
-        <AmenitiesSection amenities={amenities} />
-        <View style={[styles.divider, { marginHorizontal: 20 }]} />
-        <BottomSection
-          extraOptions={room?.extraOptions}
-          originPrice={room?.originPrice}
-          discountPercentage={room?.discountPercentage}
-          discountedPrice={room?.discountedPrice}
-          totalPrice={room?.totalPrice}
-          onBookingPress={(selectedOption) =>
-            handleBookingPress(selectedOption)
-          }
-          onViewPriceDetailPress={() => setPriceModalVisible(true)}
-        />
-      </Animated.ScrollView>
+            <Text
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              style={styles.header_title_text}
+            >
+              {room?.roomName}
+            </Text>
+          </Animated.View>
+          <CircleButton
+            Icon={ChevronLeft}
+            onPress={onBackPress}
+            style={{ position: "absolute", top: 46, left: 20, zIndex: 2 }}
+          />
+          <Animated.ScrollView
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+          >
+            <View style={styles.image}>
+              {wallpaperError ? (
+                <NoImage style={{ borderBottomWidth: 1 }} />
+              ) : (
+                <Image
+                  style={{ width: "100%", height: "100%" }}
+                  source={{
+                    uri: room?.images[0],
+                  }}
+                  resizeMode="cover"
+                  onError={() => setWallpaperError(true)}
+                />
+              )}
+            </View>
+            <IntroSection
+              roomName={roomInfo?.roomName}
+              description={roomInfo?.description}
+              roomType={roomInfo?.roomType}
+              numOfBeds={roomInfo?.numOfBeds}
+              bedType={roomInfo?.bedType}
+              maxAdults={roomInfo?.maxAdults}
+              maxChildren={roomInfo?.maxChildren}
+            />
+            <AmenitiesSection amenities={amenities} />
+            <View style={[styles.divider, { marginHorizontal: 20 }]} />
+            <BottomSection
+              extraOptions={roomInfo?.extraOptions}
+              originPrice={roomInfo?.originPrice}
+              discountPercentage={roomInfo?.discountPercentage}
+              discountedPrice={roomInfo?.discountedPrice}
+              totalPrice={roomInfo?.totalPrice}
+              onBookingPress={(selectedOption) =>
+                handleBookingPress(selectedOption)
+              }
+              onViewPriceDetailPress={() => setPriceModalVisible(true)}
+            />
+          </Animated.ScrollView>
+        </>
+      )}
     </View>
   );
 };
@@ -348,6 +432,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: COLOR.primary_blue_100,
     marginTop: 20,
+  },
+
+  content_text: {
+    fontSize: 16,
+    fontWeight: 500,
+    color: COLOR.primary_blue_100,
+    marginVertical: 5,
   },
 
   //Amenities Section

@@ -13,8 +13,6 @@ const RoomDetailCard = ({
   discountPercentage,
   discountedPrice,
   totalPrice,
-  taxPrice,
-  extraFee,
   style,
   onDetailPress,
   onSelectPress,

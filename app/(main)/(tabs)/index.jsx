@@ -23,7 +23,7 @@ import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
 import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
-import { dateObjectToDateString, dateObjectToTruncatedDate } from "@/utils/ValueConverter";
+import { dateObjectToTruncatedDate } from "@/utils/ValueConverter";
 
 const HomeScreen = () => {
   const router = useRouter();

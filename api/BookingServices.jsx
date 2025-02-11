@@ -2,6 +2,8 @@ import MyAxios from "@/utils/MyAxios";
 
 const endpoints = {
   PLACE_BOOKING: "/bookings/placeBooking",
+  GET_USER_BOOKING: "/bookings/getBookingsByUserId",
+  CANCEL_BOOKING: "/bookings/cancelBooking",
 };
 
 export const placeBookingAPI = async (bookingInfo) => {
@@ -28,3 +30,21 @@ export const placeBookingAPI = async (bookingInfo) => {
     console.log("Error in placeBookingAPI: ", error);
   }
 };
+
+export const getUserBookingAPI = async (userID) => {
+  try {
+    const response = await MyAxios.get(`${endpoints.GET_USER_BOOKING}/${userID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in getUserBookingAPI: ", error);
+  }
+}
+
+export const cancelBookingAPI = async (bookingID) => {
+  try {
+    const response = await MyAxios.patch(`${endpoints.CANCEL_BOOKING}/${bookingID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in cancelBookingAPI: ", error);
+  }
+}

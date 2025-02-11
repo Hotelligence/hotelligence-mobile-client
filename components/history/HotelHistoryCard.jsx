@@ -1,17 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { NoImage, SubmitButton, SecondaryButton } from "../search";
+import { HttpStatusCode } from "axios";
+import { getHotelByID_API } from "@/api/HotelServices";
 
 const HotelHistoryCard = ({
-  hotelName,
-  imageURL,
-  city,
+  hotelID,
   bookingID,
-  bookingTime,
-  checkinTime,
-  checkoutTime,
-  status,
+  bookingDate,
+  checkinDate,
+  checkoutDate,
+  bookingStatus,
   style,
   onRatingPress,
   onCancelPress,
@@ -19,11 +19,32 @@ const HotelHistoryCard = ({
   onPress,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [hotelInfo, setHotelInfo] = useState();
+
+  const status =
+    bookingStatus === "Đang chờ thanh toán"
+      ? "PENDING"
+      : bookingStatus === "Hoàn tất"
+      ? "COMPLETED"
+      : bookingStatus === "Đã hủy"
+      ? "CANCELLED"
+      : "RATED";
+
+  useEffect(() => {
+    const fetchHotelInfo = async (hotelID) => {
+      const response = await getHotelByID_API(hotelID);
+      if (response.status === HttpStatusCode.Ok) {
+        setHotelInfo(response.data);
+      }
+    };
+
+    fetchHotelInfo(hotelID);
+  }, []);
 
   return (
     <Pressable style={[styles.container, style]} onPress={onPress}>
       <View style={styles.image_container}>
-        {imageError ? (
+        {imageError || !hotelInfo?.images ? (
           <NoImage
             style={{ borderTopLeftRadius: 14, borderBottomLeftRadius: 14 }}
           />
@@ -31,7 +52,7 @@ const HotelHistoryCard = ({
           <Image
             style={styles.image}
             source={{
-              uri: imageURL,
+              uri: hotelInfo.images[0],
             }}
             onError={() => setImageError(true)}
           />
@@ -44,10 +65,10 @@ const HotelHistoryCard = ({
             numberOfLines={1}
             style={styles.hotel_name_text}
           >
-            {hotelName}
+            {hotelInfo?.hotelName}
           </Text>
           <Text ellipsizeMode="tail" numberOfLines={1} style={styles.city_text}>
-            {city}
+            {hotelInfo?.city}
           </Text>
           <View style={{ marginTop: 12, gap: 5 }}>
             <View
@@ -79,7 +100,7 @@ const HotelHistoryCard = ({
                 numberOfLines={1}
                 style={styles.content_text}
               >
-                {bookingTime}
+                {bookingDate}
               </Text>
             </View>
             <View
@@ -95,7 +116,7 @@ const HotelHistoryCard = ({
                 numberOfLines={1}
                 style={styles.content_text}
               >
-                {checkinTime}
+                {checkinDate}
               </Text>
             </View>
             <View
@@ -111,7 +132,7 @@ const HotelHistoryCard = ({
                 numberOfLines={1}
                 style={styles.content_text}
               >
-                {checkoutTime}
+                {checkoutDate}
               </Text>
             </View>
           </View>
@@ -135,7 +156,9 @@ const HotelHistoryCard = ({
                       ? COLOR.secondary_green_100
                       : status === "PENDING"
                       ? COLOR.secondary_blue_100
-                      : COLOR.secondary_red_100,
+                      : status === "CANCELLED"
+                      ? COLOR.secondary_red_100
+                      : COLOR.primary_gold_120
                 },
               ]}
             >
@@ -143,7 +166,9 @@ const HotelHistoryCard = ({
                 ? "Hoàn tất"
                 : status === "PENDING"
                 ? "Đang chờ thanh toán"
-                : "Đã hủy"}
+                : status === "CANCELLED"
+                ? "Đã hủy"
+                : "Đã đánh giá"}
             </Text>
           </View>
         </View>

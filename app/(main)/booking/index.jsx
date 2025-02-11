@@ -509,7 +509,6 @@ const BookingScreen = () => {
           unCancelDue: unCancelDue.toISOString(),
         };
 
-        console.log(bookingInfo);
         const response = await placeBookingAPI(bookingInfo);
         if (response.status === HttpStatusCode.Created) {
           router.replace({

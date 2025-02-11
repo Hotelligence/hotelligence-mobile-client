@@ -12,8 +12,11 @@ import {
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { COLOR } from "@/assets/colors/Colors";
 import { SubmitButton } from "@/components/search";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import GeneralHeader from "@/components/GeneralHeader";
+import { reviewRoomAPI } from "@/api/RoomServices";
+import { HttpStatusCode } from "axios";
+import { useUser } from "@clerk/clerk-expo";
 
 const RatingSlider = ({
   label,
@@ -53,6 +56,9 @@ const RatingSlider = ({
 
 const RoomReview = ({}) => {
   const router = useRouter();
+  const { user } = useUser();
+
+  const { roomID, hotelID } = useLocalSearchParams();
 
   const [ratings, setRatings] = useState({
     cleanliness: 5,
@@ -63,11 +69,32 @@ const RoomReview = ({}) => {
   });
   const [comment, setComment] = useState("");
   const [isSliding, setIsSliding] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
+  const handleSubmit = async (ratings, comment) => {
+    setButtonLoading(true);
+    try{
+      const reviewInfo = {
+        userId: user.id,
+        userName: user.lastName + " " + user.firstName,
+        cleanPoint: ratings.cleanliness,
+        servicePoint: ratings.comfort,
+        staffPoint: ratings.staff,
+        facilityPoint: ratings.facilities,
+        environmentPoint: ratings.environmentFriendly,
+        comment: comment,
+        reviewDate: new Date().toISOString(),
+      };
 
-  const handleSubmit = (ratings, comment) => {
-    console.log("Ratings: ", ratings);
-    console.log("Comment: ", comment);
+      const response = await reviewRoomAPI(roomID, hotelID, reviewInfo);
+      if (response.status === HttpStatusCode.Created){
+        router.back();
+      }
+    } catch(err){
+      console.log(err);
+    } finally{
+      setButtonLoading(false);
+    }
   };
 
   const onBackPress = () => {
@@ -146,6 +173,7 @@ const RoomReview = ({}) => {
         />
 
         <SubmitButton
+          isLoading={buttonLoading}
           text="Gửi đánh giá"
           onPress={() => handleSubmit(ratings, comment)}
           style={{ marginTop: 20, width: "60%", alignSelf: "center" }}

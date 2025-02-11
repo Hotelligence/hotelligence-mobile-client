@@ -42,12 +42,10 @@ const ProfileScreen = () => {
       </View>
       <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
         <BarButton
-          onPress={() => handleLogoutPress()}
           iconName="MessageCircle"
           text="FAQ"
         />
         <BarButton
-          onPress={() => handleLogoutPress()}
           iconName="Info"
           text="Về chúng tôi"
         />

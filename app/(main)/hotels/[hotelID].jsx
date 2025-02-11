@@ -24,19 +24,24 @@ import {
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { BookingAdditionalModal, DetailPriceModal } from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
-import { rooms, amenities } from "@/assets/TempData"; //Delete later
+import { amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { ChevronLeft, MapPin, ChevronRight } from "lucide-react-native";
 import {
   dateObjectToTruncatedDate,
   isoStringToDate,
-  dateObjectToDateString,
 } from "@/utils/ValueConverter";
 import { HttpStatusCode } from "axios";
-import { getHotelByID_API } from "@/api/HotelServices";
+import {
+  getHotelByID_API,
+  addFavoriteHotelAPI,
+  removeFavoriteHotelAPI,
+} from "@/api/HotelServices";
 import { getRoomsInHotelAPI } from "@/api/RoomServices";
 import { getReviewsByHotelID_API } from "@/api/ReviewServices";
+import { useUser } from "@clerk/clerk-expo";
+import { useAppContext } from "@/contexts/AppContext";
 
 const IntroSection = ({
   hotelName,
@@ -76,7 +81,6 @@ const IntroSection = ({
         <FavoriteButton
           isFavorite={isFavorite}
           style={{ marginStart: "auto" }}
-          // onPress={() => onFavoritePress()}
           onPress={onFavoritePress}
         />
       </View>
@@ -182,7 +186,7 @@ const RoomBookingSection = forwardRef(
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         setNumOfNights(diffDays);
       }
-    }, [selectedFromDate, selectedToDate])
+    }, [selectedFromDate, selectedToDate]);
 
     const handleOutsideModalPress = (adults, children) => {
       setNumOfAdult(adults);
@@ -350,8 +354,12 @@ const RoomBookingSection = forwardRef(
                     totalPrice: room?.totalPrice,
                     taxPercentage: room?.taxPercentage,
                   },
-                  { fromDate: selectedFromDate, toDate: selectedToDate, numOfNights: numOfNights },
-                  { numOfAdults: numOfAdult, numOfChild: numOfChild },
+                  {
+                    fromDate: selectedFromDate,
+                    toDate: selectedToDate,
+                    numOfNights: numOfNights,
+                  },
+                  { numOfAdults: numOfAdult, numOfChild: numOfChild }
                 )
               }
             />
@@ -498,9 +506,12 @@ const ReviewSection = ({
 
 const HotelDetail = () => {
   const router = useRouter();
+  const { user } = useUser();
 
   const { hotelID, fromDate, toDate, numOfChild, numOfAdults } =
     useLocalSearchParams();
+  const { userFavoriteList, fetchUserFavoriteList } = useAppContext();
+  const userFavorite = userFavoriteList.some((item) => item?.id === hotelID);
 
   const from = fromDate ? new Date(fromDate) : null; //from date passed from the prev screen
   const to = toDate ? new Date(toDate) : null; //to date passed from the prev screen
@@ -512,7 +523,7 @@ const HotelDetail = () => {
 
   //Other states
   const [wallpaperError, setWallpaperError] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false); //adjust this later
+  const [isFavorite, setIsFavorite] = useState(userFavorite);
   const [loading, setLoading] = useState(false);
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
   const [selectedRoomPriceInfo, setSelectedRoomPriceInfo] = useState(null);
@@ -520,12 +531,11 @@ const HotelDetail = () => {
   const [selectedExtraOption, setSelectedExtraOption] = useState(null);
   const [stayPeriod, setStayPeriod] = useState(null);
   const [guests, setGuests] = useState(null);
-  
 
   //Modal visibility states
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
-    
+
   useEffect(() => {
     const getHotelByID = async (hotelID) => {
       try {
@@ -583,9 +593,22 @@ const HotelDetail = () => {
   const scrollViewRef = useRef(null);
   const bookingSectionRef = useRef(null);
 
-  const onFavoritePress = async () => {
-    //send request to server to update favorite status
-    setIsFavorite(!isFavorite);
+  const onFavoritePress = async (userID, hotelID) => {
+    if(!isFavorite) {
+      const response = await addFavoriteHotelAPI(userID, hotelID);
+      if(response.status === HttpStatusCode.Ok){
+        setIsFavorite(!isFavorite);
+        await fetchUserFavoriteList();
+        console.log("Success add to favorite");
+      }
+    } else{
+      const response = await removeFavoriteHotelAPI(userID, hotelID);
+      if(response.status === HttpStatusCode.Ok){
+        setIsFavorite(!isFavorite);
+        await fetchUserFavoriteList();
+        console.log("Success remove from favorite");
+      }
+    }
   };
 
   const onBackPress = () => {
@@ -604,7 +627,13 @@ const HotelDetail = () => {
     });
   };
 
-  const handleSelectPress = (roomID, extraOptions, priceInfo, stayPeriod, guests) => {
+  const handleSelectPress = (
+    roomID,
+    extraOptions,
+    priceInfo,
+    stayPeriod,
+    guests
+  ) => {
     //adjust the handleAdditionalBookingPress as well
     //(4)
     if (extraOptions) {
@@ -625,7 +654,9 @@ const HotelDetail = () => {
           numOfNights: stayPeriod.numOfNights,
           guestNumber: guests.numOfAdults + guests.numOfChild,
           extraOptionsName: extraOptions?.optionName,
-          extraOptionsPrice: extraOptions?.optionPrice ? extraOptions?.optionPrice : 0,
+          extraOptionsPrice: extraOptions?.optionPrice
+            ? extraOptions?.optionPrice
+            : 0,
         },
       });
     }
@@ -638,7 +669,12 @@ const HotelDetail = () => {
     setSelectedExtraOption(selectedOption);
   };
 
-  const handleAdditionalBookingPress = async (selectedOption, roomID, stayPeriod, guests) => {
+  const handleAdditionalBookingPress = async (
+    selectedOption,
+    roomID,
+    stayPeriod,
+    guests
+  ) => {
     //adjust the handleSelectPress as well
     setAdditionalModalVisible(false);
     router.push({
@@ -696,13 +732,19 @@ const HotelDetail = () => {
             guests
           )
         }
-        onViewPriceDetailPress={(selectedOption) => handleViewPricePress(selectedOption)}
+        onViewPriceDetailPress={(selectedOption) =>
+          handleViewPricePress(selectedOption)
+        }
       />
       <DetailPriceModal
         buttonText="Đóng"
         numOfNights={stayPeriod?.numOfNights}
         discountedPrice={selectedRoomPriceInfo?.discountedPrice}
-        extraPrice={selectedExtraOption?.optionPrice ? selectedExtraOption?.optionPrice : 0}
+        extraPrice={
+          selectedExtraOption?.optionPrice
+            ? selectedExtraOption?.optionPrice
+            : 0
+        }
         taxPercentage={selectedRoomPriceInfo?.taxPercentage}
         visible={priceModalVisible}
         onClose={() => onPriceModalClose()}
@@ -771,7 +813,7 @@ const HotelDetail = () => {
               ratingCategory={hotelInfo?.reviewAveragePointCategory}
               numOfReviews={hotelInfo?.reviewCount}
               isFavorite={isFavorite}
-              onFavoritePress={() => onFavoritePress()}
+              onFavoritePress={() => onFavoritePress(user.id, hotelID)}
               address={hotelInfo?.address}
               description={hotelInfo?.description}
             />
@@ -792,7 +834,9 @@ const HotelDetail = () => {
               onRoomFilterSelected={(selectedFilter) =>
                 onFilterSelected(selectedFilter)
               }
-              handleDetailPress={(roomID) => handleDetailPress(roomID, hotelInfo?.extraOptions)} //This is a 4 layer deep function, caution when maintaining
+              handleDetailPress={(roomID) =>
+                handleDetailPress(roomID, hotelInfo?.extraOptions)
+              } //This is a 4 layer deep function, caution when maintaining
               handleSelectPress={(
                 roomID,
                 priceInfo,

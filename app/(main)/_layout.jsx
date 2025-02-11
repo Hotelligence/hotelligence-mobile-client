@@ -1,8 +1,13 @@
-import { Stack, Slot, Redirect, useRouter } from "expo-router";
+import { Stack, } from "expo-router";
 import { useEffect } from "react";
+import { useAppContext } from "@/contexts/AppContext";
 
 const MainStackLayout = () => {
-  // console.log("Hello Main stack");
+  const { fetchUserFavoriteList } = useAppContext();
+
+  useEffect(() => {
+    fetchUserFavoriteList();
+  }, []);
 
   return (
     <Stack>

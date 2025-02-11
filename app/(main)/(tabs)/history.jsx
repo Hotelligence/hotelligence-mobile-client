@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, StatusBar, ScrollView, RefreshControl } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { bookingHistory } from "@/assets/TempData"; //Delete later
 import { HotelHistoryCard } from "@/components/history";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { isoStringToDate } from "@/utils/ValueConverter";

@@ -1,0 +1,2 @@
+search history = "searchHistory"
+recent viewed hotels = "recentViewedHotels"

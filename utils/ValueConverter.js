@@ -311,3 +311,26 @@ export const dateObjectToVNTimeISOString = (date) => { //use this if the date ti
   vnDate.setHours(vnDate.getHours() + 7);
   return vnDate.toISOString();
 };
+
+export function isoStringToTruncatedSearchDate(value) {
+  // Parse the ISOString date time into a truncated recent search date string (this is used for the recent search history)
+  try {
+    const date = new Date(value);
+
+    // Vietnamese days of week
+    const daysOfWeek = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+
+    const dayOfWeek = daysOfWeek[date.getDay()];
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${dayOfWeek}, ${day}/${month}/${year}`;
+  } catch (error) {
+    console.error(
+      "Error parsing Date object in isoStringToFullDateTime:",
+      error
+    );
+    return null;
+  }
+}

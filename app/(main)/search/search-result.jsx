@@ -32,11 +32,16 @@ import { Circle, Star, SearchX } from "lucide-react-native";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { HttpStatusCode } from "axios";
 import { getSearchResultAPI } from "@/api/HotelServices";
+import MyAsyncStorage from "@/utils/MyAsyncStorage";
+import { useAppContext } from "@/contexts/AppContext";
 
 const SearchResult = () => {
   const router = useRouter();
-  const { query, fromDate, toDate, numOfChild, numOfAdults } = useLocalSearchParams();
+  const { query, fromDate, toDate, numOfChild, numOfAdults } =
+    useLocalSearchParams();
   // console.log(query, from, to, guests);
+
+  const { userRecentViewHotels, setUserRecentViewHotels } = useAppContext();
 
   const guests = parseInt(numOfChild) + parseInt(numOfAdults);
   const from = fromDate ? new Date(fromDate) : null;
@@ -60,7 +65,7 @@ const SearchResult = () => {
     sortBy: "discountPrice",
     sortOrder: "asc",
     label: "Giá thấp đến cao",
-  },);
+  });
 
   const [priceRange, setPriceRange] = useState(null);
   const [priceSliderVisible, setPriceSliderVisible] = useState(false);
@@ -120,14 +125,48 @@ const SearchResult = () => {
       selectedStar,
       selectedSortOption
     );
-  }, [query, fromDate, toDate, guests, priceRange, selectedRating, selectedStar, selectedSortOption]);
+  }, [
+    query,
+    fromDate,
+    toDate,
+    guests,
+    priceRange,
+    selectedRating,
+    selectedStar,
+    selectedSortOption,
+  ]);
 
   const onBackPress = () => {
     //clear something before navigate back
     router.back();
   };
 
-  const handleOnHotelCardPress = (hotelID, from, to, numOfChild, numOfAdults) => {
+  const handleOnHotelCardPress = async (
+    hotelID, 
+    hotelName,
+    images,
+    city,
+    from,
+    to,
+    numOfChild,
+    numOfAdults
+  ) => {
+    const viewedHotelInfo = {
+      hotelID: hotelID,
+      hotelName: hotelName,
+      image: images ? images[0] : "temp_string", // Take first image if array,
+      city: city,
+    };
+
+    const updatedHotels = [...userRecentViewHotels, viewedHotelInfo];
+
+    setUserRecentViewHotels(updatedHotels);
+
+    await MyAsyncStorage.setItem(
+      "recentViewedHotels",
+      JSON.stringify(updatedHotels)
+    );
+
     router.push({
       pathname: "/hotels/[hotelID]",
       params: {
@@ -177,7 +216,18 @@ const SearchResult = () => {
       // extraFee={item?.extraFee}
       totalPrice={item?.roomLowestTotalPrice || 0}
       isFavorite={true}
-      onPress={() => handleOnHotelCardPress(item?.id, from, to, numOfChild, numOfAdults)}
+      onPress={() =>
+        handleOnHotelCardPress(
+          item?.id,
+          item?.hotelName,
+          item?.images,
+          item?.city,
+          from,
+          to,
+          numOfChild,
+          numOfAdults
+        )
+      }
     />
   );
 
@@ -329,7 +379,8 @@ const SearchResult = () => {
                   marginTop: 20,
                 }}
               >
-                Rất tiếc, hiện tại không tìm thấy khách sạn nào thỏa các tùy chọn của Quý khách
+                Rất tiếc, hiện tại không tìm thấy khách sạn nào thỏa các tùy
+                chọn của Quý khách
               </Text>
             </View>
           )}

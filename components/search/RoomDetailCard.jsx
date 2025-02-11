@@ -57,14 +57,14 @@ const RoomDetailCard = ({
           </Pressable>
         </View>
         <View style={styles.content_bottom_container}>
-          {discountPercentage && discountedPrice && (
+          {discountPercentage && discountedPrice ? (
             <>
               <DiscountTag discount={discountPercentage} />
               <Text style={styles.origin_price_text}>
                 {formatVND(originPrice * numOfNights)}đ
               </Text>
             </>
-          )}
+          ) : null}
           <Text style={styles.discount_price_text}>
             {formatVND(discountedPrice * numOfNights)}đ
           </Text>

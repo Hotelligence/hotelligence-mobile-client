@@ -512,6 +512,7 @@ const HotelDetail = () => {
     useLocalSearchParams();
   const { userFavoriteList, fetchUserFavoriteList } = useAppContext();
   const userFavorite = userFavoriteList.some((item) => item?.id === hotelID);
+  console.log(hotelID);
 
   const from = fromDate ? new Date(fromDate) : null; //from date passed from the prev screen
   const to = toDate ? new Date(toDate) : null; //to date passed from the prev screen
@@ -599,14 +600,12 @@ const HotelDetail = () => {
       if(response.status === HttpStatusCode.Ok){
         setIsFavorite(!isFavorite);
         await fetchUserFavoriteList();
-        console.log("Success add to favorite");
       }
     } else{
       const response = await removeFavoriteHotelAPI(userID, hotelID);
       if(response.status === HttpStatusCode.Ok){
         setIsFavorite(!isFavorite);
         await fetchUserFavoriteList();
-        console.log("Success remove from favorite");
       }
     }
   };
@@ -795,7 +794,7 @@ const HotelDetail = () => {
                 <Image
                   style={{ width: "100%", height: "100%" }}
                   source={{
-                    uri: hotelInfo?.images[0],
+                    uri: hotelInfo?.images ? hotelInfo?.images[0] : "temp_string",
                   }}
                   resizeMode="cover"
                   onError={() => setWallpaperError(true)}

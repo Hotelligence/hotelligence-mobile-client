@@ -7,7 +7,10 @@ export const AppContext = createContext({});
 
 export const AppProvider = ({ children }) => {
   const { user } = useUser();
+
   const [userFavoriteList, setUserFavoriteList] = useState([]);
+  const [userSearchHistory, setUserSearchHistory] = useState([]);
+  const [userRecentViewHotels, setUserRecentViewHotels] = useState([]);
 
   const fetchUserFavoriteList = async () => {
     try {
@@ -22,10 +25,15 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+
   const value = {
     userFavoriteList,
     setUserFavoriteList,
-    
+    userSearchHistory,
+    setUserSearchHistory,
+    userRecentViewHotels,
+    setUserRecentViewHotels,
+
     fetchUserFavoriteList,
   };
 

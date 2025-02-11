@@ -2,7 +2,15 @@ import { COLOR } from "@/assets/colors/Colors";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Pencil } from "lucide-react-native";
 
-const SearchInfoCard = ({ searchKeyword, period, numOfGuestRoom, style, disabled, onPress }) => {
+const SearchInfoCard = ({
+  searchKeyword,
+  period,
+  numOfGuest,
+  style,
+  disabled,
+  onPress,
+  onEditPress,
+}) => {
   return (
     <Pressable
       disabled={disabled}
@@ -12,24 +20,34 @@ const SearchInfoCard = ({ searchKeyword, period, numOfGuestRoom, style, disabled
       <View>
         <Text style={styles.search_keyword_text}>{searchKeyword}</Text>
         <View style={{ flexDirection: "row" }}>
-          <Text
-            style={styles.general_text}
-            ellipsizeMode="tail"
-            numberOfLines={1}
-          >
-            01 thg 11 - 03 thg 11
-          </Text>
-          <Text
-            style={[styles.general_text, { marginStart: 20 }]}
-            ellipsizeMode="tail"
-            numberOfLines={1}
-          >
-            {numOfGuestRoom?.numOfGuest} khách | {numOfGuestRoom?.numOfRoom}{" "}
-            phòng
-          </Text>
+          {period !== "" && (
+            <>
+              <Text
+                style={styles.general_text}
+                ellipsizeMode="tail"
+                numberOfLines={1}
+              >
+                {period}
+              </Text>
+            </>
+          )}
+          {numOfGuest !== "0" && (
+            <Text
+              style={[
+                styles.general_text,
+                { marginStart: period === "" ? 0 : 20 },
+              ]}
+              ellipsizeMode="tail"
+              numberOfLines={1}
+            >
+              {numOfGuest} khách
+            </Text>
+          )}
         </View>
       </View>
-      <Pencil strokeWidth={2.5} color={COLOR.primary_blue_100} style={{ marginStart: "auto" }} />
+      <Pressable style={{ marginStart: "auto" }} onPress={onEditPress}>
+        <Pencil strokeWidth={2.5} color={COLOR.primary_blue_100} />
+      </Pressable>
     </Pressable>
   );
 };

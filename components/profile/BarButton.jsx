@@ -7,9 +7,9 @@ import { icons } from "lucide-react-native";
 const BarButton = ({
   iconName,
   iconSize = 24,
-  fontSize = 20,
+  fontSize = 18,
   text,
-  color = COLOR.primary_blue_50,
+  color = COLOR.primary_blue_100,
   style,
   onPress,
 }) => {

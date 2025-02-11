@@ -9,7 +9,7 @@ import {
 import { COLOR } from "@/assets/colors/Colors";
 import { CalendarDays } from "lucide-react-native";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
-import { isoStringToTruncatedDate } from "@/utils/ValueConverter";
+import { isoStringToTruncatedDate, dateString, dateStringToTruncatedDate, dateObjectToTruncatedDate } from "@/utils/ValueConverter";
 
 const DatePicker = ({
   label,
@@ -43,11 +43,11 @@ const DatePicker = ({
               {placeholder}
             </Text>
           ) : (
-            <Text style={styles.text}>{isoStringToTruncatedDate(value)}</Text>
+            <Text style={styles.text}>{dateObjectToTruncatedDate(value)}</Text>
           )}
         </View>
       </Pressable>
-      {/* The RNDateTimePicker on Android default is a Modal itself, but on IOS it is not so need to wrapped it inside a Modal to achieve the Modal UI */}
+      {/* The RNDateTimePicker on Android default is a Modal itself, but on IOS it is not so need to wrap it inside a Modal to achieve the Modal UI */}
       {datePickerVisible && (
         <>
           {Platform.OS === "ios" ? (
@@ -62,7 +62,7 @@ const DatePicker = ({
               >
                 <View style={styles.modal_view}>
                   <RNDateTimePicker
-                    value={value ? value : new Date()}
+                    value={value}
                     mode="date"
                     display={display}
                     onChange={onChange}
@@ -73,7 +73,7 @@ const DatePicker = ({
             </Modal>
           ) : (
             <RNDateTimePicker
-              value={value ? value : new Date()}
+              value={value}
               mode="date"
               display={display}
               onChange={onChange}
@@ -92,8 +92,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
 
   content_container: {
@@ -109,12 +109,12 @@ const styles = StyleSheet.create({
   },
 
   placeholder_text: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLOR.primary_blue_50,
   },
 
   text: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLOR.primary_blue_100,
   },
 

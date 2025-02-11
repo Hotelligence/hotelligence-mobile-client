@@ -7,7 +7,7 @@ import { SecondaryButton, SubmitButton } from "@/components/search";
 
 const Payment = () => {
   const router = useRouter();
-  const { paymentMethod } = useLocalSearchParams();
+  const { paymentMethod, bookingID, paymentAmount } = useLocalSearchParams();
   const isOnlinePayment = paymentMethod === "online";
 
   const onBackPress = () => {
@@ -18,9 +18,10 @@ const Payment = () => {
     router.replace("/");
   };
 
-  const handleEWalletPress = () => {
+  const handleEWalletPress = (bookingID, paymentAmount) => {
     router.push({
       pathname: "booking/payment-e-wallet",
+      params: { bookingID: bookingID, paymentAmount: paymentAmount },
     });
   };
 
@@ -49,14 +50,14 @@ const Payment = () => {
         <View style={styles.payment_select_container}>
           <SubmitButton
             text="Ví điện tử"
-            onPress={() => handleEWalletPress()}
+            onPress={() => handleEWalletPress(bookingID, paymentAmount)}
             style={styles.button}
           />
-          <SubmitButton
+          {/* <SubmitButton
             text="Thẻ tín dụng"
             onPress={() => handleCreditCardPress()}
             style={styles.button}
-          />
+          /> */}
         </View>
         <SecondaryButton
           text="Quay về Trang chủ"

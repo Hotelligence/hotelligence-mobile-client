@@ -7,38 +7,56 @@ import {
   FlatList,
   StatusBar,
   Platform,
+  Pressable,
+  Linking,
 } from "react-native";
 import {
   RecentSearchedCard,
   HotelTruncatedCard,
-  LocationTruncatedCard,
+  // LocationTruncatedCard,
 } from "@/components/home";
 import {
   SearchBar,
   DatePicker,
   GuestNumberPicker,
   SubmitButton,
+  CircleButton,
 } from "@/components/search";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
-import { recentSearch, hotels } from "@/assets/TempData";
 import { useRouter } from "expo-router";
+import { dateObjectToTruncatedDate } from "@/utils/ValueConverter";
+import MyAsyncStorage from "@/utils/MyAsyncStorage";
+import { useAppContext } from "@/contexts/AppContext";
+import { MessageCircleQuestion } from "lucide-react-native";
+import { Circle } from "react-native-svg";
 
 const HomeScreen = () => {
   const router = useRouter();
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const [searchValue, setSearchValue] = useState("");
 
   const [fromDatePickerVisible, setFromDatePickerVisible] = useState(false);
-  const [selectedFromDate, setSelectedFromDate] = useState(null);
+  const [selectedFromDate, setSelectedFromDate] = useState(new Date());
   const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
-  const [selectedToDate, setSelectedToDate] = useState(null);
+  const [selectedToDate, setSelectedToDate] = useState(new Date(tomorrow));
 
-  const [guestNumberPickerVisible, setGuestNumberPickerVisible] = useState(false);
-  const [numOfAdult, setNumOfAdult] = useState(0);
+  const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
+    useState(false);
+  const [numOfAdult, setNumOfAdult] = useState(1);
   const [numOfChild, setNumOfChild] = useState(0);
+
+  const {
+    userSearchHistory,
+    setUserSearchHistory,
+    userRecentViewHotels,
+    setUserRecentViewHotels,
+  } = useAppContext();
 
   useEffect(() => {
     setLoading(true);
@@ -47,9 +65,47 @@ const HomeScreen = () => {
     }, 1000);
   }, []);
 
-  const onSearchPress = () => {
-    //handle search logic
-    router.push("/search/search-result");
+  const onSearchPress = async (query, from, to, numOfChild, numOfAdults) => {
+    setButtonLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 200)); // delay UI for 200ms
+
+    const diffTime = Math.abs(to - from);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    const searchInfo = {
+      query: query,
+      from: from.toISOString(),
+      to: to.toISOString(),
+      numOfChild: numOfChild,
+      numOfAdults: numOfAdults,
+      diffDays: diffDays,
+    };
+    const updatedHistory = [...userSearchHistory, searchInfo];
+    setUserSearchHistory(updatedHistory);
+
+    await MyAsyncStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
+
+    setButtonLoading(false);
+    router.push({
+      pathname: "/search/search-result",
+      params: {
+        query,
+        fromDate: from || "",
+        toDate: to || "",
+        numOfChild: numOfChild,
+        numOfAdults: numOfAdults,
+      },
+    });
+  };
+
+  const onSearchHistoryClearPress = async () => {
+    setUserSearchHistory([]);
+    await MyAsyncStorage.removeItem("searchHistory");
+  }
+
+  const onSearchRecentViewedClearPress = async () => {
+    setUserRecentViewHotels([]);
+    await MyAsyncStorage.removeItem("recentViewedHotels");
   };
 
   const handleOutsideModalPress = (adults, children) => {
@@ -58,13 +114,47 @@ const HomeScreen = () => {
     setGuestNumberPickerVisible(false);
   };
 
+  const handleRecentSearchedPress = (item) => {
+    router.push({
+      pathname: "/search/search-result",
+      params: {
+        query: item.query,
+        fromDate: new Date(item.from),
+        toDate: new Date(item.to),
+        numOfChild: item.numOfChild,
+        numOfAdults: item.numOfAdults,
+      },
+    });
+  }
+
+  const handleRecentViewedPress = (item) => {
+    router.push({
+      pathname: "/hotels/[hotelID]",
+      params: {
+        hotelID: item.hotelID,
+        fromDate: new Date(),
+        toDate: new Date(),
+        numOfAdults: 1,
+        numOfChild: 0,
+      },
+    });
+  }
+
+  const handleChatPress = async () => {
+    await Linking.openURL(
+      "https://tawk.to/chat/673d90394304e3196ae57d35/1id48df4r"
+    );
+  }
+
   const renderRecentSearched = useCallback(
     ({ item }) => (
       <RecentSearchedCard
         style={{ marginStart: 10 }}
-        searchKeyword={item?.title}
-        period={item?.period}
-        numOfGuestRoom={item?.numOfGuestRoom}
+        searchKeyword={item?.query}
+        period={{ checkinDate: item?.from, checkoutDate: item?.to }}
+        numOfGuests={parseInt(item?.numOfChild) + parseInt(item?.numOfAdults)}
+        diffDays={item?.diffDays}
+        onPress={() => handleRecentSearchedPress(item)}
       />
     ),
     []
@@ -76,27 +166,28 @@ const HomeScreen = () => {
         style={{ marginStart: 10 }}
         hotelName={item?.hotelName}
         city={item?.city}
-        ratingScore={item?.ratingScore}
-        numOfReviews={item?.numOfReviews}
-        imageURL={item?.images[0]}
-        isFavorite={item?.isFavorite}
+        // ratingScore={item?.ratingScore}
+        // numOfReviews={item?.numOfReviews}
+        imageURL={item?.image}
+        onPress={() => handleRecentViewedPress(item)}
+        // isFavorite={item?.isFavorite}
       />
     ),
     []
   );
 
-  const renderLocations = useCallback(
-    ({ item }) => (
-      <LocationTruncatedCard
-        style={{ marginStart: 10 }}
-        city={item?.city}
-        province={item?.province}
-        imageURL={item?.images[1]}
-      />
-    ),
-    []
-  );
-  
+  // const renderLocations = useCallback(
+  //   ({ item }) => (
+  //     <LocationTruncatedCard
+  //       style={{ marginStart: 10 }}
+  //       city={item?.city}
+  //       province={item?.province}
+  //       imageURL={item?.images[1]}
+  //     />
+  //   ),
+  //   []
+  // );
+
   if (loading) {
     return (
       <>
@@ -137,8 +228,8 @@ const HomeScreen = () => {
           >
             <DatePicker
               label="Chọn ngày đi"
-              placeholder="29 thg 3"
-              value={selectedFromDate}
+              placeholder={dateObjectToTruncatedDate(new Date())}
+              value={selectedFromDate ? new Date(selectedFromDate) : new Date()}
               display={Platform.OS === "ios" ? "inline" : "default"}
               datePickerVisible={fromDatePickerVisible}
               onChange={(e, selectedDate) => {
@@ -165,8 +256,10 @@ const HomeScreen = () => {
             />
             <DatePicker
               label="Chọn ngày về"
-              placeholder="30 thg 3"
-              value={selectedToDate}
+              placeholder={dateObjectToTruncatedDate(new Date())}
+              value={
+                selectedToDate ? new Date(selectedToDate) : new Date(tomorrow)
+              }
               display={Platform.OS === "ios" ? "inline" : "default"}
               datePickerVisible={toDatePickerVisible}
               onChange={(e, selectedDate) => {
@@ -180,52 +273,100 @@ const HomeScreen = () => {
                 setToDatePickerVisible(!toDatePickerVisible)
               }
               style={{ marginBottom: 10, flex: 1 }}
-              minimumDate={selectedFromDate}
+              minimumDate={
+                selectedFromDate ? new Date(selectedFromDate) : new Date()
+              }
             />
           </View>
           <GuestNumberPicker
             style={{ marginBottom: 10 }}
             placeholder="2 người lớn, 1 trẻ em"
             modalVisible={guestNumberPickerVisible}
-            onPress={() => setGuestNumberPickerVisible(!guestNumberPickerVisible)}
-            onOutsideModalPress={(adults, children) => handleOutsideModalPress(adults, children)}
+            onPress={() =>
+              setGuestNumberPickerVisible(!guestNumberPickerVisible)
+            }
+            onOutsideModalPress={(adults, children) =>
+              handleOutsideModalPress(adults, children)
+            }
             numOfAdult={numOfAdult}
             numOfChild={numOfChild}
           />
           <SubmitButton
-            onPress={() => onSearchPress()}
+            isLoading={buttonLoading}
+            disabled={searchValue === ""}
+            onPress={() =>
+              onSearchPress(
+                searchValue,
+                selectedFromDate,
+                selectedToDate,
+                numOfChild,
+                numOfAdult
+              )
+            }
             style={{ marginTop: 5 }}
             text="Tìm"
           />
         </View>
         {/* Recent Search Section */}
         <View style={styles.general_searched_section}>
-          <Text style={styles.general_section_title}>
-            Tìm kiếm gần đây của bạn
-          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <Text style={styles.general_section_title}>
+              Tìm kiếm gần đây của bạn
+            </Text>
+            {userSearchHistory.length > 0 && (
+              <Pressable
+                style={{ marginStart: "auto", marginEnd: 20 }}
+                onPress={onSearchHistoryClearPress}
+              >
+                <Text style={styles.delete_text}>Xóa</Text>
+              </Pressable>
+            )}
+          </View>
           <FlatList
             contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={recentSearch} //replace this with real data from API
+            data={userSearchHistory} //replace this with real data from API
             renderItem={renderRecentSearched}
           />
         </View>
         {/* Recent Hotel View Section */}
         <View style={styles.general_searched_section}>
-          <Text style={styles.general_section_title}>
-            Khách sạn đã xem gần đây
-          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <Text style={styles.general_section_title}>
+              Khách sạn đã xem gần đây
+            </Text>
+            {userRecentViewHotels.length > 0 && (
+              <Pressable
+                style={{ marginStart: "auto", marginEnd: 20 }}
+                onPress={onSearchRecentViewedClearPress}
+              >
+                <Text style={styles.delete_text}>Xóa</Text>
+              </Pressable>
+            )}
+          </View>
           <FlatList
             contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={hotels} //replace this with real data from API
+            data={userRecentViewHotels} //replace this with real data from API
             renderItem={renderHotels}
           />
         </View>
         {/* Suggested Famous Location */}
-        <View style={styles.general_searched_section}>
+        {/* <View style={styles.general_searched_section}>
           <Text style={styles.general_section_title}>Các địa điểm nổi bật</Text>
           <FlatList
             contentContainerStyle={{ paddingStart: 10, paddingEnd: 20 }}
@@ -234,8 +375,18 @@ const HomeScreen = () => {
             data={hotels} //replace this with real data from API
             renderItem={renderLocations}
           />
-        </View>
+        </View> */}
       </ScrollView>
+      <CircleButton
+        Icon={MessageCircleQuestion}
+        diameter={62}
+        style={{ position: "absolute", bottom: 20, right: 20, zIndex: 999 }}
+        borderRadius={50}
+        color={COLOR.primary_white_100}
+        backgroundColor={COLOR.primary_gold_100}
+        isShadow={true}
+        onPress={handleChatPress}
+      />
     </View>
   );
 };
@@ -266,10 +417,16 @@ const styles = StyleSheet.create({
   general_section_title: {
     fontWeight: 500,
     fontSize: 22,
-    marginBottom: 10,
     marginStart: 20,
     color: COLOR.primary_blue_100,
   },
+
+  delete_text: {
+    color: COLOR.tertiary_red_100,
+    fontSize: 16,
+    fontWeight: 500,
+    textDecorationLine: "underline",
+  }
 });
 
 export default HomeScreen;

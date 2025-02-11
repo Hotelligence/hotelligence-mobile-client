@@ -4,12 +4,12 @@ import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
 import { ImageOff } from "lucide-react-native";
 
-const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfReviews, isFavorite, style, isPressable }) => {
+const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfReviews, isFavorite, style, onPress }) => {
   const [imageError, setImageError] = useState(false);
 
 
   return (
-    <Pressable disabled={!isPressable} style={[styles.container, style]}>
+    <Pressable style={[styles.container, style]} onPress={onPress}>
       {imageError ? (
         <View style={styles.image_off_container}>
           <ImageOff size={48} color={COLOR.primary_blue_50} />
@@ -23,7 +23,7 @@ const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfRevie
           onError={() => setImageError(true)}
         />
       )}
-      <FavoriteButton isFavorite={isFavorite} style={styles.favorite_button} />
+      {/* <FavoriteButton isFavorite={isFavorite} style={styles.favorite_button} /> */}
       <View style={styles.content_container}>
         <Text
           numberOfLines={1}
@@ -39,13 +39,6 @@ const HotelTruncatedCard = ({ imageURL, hotelName, city, ratingScore, numOfRevie
         >
           {city}
         </Text>
-        <View style={styles.rating_container}>
-          <Text style={styles.text_general}>{ratingScore}/10</Text>
-          <Text style={styles.text_reviews}>
-            {"("}
-            {numOfReviews} đánh giá{")"}
-          </Text>
-        </View>
       </View>
     </Pressable>
   );

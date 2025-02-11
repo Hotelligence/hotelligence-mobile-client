@@ -16,8 +16,8 @@ const HotelDetailCard = ({
   originPrice,
   discount,
   discountPrice,
-  taxPrice,
-  extraFee,
+  // taxPrice,
+  // extraFee,
   totalPrice,
   style,
   isFavorite,
@@ -28,10 +28,10 @@ const HotelDetailCard = ({
   return (
     <Pressable style={[styles.container, style]} onPress={onPress}>
       <View style={styles.image_container}>
-        <FavoriteButton
+        {/* <FavoriteButton
           style={styles.favorite_button}
           isFavorite={isFavorite}
-        />
+        /> */}
         {imageError ? (
           <NoImage
             style={{ borderTopLeftRadius: 14, borderBottomLeftRadius: 14 }}
@@ -76,14 +76,14 @@ const HotelDetailCard = ({
           </View>
         </View>
         <View style={styles.content_bottom_container}>
-          {discount && discountPrice && (
-            <>
+          {(discount && discountPrice) ? (
+            <View>
               <DiscountTag discount={discount} />
               <Text style={styles.origin_price_text}>
                 {formatVND(originPrice)}đ
               </Text>
-            </>
-          )}
+            </View>
+          ) : null}
           <Text style={styles.discount_price_text}>
             {formatVND(discountPrice)}đ
           </Text>

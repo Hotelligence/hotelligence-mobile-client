@@ -2,7 +2,7 @@ import { Tabs, Redirect } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { Platform, View } from "react-native";
 import { HomeHeader } from "@/components/home";
-import { House, Search, Heart, History, User } from "lucide-react-native";
+import { House, Search, Heart, History, User, BookCopy } from "lucide-react-native";
 import { useAuth } from "@clerk/clerk-expo";
 
 const MainTabsLayout = () => {
@@ -52,15 +52,15 @@ const MainTabsLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="search"
+          name="comparison"
           options={{
             headerShown: false,
-            title: "Tìm kiếm",
+            title: "So sánh",
             tabBarIcon: ({ focused }) =>
               focused ? (
-                <Search color={COLOR.primary_blue_100} strokeWidth={2.6} />
+                <BookCopy color={COLOR.primary_blue_100} strokeWidth={2.6} />
               ) : (
-                <Search color={COLOR.primary_blue_50} />
+                <BookCopy color={COLOR.primary_blue_50} />
               ),
           }}
         />

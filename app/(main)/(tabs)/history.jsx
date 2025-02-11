@@ -1,26 +1,78 @@
-import { View, Text, StyleSheet, StatusBar, ScrollView } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, StyleSheet, StatusBar, ScrollView, RefreshControl } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
-import { hotels, hotelHistory, bookingHistory } from "@/assets/TempData"; //Delete later
 import { HotelHistoryCard } from "@/components/history";
+import ScreenSpinner from "@/components/ScreenSpinner";
 import { isoStringToDate } from "@/utils/ValueConverter";
+import { useRouter } from "expo-router";
+import { getUserBookingAPI, cancelBookingAPI } from "@/api/BookingServices";
+import { useUser } from "@clerk/clerk-expo";
+import { HttpStatusCode } from "axios";
 
 const HistoryScreen = () => {
+  const router = useRouter();
+  const { user } = useUser();
 
-  const handleRatingPress = (hotelID) => {
-    console.log("Rating pressed: ", hotelID);
+  const [userBookingHistory, setUserBookingHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchUserBookingHistory = async (userID) => {
+    const response = await getUserBookingAPI(userID);
+    if (response.status === HttpStatusCode.Ok) {
+      setUserBookingHistory(response?.data);
+    }
   };
 
-  const handleCancelPress = (hotelID) => {
-    console.log("Cancel pressed: ", hotelID);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUserBookingHistory(user.id);
+    setRefreshing(false);
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    fetchUserBookingHistory(user.id);
+    setLoading(false);
+  }, []);
+
+  const handleRatingPress = (bookingID, hotelID, roomID) => {
+    router.push({
+      pathname: "/reviews/[roomID]",
+      params: { bookingID: bookingID, roomID: roomID, hotelID: hotelID, },
+    });
   };
 
-  const handlePaymentPress = (hotelID) => {
-    console.log("Payment pressed: ", hotelID);
+  const handleCancelPress = async (bookingID) => {
+    const response = await cancelBookingAPI(bookingID);
+    if (response.status === HttpStatusCode.Ok) {
+      await fetchUserBookingHistory(user.id);
+    }    
+  };
+
+  const handlePaymentPress = (bookingID, paymentAmount) => {
+    router.push({
+      pathname: "/booking/payment",
+      params: { bookingID: bookingID, paymentAmount: paymentAmount, paymentMethod: "online" },
+    });
   };
 
   const handleOnHotelCardPress = (hotelID) => {
     console.log("Hotel ID: ", hotelID);
   };
+
+  if (loading) {
+    return (
+      <>
+        <StatusBar
+          barStyle={"light-content"}
+          translucent={true}
+          backgroundColor="transparent"
+        />
+        <ScreenSpinner />
+      </>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -30,13 +82,20 @@ const HistoryScreen = () => {
         backgroundColor="transparent"
       />
       <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLOR.primary_gold_100}
+          />
+        }
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 20 }}
       >
         <Text style={styles.title_text}>Lịch sử đặt phòng</Text>
         <View style={{ gap: 20 }}>
-          {bookingHistory.map((item, index) => (
+          {userBookingHistory.reverse().map((item, index) => (
             <View key={index}>
               <View
                 style={{
@@ -51,23 +110,25 @@ const HistoryScreen = () => {
                   numberOfLines={1}
                   style={styles.room_name_text}
                 >
-                  {item?.roomName} ({item?.numOfGuests} khách |{" "}
-                  {item?.numOfNights} đêm)
+                  {item?.roomName} ({item?.numOfNights} đêm)
                 </Text>
               </View>
               <HotelHistoryCard
-                hotelName={item?.hotelName}
-                imageURL={item?.image}
-                city={item?.city}
-                bookingID={item?.bookingID}
-                bookingTime={isoStringToDate(item?.bookingTime)}
-                checkinTime={isoStringToDate(item?.checkinTime)}
-                checkoutTime={isoStringToDate(item?.checkoutTime)}
-                status={item?.status}
-                onRatingPress={() => handleRatingPress(item?.bookingID)} // Change this to id later
-                onCancelPress={() => handleCancelPress(item?.bookingID)} // Change this to id later
-                onPaymentPress={() => handlePaymentPress(item?.bookingID)} // Change this to id later
-                onPress={() => handleOnHotelCardPress(item?.bookingID)} // Change this to id later
+                hotelID={item?.hotelId}
+                bookingID={item?.id}
+                bookingDate={isoStringToDate(item?.bookingDate)}
+                checkinDate={isoStringToDate(item?.checkinDate)}
+                checkoutDate={isoStringToDate(item?.checkoutDate)}
+                bookingStatus={item?.bookingStatus}
+                paymentMethod={item?.paymentMethod}
+                onRatingPress={() =>
+                  handleRatingPress(item?.id, item?.hotelId, item?.roomId)
+                }
+                onCancelPress={() => handleCancelPress(item?.id)}
+                onPaymentPress={() =>
+                  handlePaymentPress(item?.id, item?.paymentAmount)
+                }
+                onPress={() => handleOnHotelCardPress(item?.id)}
               />
             </View>
           ))}

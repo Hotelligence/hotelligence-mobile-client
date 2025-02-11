@@ -11,16 +11,38 @@ import {
 import { COLOR } from "@/assets/colors/Colors";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import GeneralHeader from "@/components/GeneralHeader";
-import { InputField, AmenityDisplay, SubmitButton } from "@/components/search";
-import { useRouter } from "expo-router";
-import { bookingConfirmation } from "@/assets/TempData"; //delete later
-import { isoStringToFullDateTime, formatVND } from "@/utils/ValueConverter";
+import { InputField, SubmitButton } from "@/components/search";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { useUser, } from "@clerk/clerk-expo";
+import {
+  formatVND,
+  dateObjectToFullDateTime,
+  dateObjectToDateTime,
+  dateObjectToVNTimeISOString,
+} from "@/utils/ValueConverter";
 import { Check } from "lucide-react-native";
+import { getRoomByID_API } from "@/api/RoomServices";
+import { initiateBookingAPI } from "@/api/BookingServices";
+import { HttpStatusCode } from "axios";
+import ScreenSpinner from "@/components/ScreenSpinner";
 
-const BookingInfoSection = ({ bookingInfo }) => {
+const BookingInfoSection = ({
+  hotelName,
+  checkinTime,
+  checkoutTime,
+  numOfNights,
+  numOfGuest,
+  roomName,
+  extraOptionsPrice,
+  originPrice,
+  discountedPrice,
+  taxFee,
+  paymentAmount,
+}) => {
+
   return (
     <View style={styles.booking_info_container}>
-      <Text style={styles.hotel_name_text}>{bookingInfo.hotelName}</Text>
+      <Text style={styles.hotel_name_text}>{hotelName}</Text>
       <View
         style={{
           flexDirection: "row",
@@ -34,7 +56,7 @@ const BookingInfoSection = ({ bookingInfo }) => {
           style={[styles.content_text, { flex: 2, marginStart: 5 }]}
           numberOfLines={2}
         >
-          {isoStringToFullDateTime(bookingInfo?.checkinTime)}
+          {dateObjectToFullDateTime(checkinTime, "14", "00")}
         </Text>
       </View>
       <View
@@ -49,7 +71,7 @@ const BookingInfoSection = ({ bookingInfo }) => {
           style={[styles.content_text, { flex: 2, marginStart: 5 }]}
           numberOfLines={2}
         >
-          {isoStringToFullDateTime(bookingInfo?.checkoutTime)}
+          {dateObjectToFullDateTime(checkoutTime, "12", "00")}
         </Text>
       </View>
       <View
@@ -64,7 +86,7 @@ const BookingInfoSection = ({ bookingInfo }) => {
           style={[styles.content_text, { flex: 2, marginStart: 5 }]}
           numberOfLines={2}
         >
-          {bookingInfo?.numOfRooms} phòng, {bookingInfo?.numOfNights} đêm
+          {numOfGuest} khách, {numOfNights} đêm
         </Text>
       </View>
       <View style={styles.divider} />
@@ -73,7 +95,7 @@ const BookingInfoSection = ({ bookingInfo }) => {
       >
         <View style={styles.bullet_point} />
         <Text style={[styles.label_text, { fontSize: 18, flex: 1 }]}>
-          {bookingInfo?.roomName}
+          {roomName}
         </Text>
       </View>
       <View
@@ -83,9 +105,11 @@ const BookingInfoSection = ({ bookingInfo }) => {
           marginVertical: 5,
         }}
       >
-        <Text style={[styles.label_text, { flex: 1 }]}>Giá phòng</Text>
+        <Text style={[styles.label_text, { flex: 1.2 }]}>
+          Giá phòng ({numOfNights} đêm + phụ phí)
+        </Text>
         <Text style={[styles.content_text, { textAlign: "right", flex: 2 }]}>
-          {formatVND(bookingInfo?.roomPrice)}đ
+          {formatVND((originPrice + extraOptionsPrice) * numOfNights)}đ
         </Text>
       </View>
       <View
@@ -95,9 +119,21 @@ const BookingInfoSection = ({ bookingInfo }) => {
           marginVertical: 5,
         }}
       >
-        <Text style={[styles.label_text, { flex: 1 }]}>Thuế & Phí</Text>
+        <Text style={[styles.label_text, { flex: 1 }]}>Giảm giá</Text>
         <Text style={[styles.content_text, { textAlign: "right", flex: 2 }]}>
-          {formatVND(bookingInfo?.taxAndFee)}đ
+          - {formatVND((originPrice - discountedPrice) * numOfNights)}đ
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginVertical: 5,
+        }}
+      >
+        <Text style={[styles.label_text, { flex: 1 }]}>Thuế</Text>
+        <Text style={[styles.content_text, { textAlign: "right", flex: 2 }]}>
+          {formatVND(taxFee)}đ
         </Text>
       </View>
       <View
@@ -110,14 +146,27 @@ const BookingInfoSection = ({ bookingInfo }) => {
       >
         <Text style={[styles.label_text, { flex: 1 }]}>Tổng giá</Text>
         <Text style={[styles.total_price_text, { textAlign: "right" }]}>
-          {formatVND(bookingInfo?.totalPrice)}đ
+          {formatVND(paymentAmount)}đ
         </Text>
       </View>
     </View>
   );
 };
 
-const FirstStepSection = ({}) => {
+const FirstStepSection = ({
+  fullName,
+  email,
+  phoneNumber,
+  onFullNameChange,
+  onEmailChange,
+  onPhoneNumberChange,
+  fullNameError,
+  emailError,
+  phoneNumberError,
+  fullNameErrorMessage,
+  emailErrorMessage,
+  phoneNumberErrorMessage,
+}) => {
   return (
     <View style={styles.booking_step_container}>
       <View style={styles.section_title_container}>
@@ -130,23 +179,36 @@ const FirstStepSection = ({}) => {
           đầy đủ nếu khách mang họ kép (như Nguyễn Phước, Tôn Nữ, Lê Đoàn,
           v.v.).
         </Text>
-        <InputField style={{ marginTop: 15 }} label="Họ tên" />
-        <InputField style={{ marginTop: 10 }} label="Email" />
-        <InputField style={{ marginTop: 10 }} label="Số điện thoại" />
+        <InputField
+          style={{ marginTop: 15 }}
+          label="Họ tên"
+          value={fullName}
+          onChange={onFullNameChange}
+          isError={fullNameError}
+          errorMessage={fullNameErrorMessage}
+        />
+        <InputField
+          style={{ marginTop: 5 }}
+          label="Email"
+          value={email}
+          onChange={onEmailChange}
+          isError={emailError}
+          errorMessage={emailErrorMessage}
+        />
+        <InputField
+          style={{ marginTop: 5 }}
+          label="Số điện thoại"
+          value={phoneNumber}
+          onChange={onPhoneNumberChange}
+          isError={phoneNumberError}
+          errorMessage={phoneNumberErrorMessage}
+        />
       </View>
     </View>
   );
 };
 
-const SecondStepSection = ({ bookingInfo }) => {
-  const firstColumn = bookingInfo?.amenities.slice(
-    0,
-    Math.ceil(bookingInfo?.amenities.length / 2)
-  );
-  const secondColumn = bookingInfo?.amenities.slice(
-    Math.ceil(bookingInfo?.amenities.length / 2)
-  );
-
+const SecondStepSection = ({ extraOptionsName, roomInfo }) => {
   return (
     <View style={styles.booking_step_container}>
       <View style={styles.section_title_container}>
@@ -164,33 +226,33 @@ const SecondStepSection = ({ bookingInfo }) => {
         >
           <View style={styles.bullet_point} />
           <Text style={[styles.label_text, { fontSize: 18, flex: 1 }]}>
-            {bookingInfo?.roomName}
+            {roomInfo?.roomName}
           </Text>
         </View>
-        <View style={styles.amenities_list_container}>
-          <View style={{ flex: 1 }}>
-            {firstColumn.map((amenity, index) => (
-              <AmenityDisplay
-                key={index}
-                iconName={amenity.amenityIconName}
-                label={amenity.amenityName}
-                style={{ width: "85%", marginVertical: 2 }}
-              />
-            ))}
-          </View>
-          <View style={{ flex: 1, marginStart: 5 }}>
-            {secondColumn.map((amenity, index) => (
-              <AmenityDisplay
-                key={index}
-                iconName={amenity.amenityIconName}
-                label={amenity.amenityName}
-                style={{ width: "85%", marginVertical: 2 }}
-              />
-            ))}
-          </View>
+        <View style={{ marginTop: 5, paddingHorizontal: 15 }}>
+          <Text style={styles.room_info_text}>
+            Loại phòng:{" "}
+            <Text style={{ fontWeight: 400 }}>{roomInfo?.roomType}</Text>
+          </Text>
+          <Text style={styles.room_info_text}>
+            Số lượng giường:{" "}
+            <Text style={{ fontWeight: 400 }}>{roomInfo?.numOfBeds}</Text>
+          </Text>
+          <Text style={styles.room_info_text}>
+            Loại giường:{" "}
+            <Text style={{ fontWeight: 400 }}>{roomInfo?.bedType}</Text>
+          </Text>
+          <Text style={styles.room_info_text}>
+            Số lượng người lớn tối đa:{" "}
+            <Text style={{ fontWeight: 400 }}>{roomInfo?.maxAdults}</Text>
+          </Text>
+          <Text style={styles.room_info_text}>
+            Số lượng trẻ em tối đa:{" "}
+            <Text style={{ fontWeight: 400 }}>{roomInfo?.maxChildren}</Text>
+          </Text>
         </View>
       </View>
-      {bookingInfo?.isBreakfastProvided && (
+      {extraOptionsName && (
         <View
           style={{
             flexDirection: "row",
@@ -204,9 +266,7 @@ const SecondStepSection = ({ bookingInfo }) => {
             color={COLOR.secondary_green_100}
             strokeWidth={2.5}
           />
-          <Text style={styles.breakfast_text}>
-            Bao gồm: Bữa sáng cho {bookingInfo?.numOfBreakfastProvided} người
-          </Text>
+          <Text style={styles.breakfast_text}>Bao gồm: {extraOptionsName}</Text>
         </View>
       )}
     </View>
@@ -274,10 +334,22 @@ const ThirdStepSection = ({
             marginTop: 10,
           }}
         >
-          <Image style={[styles.payment_logo, { width: 57 }]} source={require("@/assets/images/MasterCard_Logo.png")} />
-          <Image style={styles.payment_logo} source={require("@/assets/images/MoMo_Logo.png")} />
-          <Image style={[styles.payment_logo, { width: 57 }]} source={require("@/assets/images/Visa_Logo.png")} />
-          <Image style={styles.payment_logo} source={require("@/assets/images/VNPay_Logo.png")} />
+          <Image
+            style={[styles.payment_logo, { width: 57 }]}
+            source={require("@/assets/images/MasterCard_Logo.png")}
+          />
+          <Image
+            style={styles.payment_logo}
+            source={require("@/assets/images/MoMo_Logo.png")}
+          />
+          <Image
+            style={[styles.payment_logo, { width: 57 }]}
+            source={require("@/assets/images/Visa_Logo.png")}
+          />
+          <Image
+            style={styles.payment_logo}
+            source={require("@/assets/images/VNPay_Logo.png")}
+          />
         </View>
         <View style={[styles.divider, { marginVertical: 30 }]} />
         <Text style={[styles.content_text, { textAlign: "justify" }]}>
@@ -285,26 +357,12 @@ const ThirdStepSection = ({
           thêm thông tin về thẻ tín dụng. Chúng tôi cam kết sử dụng phương thức
           truyền tải an toàn để bảo vệ thông tin cá nhân của Quý khách.
         </Text>
-        <InputField style={{ marginTop: 15 }} label="Số thẻ" />
-        <View style={{ flexDirection: "row" }}>
-          <InputField style={{ marginTop: 10, flex: 1 }} label="Ngày hết hạn" />
-          <InputField
-            style={{ marginTop: 10, flex: 1, marginStart: 20 }}
-            label="Mã CVV"
-          />
-        </View>
       </View>
     </View>
   );
 };
 
-const CancelPolicySection = ({}) => {
-  const policies = [
-    "Quý khách được hủy miễn phí đến 18:00 19/04/2024.",
-    "Nếu Quý khách thay đổi hoặc hủy đặt phòng sau 18:00 19/04/2024, Quý khách sẽ phải thanh toán phí tương đương 1 đêm (gồm thuế).",
-    "Nếu Quý khách thay đổi hoặc hủy đặt phòng sau 09:00 21/04/2024, Quý khách sẽ không được hoàn trả bất kỳ khoản thanh toán nào.",
-  ];
-
+const CancelPolicySection = ({ policies }) => {
   return (
     <View style={[styles.booking_info_container, { marginTop: 20 }]}>
       <Text style={[styles.label_text, { fontSize: 18 }]}>Chính sách hủy</Text>
@@ -323,20 +381,99 @@ const CancelPolicySection = ({}) => {
       <Text
         style={[styles.content_text, { marginTop: 10, textAlign: "justify" }]}
       >
-        *Thời gian được tính theo giờ địa phương hiện tại của Quý khách (GMT +7)
+        * Thời gian được tính theo giờ địa phương hiện tại của Quý khách (GMT
+        +7)
       </Text>
     </View>
   );
 };
 
-const BookingConfirmation = () => {
+const BookingScreen = () => {
+  const { user } = useUser();
+  // console.log(user.id);
+
+  const cancelDue = new Date();
+  cancelDue.setDate(cancelDue.getDate() + 3);
+
+  const unCancelDue = new Date();
+  unCancelDue.setDate(unCancelDue.getDate() + 7);
+
+  const policies = [
+    `Quý khách được hủy miễn phí đến ${dateObjectToDateTime(
+      cancelDue,
+      "00",
+      "00"
+    )}`,
+    `Nếu Quý khách thay đổi hoặc hủy đặt phòng sau ${dateObjectToDateTime(
+      cancelDue,
+      "00",
+      "00"
+    )}, Quý khách sẽ phải thanh toán phí tương đương 1 đêm (gồm thuế).`,
+    `Nếu Quý khách thay đổi hoặc hủy đặt phòng sau ${dateObjectToDateTime(
+      unCancelDue,
+      "00",
+      "00"
+    )}, Quý khách sẽ không được hoàn trả bất kỳ khoản thanh toán nào.`,
+  ];
+
   const router = useRouter();
+
+  const {
+    roomID,
+    hotelName,
+    checkinDate,
+    checkoutDate,
+    numOfNights,
+    guestNumber,
+    extraOptionsName,
+    extraOptionsPrice,
+  } = useLocalSearchParams();
+
+  const [selectedOption, setSelectedOption] = useState("0");
+  const [roomInfo, setRoomInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  //Input states:
+  const [fullName, setFullName] = useState("");
+  const [fullNameErrorMessage, setFullNameErrorMessage] = useState(" ");
+
+  const [email, setEmail] = useState("");
+  const [emailErrorMessage, setEmailErrorMessage] = useState(" ");
+
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumberErrorMessage, setPhoneNumberErrorMessage] = useState(" ");
+
+  //Other states
+  const [generalErrorMessage, setGeneralErrorMessage] = useState(" ");
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  const taxFee =
+    ((roomInfo?.discountedPrice + parseInt(extraOptionsPrice)) * numOfNights) /
+    roomInfo?.taxPercentage;
+  const paymentAmount =
+    (roomInfo?.discountedPrice + parseInt(extraOptionsPrice)) * numOfNights + taxFee;
+
+  useEffect(() => {
+    const getRoomInfo = async (roomID) => {
+      setLoading(true);
+      try {
+        const response = await getRoomByID_API(roomID);
+        if (response.status === HttpStatusCode.Ok) {
+          setRoomInfo(response.data);
+        }
+      } catch (err) {
+        console.log("Error in getRoomInfo: ", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getRoomInfo(roomID);
+  }, []);
 
   const onBackPress = () => {
     router.back();
   };
-
-  const [selectedOption, setSelectedOption] = useState("0");
 
   const handleDirectOptionSelect = () => {
     setSelectedOption("0");
@@ -346,8 +483,61 @@ const BookingConfirmation = () => {
     setSelectedOption("1");
   };
 
-  const handleConfirmBookingPress = async () => {
-    router.push("/booking/booking-confirmation");
+  const handleConfirmBookingPress = async (
+    fullName,
+    email,
+    phoneNumber,
+    selectedOption
+  ) => {
+    const phoneRegex =
+      "^(\\+84|0)(3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-46-9])\\d{7}$";
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    setButtonLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 200)); // make the button to load for 200ms
+
+    if (!phoneNumber.match(phoneRegex) || !email.match(emailRegex)) {
+      if (!phoneNumber.match(phoneRegex)) {
+        setPhoneNumberErrorMessage("Số điện thoại không hợp lệ");
+        setGeneralErrorMessage("Vui lòng kiểm tra lại các Thông tin cá nhân");
+      }
+      if (!email.match(emailRegex)) {
+        setEmailErrorMessage("Email không hợp lệ");
+        setGeneralErrorMessage("Vui lòng kiểm tra lại các Thông tin cá nhân");
+      }
+      setButtonLoading(false);
+    } else {
+      try {
+        const response = await initiateBookingAPI(email);
+        if(response.status === HttpStatusCode.Created) {
+          router.replace({
+            pathname: "/booking/booking-confirmation",
+            params: {
+                userID: user.id,
+                hotelID: roomInfo?.hotelId,
+                roomID: roomInfo?.id,
+                roomName: roomInfo?.roomName,
+                fullName: fullName,
+                email: email,
+                phoneNumber: phoneNumber,
+                paymentMethod: selectedOption === "0" ? "offline" : "online",
+                paymentAmount: paymentAmount,
+                bookingDate: dateObjectToVNTimeISOString(new Date()),
+                checkinDate: dateObjectToVNTimeISOString(new Date(checkinDate)),
+                checkoutDate: dateObjectToVNTimeISOString(new Date(checkoutDate)),
+                cancelDue: dateObjectToVNTimeISOString(cancelDue),
+                unCancelDue: dateObjectToVNTimeISOString(unCancelDue),
+            },
+          });
+        }
+
+      } catch (err) {
+        console.log("Error in handleConfirmBookingPress: ", err);
+        setGeneralErrorMessage("Đã xảy ra lỗi, vui lòng thử lại sau");
+      } finally {
+        setButtonLoading(false);
+      }
+    }
   };
 
   return (
@@ -356,37 +546,90 @@ const BookingConfirmation = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <GeneralHeader title="Chi tiết đặt phòng" onBackPress={onBackPress} />
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <BookingInfoSection bookingInfo={bookingConfirmation} />
-        <FirstStepSection />
-        <SecondStepSection bookingInfo={bookingConfirmation} />
-        <ThirdStepSection
-          selectedOption={selectedOption}
-          onDirectOptionSelect={handleDirectOptionSelect}
-          onOnlineOptionSelect={handleOnlineOptionSelect}
-        />
-        <CancelPolicySection />
-        <View style={{ paddingHorizontal: 20 }}>
-          <Text style={[styles.content_text, { textAlign: "justify" }]}>
-            Bằng việc bấm <Text style={{ fontWeight: 600 }}>"Đặt phòng"</Text>,
-            chúng tôi mặc định Quý khách xác nhận đã đọc và đồng ý{" "}
-            <Text style={{ fontWeight: 600 }}>
-              Điều khoản & Điều kiện, Chính sách bảo mật và Hướng dẫn du lịch
-              của chính phủ
-            </Text>{" "}
-            của Hotelligence.
-          </Text>
-          <SubmitButton
-            text="Xác nhận đặt phòng"
-            style={{ marginTop: 20 }}
-            onPress={() => handleConfirmBookingPress()}
+      {loading ? (
+        <ScreenSpinner />
+      ) : (
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <BookingInfoSection
+            hotelName={hotelName}
+            checkinTime={new Date(checkinDate)}
+            checkoutTime={new Date(checkoutDate)}
+            numOfNights={numOfNights}
+            numOfGuest={guestNumber}
+            roomName={roomInfo?.roomName}
+            originPrice={roomInfo?.originPrice}
+            discountedPrice={roomInfo?.discountedPrice}
+            totalPrice={roomInfo?.totalPrice}
+            extraOptionsPrice={parseInt(extraOptionsPrice)}
+            taxPercentage={roomInfo?.taxPercentage}
+            taxFee={taxFee}
+            paymentAmount={paymentAmount}
           />
-        </View>
-      </ScrollView>
+          <FirstStepSection
+            fullName={fullName}
+            email={email}
+            phoneNumber={phoneNumber}
+            onFullNameChange={(text) => {
+              setFullName(text);
+              setFullNameErrorMessage(" ");
+              setGeneralErrorMessage(" ");
+            }}
+            onEmailChange={(text) => {
+              setEmail(text);
+              setEmailErrorMessage(" ");
+              setGeneralErrorMessage(" ");
+            }}
+            onPhoneNumberChange={(text) => {
+              setPhoneNumber(text);
+              setPhoneNumberErrorMessage(" ");
+              setGeneralErrorMessage(" ");
+            }}
+            fullNameErrorMessage={fullNameErrorMessage}
+            emailErrorMessage={emailErrorMessage}
+            phoneNumberErrorMessage={phoneNumberErrorMessage}
+          />
+          <SecondStepSection
+            extraOptionsName={extraOptionsName}
+            roomInfo={roomInfo}
+          />
+          <ThirdStepSection
+            selectedOption={selectedOption}
+            onDirectOptionSelect={handleDirectOptionSelect}
+            onOnlineOptionSelect={handleOnlineOptionSelect}
+          />
+          <CancelPolicySection policies={policies} />
+          <View style={{ paddingHorizontal: 20 }}>
+            <Text style={[styles.content_text, { textAlign: "justify" }]}>
+              Bằng việc bấm <Text style={{ fontWeight: 600 }}>"Đặt phòng"</Text>
+              , chúng tôi mặc định Quý khách xác nhận đã đọc và đồng ý{" "}
+              <Text style={{ fontWeight: 600 }}>
+                Điều khoản & Điều kiện, Chính sách bảo mật và Hướng dẫn du lịch
+                của chính phủ
+              </Text>{" "}
+              của Hotelligence.
+            </Text>
+            <Text style={styles.error_text}>{generalErrorMessage}</Text>
+            <SubmitButton
+              text="Xác nhận đặt phòng"
+              disabled={fullName === "" || email === "" || phoneNumber === ""}
+              isLoading={buttonLoading}
+              style={{ marginTop: 20 }}
+              onPress={() =>
+                handleConfirmBookingPress(
+                  fullName,
+                  email,
+                  phoneNumber,
+                  selectedOption
+                )
+              }
+            />
+          </View>
+        </ScrollView>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -438,6 +681,12 @@ const styles = StyleSheet.create({
     // marginStart: 5,
   },
 
+  error_text: {
+    marginTop: 15,
+    fontSize: 14,
+    color: COLOR.secondary_red_100,
+  },
+
   //Booking Info Section
   booking_info_container: {
     paddingHorizontal: 15,
@@ -468,7 +717,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 5,
     backgroundColor: COLOR.primary_blue_100,
-    marginHorizontal: 10,
+    marginEnd: 10,
   },
 
   total_price_text: {
@@ -480,17 +729,18 @@ const styles = StyleSheet.create({
   //First Step Section
 
   //Second Step Section
-  amenities_list_container: {
-    flexDirection: "row",
-    paddingTop: 10,
-    justifyContent: "space-between",
-  },
-
   breakfast_text: {
     fontSize: 16,
     color: COLOR.secondary_green_100,
     fontWeight: 500,
     marginStart: 5,
+  },
+
+  room_info_text: {
+    fontSize: 16,
+    fontWeight: 500,
+    color: COLOR.primary_blue_100,
+    marginVertical: 5,
   },
 
   //Third Step Section
@@ -506,4 +756,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookingConfirmation;
+export default BookingScreen;

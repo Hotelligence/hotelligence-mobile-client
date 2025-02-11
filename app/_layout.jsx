@@ -1,6 +1,7 @@
 import { Slot } from "expo-router";
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/utils/ExpoSecureStore";
+import { AppProvider } from "@/contexts/AppContext";
 
 const AppStackLayout = () => {
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -11,9 +12,11 @@ const AppStackLayout = () => {
 
   return (
     <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <ClerkLoaded>
-        <Slot />
-      </ClerkLoaded>
+      <AppProvider>
+        <ClerkLoaded>
+          <Slot />
+        </ClerkLoaded>
+      </AppProvider>
     </ClerkProvider>
   );
 

@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef } from "react";
+import { useState, useRef, forwardRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Image,
   Pressable,
   Animated,
+  Platform,
 } from "react-native";
 import {
   CircleButton,
@@ -13,20 +14,38 @@ import {
   StarDisplay,
   RatingScoreTag,
   AmenityDisplay,
-  DatePicker,
-  GuestNumberPicker,
   RoomDetailCard,
   DetailReviewPoint,
   CommentDisplay,
   SubmitButton,
+  DatePicker,
+  GuestNumberPicker,
 } from "@/components/search";
-import { BookingAdditionalModal, DetailPriceModal } from "@/components/modal";
+import ScreenSpinner from "@/components/ScreenSpinner";
+import {
+  BookingAdditionalModal,
+  DetailPriceModal,
+  ConfirmActionModal,
+} from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
-import { hotels, rooms, reviews, amenities } from "@/assets/TempData"; //Delete later
+import { amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { COLOR } from "@/assets/colors/Colors";
 import { ChevronLeft, MapPin, ChevronRight } from "lucide-react-native";
-import { isoStringToDate } from "@/utils/ValueConverter";
+import {
+  dateObjectToTruncatedDate,
+  isoStringToDate,
+} from "@/utils/ValueConverter";
+import { HttpStatusCode } from "axios";
+import {
+  getHotelByID_API,
+  addFavoriteHotelAPI,
+  removeFavoriteHotelAPI,
+} from "@/api/HotelServices";
+import { getRoomsInHotelAPI, addRoomToComparisonListAPI } from "@/api/RoomServices";
+import { getReviewsByHotelID_API } from "@/api/ReviewServices";
+import { useUser } from "@clerk/clerk-expo";
+import { useAppContext } from "@/contexts/AppContext";
 
 const IntroSection = ({
   hotelName,
@@ -56,7 +75,7 @@ const IntroSection = ({
           paddingVertical: 10,
         }}
       >
-        <RatingScoreTag ratingScore={ratingScore} />
+        <RatingScoreTag ratingScore={ratingScore?.toFixed(1)} />
         <View style={{ marginStart: 4 }}>
           <Text style={styles.numOf_reviews_text}>
             ({numOfReviews} đánh giá)
@@ -66,7 +85,6 @@ const IntroSection = ({
         <FavoriteButton
           isFavorite={isFavorite}
           style={{ marginStart: "auto" }}
-          // onPress={() => onFavoritePress()}
           onPress={onFavoritePress}
         />
       </View>
@@ -139,127 +157,331 @@ const AmenitiesSection = ({ amenities, onViewAllPress }) => {
 };
 
 const RoomBookingSection = forwardRef(
-  ({
-  rooms,
-  roomFilterSelected,
-  onRoomFilterSelected,
-  displayedRoom,
-  totalRoom,
-  handleDetailPress,
-  handleSelectPress,
-}, ref) => {
-  return (
-    <View ref={ref} style={styles.room_booking_container}>
-      <Text style={styles.section_title_text}>Chọn phòng</Text>
-      <DatePicker
-        style={{ marginBottom: 10, marginTop: 15 }}
-        placeholder="29 thg 3 - 30 thg 3"
-      />
-      <GuestNumberPicker
-        style={{ marginBottom: 10 }}
-        placeholder="2 khách, 1 phòng"
-      />
-      <View style={{ flexDirection: "row", alignContent: "center", gap: 10 }}>
-        <Pressable
-          onPress={() => onRoomFilterSelected(0)}
-          style={[
-            styles.filter_button,
-            {
-              backgroundColor:
-                roomFilterSelected === 0
-                  ? COLOR.tertiary_blue_40
-                  : COLOR.primary_white_100,
-            },
-          ]}
-        >
-          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
-            Tất cả phòng
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => onRoomFilterSelected(1)}
-          style={[
-            styles.filter_button,
-            {
-              backgroundColor:
-                roomFilterSelected === 1
-                  ? COLOR.tertiary_blue_40
-                  : COLOR.primary_white_100,
-            },
-          ]}
-        >
-          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
-            1 giường
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => onRoomFilterSelected(2)}
-          style={[
-            styles.filter_button,
-            {
-              backgroundColor:
-                roomFilterSelected === 2
-                  ? COLOR.tertiary_blue_40
-                  : COLOR.primary_white_100,
-            },
-          ]}
-        >
-          <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
-            2 giường
-          </Text>
-        </Pressable>
-      </View>
-      <Text
-        style={{
-          color: COLOR.primary_blue_100,
-          fontSize: 16,
-          marginVertical: 10,
-        }}
-      >
-        Hiển thị {displayedRoom} trên {totalRoom} phòng
-      </Text>
-      <View style={{ gap: 15 }}>
-        {rooms.map((room) => (
-          <RoomDetailCard
-            key={room?.id}
-            roomName={room?.roomName}
-            imageURL={room?.images[0]}
-            originPrice={room?.originPrice}
-            discountPercentage={room?.discountPercentage}
-            discountedPrice={room?.discountedPrice}
-            // taxPrice={room?.taxPrice}
-            // extraFee={room?.extraFee}
-            totalPrice={room?.totalPrice}
-            onDetailPress={() => handleDetailPress(room?.id)}
-            onSelectPress={() => handleSelectPress(room?.id)}
-          />
-        ))}
-      </View>
-    </View>
-  );
-});
+  (
+    {
+      rooms,
+      roomFilterSelected,
+      onRoomFilterSelected,
+      displayedRoom,
+      totalRoom,
+      fromDate,
+      toDate,
+      child,
+      adults,
+      handleDetailPress,
+      handleSelectPress, //(2)
+      handleComparisonPress,
+    },
+    ref
+  ) => {
+    const [fromDatePickerVisible, setFromDatePickerVisible] = useState(false);
+    const [selectedFromDate, setSelectedFromDate] = useState(fromDate);
+    const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
+    const [selectedToDate, setSelectedToDate] = useState(toDate);
+    const [numOfNights, setNumOfNights] = useState();
 
-const FeePolicySection = ({}) => {
+    const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
+      useState(false);
+    const [numOfAdult, setNumOfAdult] = useState(parseInt(adults));
+    const [numOfChild, setNumOfChild] = useState(parseInt(child));
+
+    useEffect(() => {
+      if (selectedFromDate && selectedToDate) {
+        const diffTime = Math.abs(selectedToDate - selectedFromDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        setNumOfNights(diffDays);
+      }
+    }, [selectedFromDate, selectedToDate]);
+
+    const handleOutsideModalPress = (adults, children) => {
+      setNumOfAdult(adults);
+      setNumOfChild(children);
+      setGuestNumberPickerVisible(false);
+    };
+
+    return (
+      <View ref={ref} style={styles.room_booking_container}>
+        <Text style={styles.section_title_text}>Chọn phòng</Text>
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            marginTop: 15,
+          }}
+        >
+          <DatePicker
+            label="Chọn ngày đi"
+            placeholder={dateObjectToTruncatedDate(new Date())}
+            value={selectedFromDate}
+            display={Platform.OS === "ios" ? "inline" : "default"}
+            datePickerVisible={fromDatePickerVisible}
+            onChange={(e, selectedDate) => {
+              setSelectedFromDate(selectedDate);
+              setFromDatePickerVisible(!fromDatePickerVisible);
+            }}
+            onPress={() => {
+              setFromDatePickerVisible(!fromDatePickerVisible);
+            }}
+            onOutsideModalPress={() =>
+              setFromDatePickerVisible(!fromDatePickerVisible)
+            }
+            style={{ marginBottom: 10, flex: 1 }}
+            minimumDate={new Date()}
+          />
+          <View
+            style={{
+              height: 2,
+              width: "2%",
+              backgroundColor: COLOR.primary_blue_50,
+              alignSelf: "center",
+              marginHorizontal: 10,
+            }}
+          />
+          <DatePicker
+            label="Chọn ngày về"
+            placeholder={dateObjectToTruncatedDate(new Date())}
+            value={selectedToDate}
+            display={Platform.OS === "ios" ? "inline" : "default"}
+            datePickerVisible={toDatePickerVisible}
+            onChange={(e, selectedDate) => {
+              setSelectedToDate(selectedDate);
+              setToDatePickerVisible(!toDatePickerVisible);
+            }}
+            onPress={() => {
+              setToDatePickerVisible(!toDatePickerVisible);
+            }}
+            onOutsideModalPress={() =>
+              setToDatePickerVisible(!toDatePickerVisible)
+            }
+            style={{ marginBottom: 10, flex: 1 }}
+            minimumDate={selectedFromDate}
+          />
+        </View>
+        <GuestNumberPicker
+          style={{ marginBottom: 10 }}
+          placeholder="2 người lớn, 1 trẻ em"
+          modalVisible={guestNumberPickerVisible}
+          onPress={() => setGuestNumberPickerVisible(!guestNumberPickerVisible)}
+          onOutsideModalPress={(adults, children) =>
+            handleOutsideModalPress(adults, children)
+          }
+          numOfAdult={numOfAdult}
+          numOfChild={numOfChild}
+        />
+        <View
+          style={{
+            flexDirection: "row",
+            alignContent: "center",
+            gap: 10,
+            marginTop: 10,
+          }}
+        >
+          <Pressable
+            onPress={() => onRoomFilterSelected(0)}
+            style={[
+              styles.filter_button,
+              {
+                backgroundColor:
+                  roomFilterSelected === 0
+                    ? COLOR.tertiary_blue_40
+                    : COLOR.primary_white_100,
+              },
+            ]}
+          >
+            <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+              Tất cả phòng
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => onRoomFilterSelected(1)}
+            style={[
+              styles.filter_button,
+              {
+                backgroundColor:
+                  roomFilterSelected === 1
+                    ? COLOR.tertiary_blue_40
+                    : COLOR.primary_white_100,
+              },
+            ]}
+          >
+            <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+              1 giường
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => onRoomFilterSelected(2)}
+            style={[
+              styles.filter_button,
+              {
+                backgroundColor:
+                  roomFilterSelected === 2
+                    ? COLOR.tertiary_blue_40
+                    : COLOR.primary_white_100,
+              },
+            ]}
+          >
+            <Text style={[styles.filter_text, { marginHorizontal: 5 }]}>
+              2 giường
+            </Text>
+          </Pressable>
+        </View>
+        <Text
+          style={{
+            color: COLOR.primary_blue_100,
+            fontSize: 16,
+            marginVertical: 10,
+          }}
+        >
+          Hiển thị {displayedRoom} trên {totalRoom} phòng
+        </Text>
+        <View style={{ gap: 15 }}>
+          {rooms.map((room) => (
+            <RoomDetailCard
+              key={room?.id}
+              roomName={room?.roomName}
+              imageURL={room?.images[0]}
+              originPrice={room?.originPrice}
+              discountPercentage={room?.discountPercentage}
+              discountedPrice={room?.discountedPrice}
+              // taxPrice={room?.taxPrice}
+              // extraFee={room?.extraFee}
+              totalPrice={room?.totalPrice}
+              numOfNights={numOfNights}
+              onComparisonPress={() => handleComparisonPress(room?.id)}
+              onDetailPress={() => handleDetailPress(room?.id)}
+              onSelectPress={() =>
+                handleSelectPress(
+                  //This function is different from the one in HotelDetail, use params number to distinguish them (1)
+                  room?.id,
+                  {
+                    originPrice: room?.originPrice,
+                    discountedPrice: room?.discountedPrice,
+                    discountPercentage: room?.discountPercentage,
+                    totalPrice: room?.totalPrice,
+                    taxPercentage: room?.taxPercentage,
+                  },
+                  {
+                    fromDate: selectedFromDate,
+                    toDate: selectedToDate,
+                    numOfNights: numOfNights,
+                  },
+                  { numOfAdults: numOfAdult, numOfChild: numOfChild }
+                )
+              }
+            />
+          ))}
+        </View>
+      </View>
+    );
+  }
+);
+
+const FeePolicySection = ({ optionalFees, policies }) => {
   return (
     <View style={styles.fee_policy_section}>
       <Text style={styles.section_title_text}>Phí và chính sách</Text>
+      <View style={{ marginTop: 10 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 500,
+            color: COLOR.primary_blue_100,
+          }}
+        >
+          Phí tùy chọn
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {optionalFees !== "" && (
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 10,
+                backgroundColor: COLOR.primary_blue_100,
+                marginHorizontal: 10,
+              }}
+            />
+          )}
+          <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
+            style={{
+              flex: 1,
+              fontSize: 16,
+              fontWeight: 400,
+              color: COLOR.primary_blue_100,
+            }}
+          >
+            {optionalFees !== "" ? optionalFees : "Không."}
+          </Text>
+        </View>
+      </View>
+      <View style={{ marginTop: 10 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 500,
+            color: COLOR.primary_blue_100,
+          }}
+        >
+          Chính sách
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {policies !== "" && (
+            <View
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 10,
+                backgroundColor: COLOR.primary_blue_100,
+                marginHorizontal: 10,
+              }}
+            />
+          )}
+          <Text
+            ellipsizeMode="tail"
+            numberOfLines={1}
+            style={{
+              flex: 1,
+              fontSize: 16,
+              fontWeight: 400,
+              color: COLOR.primary_blue_100,
+            }}
+          >
+            {policies !== "" ? policies : "Không."}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 };
 
-const ReviewSection = ({ reviews, reviewPoints, onViewAllReviewPress }) => {
+const ReviewSection = ({
+  reviews,
+  reviewCount,
+  reviewCategory,
+  reviewPoints = {
+    overall: 0.0,
+    cleanliness: 0.0,
+    comfort: 0.0,
+    staff: 0.0,
+    facilities: 0.0,
+    environmentFriendly: 0.0,
+  },
+  onViewAllReviewPress,
+}) => {
   return (
     <View style={styles.review_section}>
       <Text style={styles.section_title_text}>Đánh giá</Text>
       <DetailReviewPoint
-        overallPoint={8.8}
-        reviewCount="59"
-        pointCategory="Rất tốt"
-        cleanPoint={8.8}
-        servicePoint={9}
-        staffPoint={8.6}
-        facilityPoint={8.4}
-        environmentPoint={8.6}
+        overallPoint={reviewPoints?.overall}
+        reviewCount={reviewCount}
+        pointCategory={reviewCategory}
+        cleanPoint={reviewPoints?.cleanliness}
+        servicePoint={reviewPoints?.comfort}
+        staffPoint={reviewPoints?.staff}
+        facilityPoint={reviewPoints?.facilities}
+        environmentPoint={reviewPoints?.environmentFriendly}
       />
       <View style={{ gap: 10, marginTop: 20 }}>
         {reviews.map((review) => (
@@ -290,22 +512,84 @@ const ReviewSection = ({ reviews, reviewPoints, onViewAllReviewPress }) => {
 
 const HotelDetail = () => {
   const router = useRouter();
+  const { user } = useUser();
 
-  const hotel = hotels[1]; //adjust this later
-  const tempRooms = rooms.slice(0, 6);
+  const { hotelID, fromDate, toDate, numOfChild, numOfAdults } =
+    useLocalSearchParams();
+  const { userFavoriteList, fetchUserFavoriteList } = useAppContext();
+  const userFavorite = userFavoriteList.some((item) => item?.id === hotelID);
 
-  // const { hotelID } = useLocalSearchParams();
+  const from = fromDate ? new Date(fromDate) : null; //from date passed from the prev screen
+  const to = toDate ? new Date(toDate) : null; //to date passed from the prev screen
 
+  //API fetched states
+  const [hotelInfo, setHotelInfo] = useState(null);
+  const [roomsInHotel, setRoomsInHotel] = useState([]);
+  const [hotelReviews, setHotelReviews] = useState([]);
+
+  //Other states
   const [wallpaperError, setWallpaperError] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(hotel?.isFavorite); //adjust this later
+  const [isFavorite, setIsFavorite] = useState(userFavorite);
+  const [loading, setLoading] = useState(false);
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
+  const [selectedRoomPriceInfo, setSelectedRoomPriceInfo] = useState(null);
+  const [selectedRoomID, setSelectedRoomID] = useState(null);
+  const [selectedExtraOption, setSelectedExtraOption] = useState(null);
+  const [stayPeriod, setStayPeriod] = useState(null);
+  const [guests, setGuests] = useState(null);
 
+  const [selectedComparisonRoomID, setSelectedComparisonRoomID] = useState("");
+
+  //Modal visibility states
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
+  const [comparisonConfirmModalVisible, setComparisonConfirmModalVisible] =
+    useState(false);
 
-  // useEffect(() => {
-  //   //fetch data from server
-  // }, [])
+  useEffect(() => {
+    const getHotelByID = async (hotelID) => {
+      try {
+        const response = await getHotelByID_API(hotelID);
+        if (response.status === HttpStatusCode.Ok) {
+          setHotelInfo(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const getRoomsInHotel = async (hotelID) => {
+      try {
+        const response = await getRoomsInHotelAPI(hotelID);
+        if (response.status === HttpStatusCode.Ok) {
+          setRoomsInHotel(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const getReviewsOfHotel = async (hotelID) => {
+      try {
+        const response = await getReviewsByHotelID_API(hotelID);
+        if (response.status === HttpStatusCode.Ok) {
+          setHotelReviews(response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    const fetchData = async (hotelID) => {
+      setLoading(true);
+      await getHotelByID(hotelID);
+      await getRoomsInHotel(hotelID);
+      await getReviewsOfHotel(hotelID);
+      setLoading(false);
+    };
+
+    fetchData(hotelID);
+  }, []);
 
   //Animation for the header bar:
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -319,9 +603,20 @@ const HotelDetail = () => {
   const scrollViewRef = useRef(null);
   const bookingSectionRef = useRef(null);
 
-  const onFavoritePress = async () => {
-    //send request to server to update favorite status
-    setIsFavorite(!isFavorite);
+  const onFavoritePress = async (userID, hotelID) => {
+    if (!isFavorite) {
+      const response = await addFavoriteHotelAPI(userID, hotelID);
+      if (response.status === HttpStatusCode.Ok) {
+        setIsFavorite(!isFavorite);
+        await fetchUserFavoriteList();
+      }
+    } else {
+      const response = await removeFavoriteHotelAPI(userID, hotelID);
+      if (response.status === HttpStatusCode.Ok) {
+        setIsFavorite(!isFavorite);
+        await fetchUserFavoriteList();
+      }
+    }
   };
 
   const onBackPress = () => {
@@ -333,30 +628,76 @@ const HotelDetail = () => {
     setRoomFilterSelected(selectedFilter);
   };
 
-  const handleDetailPress = (roomID) => {
+  const handleDetailPress = (roomID, extraOptions) => {
     router.push({
       pathname: "/rooms/[roomID]",
-      params: { roomID: roomID },
-    })
+      params: { roomID: roomID, extraOptions: extraOptions },
+    });
   };
 
-  const handleSelectPress = (roomID) => {
-    //navigate to room detail page
-    setAdditionalModalVisible(true);
+  const handleSelectPress = (
+    roomID,
+    extraOptions,
+    priceInfo,
+    stayPeriod,
+    guests
+  ) => {
+    //adjust the handleAdditionalBookingPress as well
+    //(4)
+    if (extraOptions) {
+      //need to set these states so we can access them inside the additional option modal to place a booking
+      setAdditionalModalVisible(true);
+      setSelectedRoomPriceInfo(priceInfo);
+      setSelectedRoomID(roomID);
+      setStayPeriod(stayPeriod);
+      setGuests(guests);
+    } else {
+      router.push({
+        pathname: "/booking",
+        params: {
+          roomID: roomID,
+          hotelName: hotelInfo?.hotelName,
+          checkinDate: stayPeriod.fromDate,
+          checkoutDate: stayPeriod.toDate,
+          numOfNights: stayPeriod.numOfNights,
+          guestNumber: guests.numOfAdults + guests.numOfChild,
+          extraOptionsName: extraOptions?.optionName,
+          extraOptionsPrice: extraOptions?.optionPrice
+            ? extraOptions?.optionPrice
+            : 0,
+        },
+      });
+    }
   };
 
   const handleViewAllReviewPress = () => {};
 
-  const onAdditionalModalClose = () => {
+  const onAdditionalModalClose = (selectedOption) => {
     setAdditionalModalVisible(false);
+    setSelectedExtraOption(selectedOption);
   };
 
-  const handleAdditionalBookingPress = async (selectedOption) => {
+  const handleAdditionalBookingPress = async (
+    selectedOption,
+    roomID,
+    stayPeriod,
+    guests
+  ) => {
+    //adjust the handleSelectPress as well
     setAdditionalModalVisible(false);
     router.push({
       pathname: "/booking",
-      // params: { selectedOption: selectedOption },
-    })
+      params: {
+        roomID: roomID,
+        hotelName: hotelInfo?.hotelName,
+        checkinDate: stayPeriod.fromDate,
+        checkoutDate: stayPeriod.toDate,
+        numOfNights: stayPeriod.numOfNights,
+        guestNumber: guests.numOfAdults + guests.numOfChild,
+        extraOptionsName: selectedOption?.optionName,
+        extraOptionsPrice: selectedOption?.optionPrice,
+      },
+    });
   };
 
   const onPriceModalClose = () => {
@@ -364,131 +705,222 @@ const HotelDetail = () => {
     setAdditionalModalVisible(true);
   };
 
-  const handlePriceBookingPress = async () => {
-    setPriceModalVisible(false);
-    router.push({
-      pathname: "/booking",
-    });
-  };
+  // const handlePriceBookingPress = async () => {
+  //   setPriceModalVisible(false);
+  // };
 
-  const handleViewPricePress = () => {
+  const handleViewPricePress = (selectedOption) => {
     setAdditionalModalVisible(false);
     setPriceModalVisible(true);
+    setSelectedExtraOption(selectedOption);
+  };
+
+  const handleComparisonPress = async (roomID) => {
+    setComparisonConfirmModalVisible(true);
+    setSelectedComparisonRoomID(roomID);
+  };
+
+  const handleConfirmComparisonPress = async (roomID) => {
+    const response = await addRoomToComparisonListAPI(user.id, roomID);
+    if (response.status === HttpStatusCode.Ok) {
+      setComparisonConfirmModalVisible(false);
+      router.replace({
+        pathname: "/comparison",
+      })
+    }
   };
 
   const handleBookingPress = () => {
     bookingSectionRef.current?.measure((x, y, width, height, pageX, pageY) => {
       scrollViewRef.current?.scrollTo({
         y: pageY - 83, // Offset to account for header
-        animated: true
+        animated: true,
       });
     });
   };
 
   return (
     <View style={styles.container}>
+      <ConfirmActionModal
+        visible={comparisonConfirmModalVisible}
+        title="Thêm vào So sánh?"
+        confirmationText="Bạn có chắc muốn thêm phòng này vào danh sách So sánh phòng?"
+        confirmButtonText="Thêm"
+        onClose={() => setComparisonConfirmModalVisible(false)}
+        onConfirmPress={() =>
+          handleConfirmComparisonPress(selectedComparisonRoomID)
+        }
+      />
       <BookingAdditionalModal
         visible={additionalModalVisible}
-        onClose={() => onAdditionalModalClose()}
+        additionalOptions={hotelInfo?.extraOptions}
+        priceInfo={selectedRoomPriceInfo}
+        numOfNights={stayPeriod?.numOfNights}
+        onClose={(selectedOption) => onAdditionalModalClose(selectedOption)}
         onBookingPress={(selectedOption) =>
-          handleAdditionalBookingPress(selectedOption)
+          handleAdditionalBookingPress(
+            selectedOption,
+            selectedRoomID,
+            stayPeriod,
+            guests
+          )
         }
-        onViewPriceDetailPress={handleViewPricePress}
+        onViewPriceDetailPress={(selectedOption) =>
+          handleViewPricePress(selectedOption)
+        }
       />
       <DetailPriceModal
+        buttonText="Đóng"
+        numOfNights={stayPeriod?.numOfNights}
+        discountedPrice={selectedRoomPriceInfo?.discountedPrice}
+        extraPrice={
+          selectedExtraOption?.optionPrice
+            ? selectedExtraOption?.optionPrice
+            : 0
+        }
+        taxPercentage={selectedRoomPriceInfo?.taxPercentage}
         visible={priceModalVisible}
         onClose={() => onPriceModalClose()}
-        onBookingPress={() => handlePriceBookingPress()}
+        onBookingPress={() => onPriceModalClose()}
       />
-      <Animated.View
-        style={[styles.header_container, { opacity: headerOpacity }]}
-      >
-        <CircleButton
-          Icon={ChevronLeft}
-          onPress={onBackPress}
-          style={styles.header_back_button}
-        />
-        <Text
-          ellipsizeMode="tail"
-          numberOfLines={1}
-          style={styles.header_title_text}
-        >
-          {hotel?.hotelName}
-        </Text>
-      </Animated.View>
-      <CircleButton
-        Icon={ChevronLeft}
-        onPress={onBackPress}
-        style={{ position: "absolute", top: 56, left: 20, zIndex: 2 }}
-      />
-      <Animated.ScrollView
-        ref={scrollViewRef}
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 90 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          {
-            useNativeDriver: true,
-          }
-        )}
-        scrollEventThrottle={16}
-      >
-        <View style={styles.image}>
-          {wallpaperError ? (
-            <NoImage style={{ borderBottomWidth: 1 }} />
-          ) : (
-            <Image
-              style={{ width: "100%", height: "100%" }}
-              source={{
-                uri: hotel?.images[2],
-              }}
-              resizeMode="cover"
-              onError={() => setWallpaperError(true)}
+      {loading ? (
+        <ScreenSpinner />
+      ) : (
+        <>
+          <Animated.View
+            style={[styles.header_container, { opacity: headerOpacity }]}
+          >
+            <CircleButton
+              Icon={ChevronLeft}
+              onPress={onBackPress}
+              style={styles.header_back_button}
             />
-          )}
-        </View>
-        <IntroSection
-          hotelName={hotel?.hotelName}
-          star={hotel?.star}
-          ratingScore={hotel?.ratingScore.toFixed(1)}
-          ratingCategory={hotel?.ratingCategory}
-          numOfReviews={hotel?.numOfReviews}
-          isFavorite={isFavorite}
-          onFavoritePress={() => onFavoritePress()}
-          address={hotel?.address}
-          description={hotel?.description}
-        />
-        <AmenitiesSection
-          amenities={amenities}
-          // onViewAllPress={}
-        />
-        <RoomBookingSection
-          ref={bookingSectionRef}
-          displayedRoom={18}
-          totalRoom={18}
-          rooms={tempRooms}
-          roomFilterSelected={roomFilterSelected}
-          onRoomFilterSelected={(selectedFilter) =>
-            onFilterSelected(selectedFilter)
-          }
-          handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
-          handleSelectPress={(roomID) => handleSelectPress(roomID)} //This is a 4 layer deep function, caution when maintaining
-        />
-        <FeePolicySection />
-        <ReviewSection
-          reviews={reviews}
-          // reviewPoints={reviewPoints}
-          onViewAllReviewPress={() => handleViewAllReviewPress()}
-        />
-      </Animated.ScrollView>
-      <View style={styles.submit_button_container}>
-        <SubmitButton
-          text="Đặt phòng"
-          style={{ width: "95%" }}
-          onPress={handleBookingPress}
-        />
-      </View>
+            <Text
+              ellipsizeMode="tail"
+              numberOfLines={1}
+              style={styles.header_title_text}
+            >
+              {hotelInfo?.hotelName}
+            </Text>
+          </Animated.View>
+          <CircleButton
+            Icon={ChevronLeft}
+            onPress={onBackPress}
+            style={{ position: "absolute", top: 56, left: 20, zIndex: 2 }}
+          />
+          <Animated.ScrollView
+            ref={scrollViewRef}
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 90 }}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              {
+                useNativeDriver: true,
+              }
+            )}
+            scrollEventThrottle={16}
+          >
+            <View style={styles.image}>
+              {wallpaperError ? (
+                <NoImage style={{ borderBottomWidth: 1 }} />
+              ) : (
+                <Image
+                  style={{ width: "100%", height: "100%" }}
+                  source={{
+                    uri: hotelInfo?.images
+                      ? hotelInfo?.images[0]
+                      : "temp_string",
+                  }}
+                  resizeMode="cover"
+                  onError={() => setWallpaperError(true)}
+                />
+              )}
+            </View>
+            <IntroSection
+              hotelName={hotelInfo?.hotelName}
+              star={hotelInfo?.star}
+              ratingScore={
+                hotelInfo?.reviewAverageOverallPoint !== "NaN"
+                  ? hotelInfo?.reviewAverageOverallPoint
+                  : "0.0"
+              }
+              ratingCategory={hotelInfo?.reviewAveragePointCategory}
+              numOfReviews={hotelInfo?.reviewCount}
+              isFavorite={isFavorite}
+              onFavoritePress={() => onFavoritePress(user.id, hotelID)}
+              address={hotelInfo?.address}
+              description={hotelInfo?.description}
+            />
+            <AmenitiesSection
+              amenities={amenities} //hard-coded data here
+              // onViewAllPress={}
+            />
+            <RoomBookingSection
+              ref={bookingSectionRef}
+              rooms={roomsInHotel}
+              displayedRoom={hotelInfo?.roomCount}
+              totalRoom={hotelInfo?.roomCount}
+              fromDate={from}
+              toDate={to}
+              child={numOfChild}
+              adults={numOfAdults}
+              roomFilterSelected={roomFilterSelected}
+              onRoomFilterSelected={(selectedFilter) =>
+                onFilterSelected(selectedFilter)
+              }
+              handleComparisonPress={(roomID) => handleComparisonPress(roomID)} // This is a 4 layer deep function, caution when maintaining
+              handleDetailPress={(roomID) =>
+                handleDetailPress(roomID, hotelInfo?.extraOptions)
+              } //This is a 4 layer deep function, caution when maintaining
+              handleSelectPress={(
+                roomID,
+                priceInfo,
+                stayPeriod,
+                guests,
+                roomName //(3)
+              ) =>
+                handleSelectPress(
+                  roomID,
+                  hotelInfo?.extraOptions,
+                  priceInfo,
+                  stayPeriod,
+                  guests,
+                  roomName
+                )
+              } //This is a 4 layer deep function, caution when maintaining
+            />
+            <FeePolicySection
+              policies={hotelInfo?.policies ? hotelInfo?.policies : ""}
+              optionalFees={
+                hotelInfo?.optionalFees ? hotelInfo?.optionalFees : ""
+              }
+            />
+            <ReviewSection
+              reviews={hotelReviews}
+              reviewCount={hotelInfo?.reviewCount}
+              reviewCategory={hotelInfo?.reviewAveragePointCategory}
+              reviewPoints={{
+                overall: hotelInfo?.reviewAverageOverallPoint?.toFixed(1),
+                cleanliness: hotelInfo?.reviewAverageCleanPoint?.toFixed(1),
+                comfort: hotelInfo?.reviewAverageServicePoint?.toFixed(1),
+                staff: hotelInfo?.reviewAverageStaffPoint?.toFixed(1),
+                facilities: hotelInfo?.reviewAverageFacilityPoint?.toFixed(1),
+                environmentFriendly:
+                  hotelInfo?.reviewAverageEnvironmentPoint?.toFixed(1),
+              }}
+              onViewAllReviewPress={() => handleViewAllReviewPress()}
+            />
+          </Animated.ScrollView>
+          <View style={styles.submit_button_container}>
+            <SubmitButton
+              text="Đặt phòng"
+              style={{ width: "95%" }}
+              onPress={handleBookingPress}
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 };
@@ -518,7 +950,6 @@ const styles = StyleSheet.create({
     right: 0,
     height: 90,
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: "center",
   },
 

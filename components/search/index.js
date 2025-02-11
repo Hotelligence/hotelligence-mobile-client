@@ -17,3 +17,5 @@ export { default as DetailReviewPoint } from "./DetailReviewPoint";
 export { default as CommentDisplay } from "./CommentDisplay";
 export { default as AmenityDetailDisplay } from "./AmenityDetailDisplay";
 export { default as InputField } from "./InputField";
+export { default as SortDropDown } from "./SortDropDown";
+export { default as PriceRangePicker } from "./PriceRangePicker";

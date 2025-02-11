@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, StatusBar, Image } from "react-native";
+import { useState } from "react";
 import { COLOR } from "@/assets/colors/Colors";
 import { BarButton } from "@/components/profile";
+import { ConfirmActionModal } from "@/components/modal";
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
 
@@ -8,17 +10,31 @@ const ProfileScreen = () => {
   const { signOut } = useClerk();
   const { user } = useUser();
 
+  const [modalVisible, setModalVisible] = useState(false);
+
   const handleLogoutPress = async () => {
+    setModalVisible(true);
+  };
+
+  const handleConfirmLogoutPress = async () => {
     try {
       await signOut();
+      setModalVisible(false);
       Linking.openURL(Linking.createURL("/"));
     } catch (err) {
       console.error(JSON.stringify(err, null, 2));
     }
-  };
+  }
 
   return (
     <View style={styles.container}>
+      <ConfirmActionModal
+        visible={modalVisible}
+        title="Đăng xuất?"
+        confirmationText="Bạn có chắc chắn muốn đăng xuất không?"
+        onConfirmPress={handleConfirmLogoutPress}
+        onClose={() => setModalVisible(false)}
+      />
       <StatusBar
         barStyle={"light-content"}
         translucent={true}
@@ -35,11 +51,20 @@ const ProfileScreen = () => {
             source={require("@/assets/images/avatar.png")}
             style={styles.avatar}
           />
-          <Text style={styles.user_name_text}>{`${user.lastName} ${user.firstName}`}</Text>
+          <Text
+            style={styles.user_name_text}
+          >{`${user.lastName} ${user.firstName}`}</Text>
         </View>
       </View>
-      <View style={{ marginTop: 30, paddingHorizontal: 20 }}>
-        <BarButton onPress={() => handleLogoutPress()} color={COLOR.secondary_red_100} iconName="LogOut" text="Đăng xuất" />
+      <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>
+        <BarButton iconName="MessageCircle" text="FAQ" />
+        <BarButton iconName="Info" text="Về chúng tôi" />
+        <BarButton
+          onPress={() => handleLogoutPress()}
+          color={COLOR.secondary_red_100}
+          iconName="LogOut"
+          text="Đăng xuất"
+        />
       </View>
     </View>
   );

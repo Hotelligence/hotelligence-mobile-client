@@ -5,26 +5,13 @@ import GeneralHeader from "@/components/GeneralHeader";
 import { SubmitButton, SecondaryButton } from "@/components/search";
 import { useRouter, useLocalSearchParams } from "expo-router";
 
-const BookingStatus = () => {
+const PaymentStatus = () => {
   const router = useRouter();
   const { isSuccess } = useLocalSearchParams();
   const bookingSuccess = isSuccess === "true";
-  const paymentMethod = "online"; //adjust this later (cash or online)
 
   const onBackPress = () => {
     router.back();
-  };
-
-  const handleNextActionPress = () => {
-    //go to payment screen if success, else go back to booking screen
-    if (bookingSuccess) {
-      router.push({
-        pathname: "booking/payment",
-        params: { paymentMethod: paymentMethod },
-      });
-    } else {
-      router.dismissAll();
-    }
   };
 
   const handleBackToHomePress = () => {
@@ -35,21 +22,21 @@ const BookingStatus = () => {
     <View style={styles.container}>
       <GeneralHeader
         onBackPress={onBackPress}
-        title={bookingSuccess ? "Đặt phòng thành công" : "Đặt phòng thất bại"}
+        title={bookingSuccess ? "Thanh toán thành công" : "Thanh toán thất bại"}
       />
       <View style={{ paddingHorizontal: 20, alignItems: "center", paddingTop: 100, }}>
         <Text style={styles.title_text}>
-          {bookingSuccess ? "Xin chúc mừng!" : "Lỗi khi đặt phòng!"}
+          {bookingSuccess ? "Thanh toán thành công!" : "Lỗi khi thanh toán!"}
         </Text>
         {bookingSuccess && (
           <Text style={[styles.title_text, { fontSize: 16, marginTop: 20 }]}>
-            Chúc mừng quý khách đã đặt phòng thành công!
+            Chúc mừng quý khách đã thanh toán thành công!
           </Text>
         )}
         <Text style={styles.content_text}>
           {bookingSuccess
-            ? "Quý khách vui lòng quay về trang Lịch sử đặt phòng để theo dõi trạng thái đặt phòng cũng như thanh toán (nếu lựa chọn thanh toán online)"
-            : "Đã có lỗi xảy ra khi đặt phòng. Quý khách vui lòng thử lại sau giây lát."}
+            ? "Quý khách vui lòng theo dõi và hoàn thành các thủ tục còn lại (nếu có) theo hướng dẫn để có được trải nghiệm tốt nhất."
+            : "Đã có lỗi xảy ra khi thanh toán. Quý khách vui lòng thử lại sau giây lát."}
         </Text>
         {bookingSuccess && (
           <Text style={styles.content_text}>
@@ -57,18 +44,11 @@ const BookingStatus = () => {
             <Text style={{ fontWeight: 500 }}>Hotelligence</Text>.
           </Text>
         )}
-        {/* <SubmitButton
-          text={bookingSuccess ? "Thanh toán" : "Thử lại"}
-          onPress={() => handleNextActionPress()}
-          style={{ marginTop: 40, width: "40%" }}
-        /> */}
-        {bookingSuccess && (
-          <SecondaryButton
-            text="Quay về Trang chủ"
-            onPress={() => handleBackToHomePress()}
-            style={{ marginTop: 20, width: "60%" }}
-          />
-        )}
+        <SecondaryButton
+          text="Quay về Trang chủ"
+          onPress={() => handleBackToHomePress()}
+          style={{ marginTop: 20, width: "60%" }}
+        />
       </View>
     </View>
   );
@@ -97,4 +77,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BookingStatus;
+export default PaymentStatus;

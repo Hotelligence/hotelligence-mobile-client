@@ -1,12 +1,46 @@
 import { StyleSheet, Text, View, Pressable, Image } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { COLOR } from "@/assets/colors/Colors";
 import GeneralHeader from "@/components/GeneralHeader";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { SecondaryButton, } from "@/components/search";
+import { SecondaryButton } from "@/components/search";
+import WebView from "react-native-webview";
+import { submitPaymentAPI, updateBookingStatusAPI } from "@/api/BookingServices";
+import { HttpStatusCode } from "axios";
+import * as Linking from "expo-linking";
 
 const PaymentEWallet = () => {
   const router = useRouter();
+  const { bookingID, paymentAmount } = useLocalSearchParams();
+  console.log(bookingID);
+  console.log(paymentAmount);
+
+  // const [paymentUrl, setPaymentUrl] = useState(null);
+
+  // const handleDeepLink = (event) => {
+  //   const data = Linking.parse(event.url);
+  //   if (data.hostname === "payment" && data.path === "/callback") {
+  //     const status = data.queryParams.status;
+  //     if (status === "success") {
+  //       console.log("Payment success");
+  //       router.replace({
+  //         pathname: "/booking/payment-status",
+  //         params: { isSuccess: true },
+  //       });
+  //     } else {
+  //       console.log("Payment failed");
+  //       router.replace({
+  //         pathname: "/booking/payment-status",
+  //         params: { isSuccess: false },
+  //       });
+  //     }
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const subscription = Linking.addEventListener("url", handleDeepLink);
+  //   return () => subscription.remove();
+  // }, []);
 
   const onBackPress = () => {
     router.back();
@@ -16,7 +50,19 @@ const PaymentEWallet = () => {
     router.replace("/");
   };
 
-  const handleVNPayPress = () => {};
+  const handleVNPayPress = async (bookingID, paymentAmount) => {
+    console.log("Pressed");
+    const response = await submitPaymentAPI(bookingID, paymentAmount);
+    if (response.status === HttpStatusCode.Ok) {
+      const paymentUrl = response.data;
+      await Linking.openURL(paymentUrl);
+      await updateBookingStatusAPI(bookingID, "Hoàn tất");
+      router.push({
+        pathname: "/booking/payment-status",
+        params: { isSuccess: true },
+      })
+    }
+  };
 
   const handleMoMoPress = () => {};
 
@@ -29,7 +75,10 @@ const PaymentEWallet = () => {
           Quý khách vui lòng chọn Ví điện tử
         </Text>
         <View style={styles.payment_select_container}>
-          <Pressable style={styles.button} onPress={handleVNPayPress}>
+          <Pressable
+            style={styles.button}
+            onPress={() => handleVNPayPress(bookingID, paymentAmount)}
+          >
             <Text
               style={[
                 styles.content_text,
@@ -43,7 +92,7 @@ const PaymentEWallet = () => {
               source={require("@/assets/images/VNPay_Logo.png")}
             />
           </Pressable>
-          <Pressable style={styles.button} onPress={handleMoMoPress}>
+          {/* <Pressable style={styles.button} onPress={handleMoMoPress}>
             <Text
               style={[
                 styles.content_text,
@@ -56,7 +105,7 @@ const PaymentEWallet = () => {
               style={styles.logo}
               source={require("@/assets/images/MoMo_Logo.png")}
             />
-          </Pressable>
+          </Pressable> */}
         </View>
         <SecondaryButton
           text="Quay về Trang chủ"

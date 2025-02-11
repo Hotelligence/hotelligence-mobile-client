@@ -3,8 +3,8 @@ import { COLOR } from "@/assets/colors/Colors";
 import { useState } from "react";
 import { DiscountTag, RatingScoreTag } from ".";
 import { formatVND } from "@/utils/ValueConverter";
-import { NoImage, SubmitButton } from ".";
-import { ChevronRight } from "lucide-react-native";  
+import { NoImage, SubmitButton, CircleButton } from ".";
+import { ChevronRight, BookCopy } from "lucide-react-native";  
 
 const RoomDetailCard = ({
   roomName,
@@ -17,6 +17,7 @@ const RoomDetailCard = ({
   style,
   onDetailPress,
   onSelectPress,
+  onComparisonPress,
 }) => {
   const [imageError, setImageError] = useState(false);
 
@@ -39,22 +40,38 @@ const RoomDetailCard = ({
       </View>
       <View style={styles.content_container}>
         <View style={styles.content_top_container}>
-          <Text
-            ellipsizeMode="tail"
-            numberOfLines={1}
-            style={styles.room_name_text}
-          >
-            {roomName}
-          </Text>
-          <Pressable style={{ flexDirection: "row", alignItems: "center", marginTop: 15, }} onPress={onDetailPress}>
-            <Text style={styles.view_detail_text}>Xem chi tiết phòng</Text>
-            <ChevronRight
-              size={16}
-              color={COLOR.primary_gold_120}
-              strokeWidth={2.25}
-              style={{ marginTop: 2, }}
+          <View style={{ flexDirection: "row", width: "100%" }}>
+            <View style={{ width: "85%" }}>
+              <Text
+                ellipsizeMode="tail"
+                numberOfLines={1}
+                style={styles.room_name_text}
+              >
+                {roomName}
+              </Text>
+              <Pressable
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 15,
+                }}
+                onPress={onDetailPress}
+              >
+                <Text style={styles.view_detail_text}>Xem chi tiết phòng</Text>
+                <ChevronRight
+                  size={16}
+                  color={COLOR.primary_gold_120}
+                  strokeWidth={2.25}
+                  style={{ marginTop: 2 }}
+                />
+              </Pressable>
+            </View>
+            <CircleButton
+              Icon={BookCopy}
+              onPress={onComparisonPress}
+              style={{ marginStart: 5, }}
             />
-          </Pressable>
+          </View>
         </View>
         <View style={styles.content_bottom_container}>
           {discountPercentage && discountedPrice ? (
@@ -76,7 +93,11 @@ const RoomDetailCard = ({
             Tổng {formatVND(totalPrice * numOfNights)}đ bao gồm thuế
           </Text>
         </View>
-        <SubmitButton text="Chọn" onPress={onSelectPress} style={{ width: "50%", marginStart: "auto", marginTop: 15, }} />
+        <SubmitButton
+          text="Chọn"
+          onPress={onSelectPress}
+          style={{ width: "50%", marginStart: "auto", marginTop: 15 }}
+        />
       </View>
     </View>
   );

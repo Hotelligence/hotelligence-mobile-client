@@ -4,6 +4,10 @@ const endpoints = {
   GET_ROOM: "/rooms/getRoomById",
   GET_ROOM_IN_HOTEL: "/rooms/getRoomsInHotel",
   REVIEW_ROOM: "/reviews/writeReview",
+  GET_ROOM_COMPARISON: "/comparisons/getComparisonListByUserId",
+  ADD_ROOM_COMPARISON: "/comparisons/addToComparisonList",
+  REMOVE_ROOM_COMPARISON: "/comparisons/removeFromComparisonList",
+  REMOVE_ALL_COMPARISON: "/comparisons/removeAllRoomsFromComparisonList",
 };
 
 export const getRoomByID_API = async (roomID) => {
@@ -47,5 +51,41 @@ export const reviewRoomAPI = async (roomID, hotelID, reviewInfo) => {
     return response;
   } catch (error) {
     console.log("Error in reviewRoomAPI: ", error);
+  }
+}
+
+export const getRoomComparisonListAPI = async (userID) => {
+  try {
+    const response = await MyAxios.get(`${endpoints.GET_ROOM_COMPARISON}/${userID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in getRoomComparisonListAPI: ", error);
+  }
+}
+
+export const addRoomToComparisonListAPI = async (userID, roomID) => {
+  try {
+    const response = await MyAxios.post(`${endpoints.ADD_ROOM_COMPARISON}/${userID}/${roomID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in addRoomToComparisonListAPI: ", error);
+  }
+}
+
+export const removeRoomFromComparisonListAPI = async (userID, roomID) => {
+  try {
+    const response = await MyAxios.post(`${endpoints.REMOVE_ROOM_COMPARISON}/${userID}/${roomID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in removeRoomFromComparisonListAPI: ", error);
+  }
+}
+
+export const removeAllRoomsFromComparisonListAPI = async (userID) => {
+  try {
+    const response = await MyAxios.post(`${endpoints.REMOVE_ALL_COMPARISON}/${userID}`);
+    return response;
+  } catch (error) {
+    console.log("Error in removeAllRoomsFromComparisonListAPI: ", error);
   }
 }

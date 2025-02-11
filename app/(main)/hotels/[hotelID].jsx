@@ -22,7 +22,11 @@ import {
   GuestNumberPicker,
 } from "@/components/search";
 import ScreenSpinner from "@/components/ScreenSpinner";
-import { BookingAdditionalModal, DetailPriceModal } from "@/components/modal";
+import {
+  BookingAdditionalModal,
+  DetailPriceModal,
+  ConfirmActionModal,
+} from "@/components/modal";
 import { FavoriteButton } from "@/components/home";
 import { amenities } from "@/assets/TempData"; //Delete later
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -38,7 +42,7 @@ import {
   addFavoriteHotelAPI,
   removeFavoriteHotelAPI,
 } from "@/api/HotelServices";
-import { getRoomsInHotelAPI } from "@/api/RoomServices";
+import { getRoomsInHotelAPI, addRoomToComparisonListAPI } from "@/api/RoomServices";
 import { getReviewsByHotelID_API } from "@/api/ReviewServices";
 import { useUser } from "@clerk/clerk-expo";
 import { useAppContext } from "@/contexts/AppContext";
@@ -166,6 +170,7 @@ const RoomBookingSection = forwardRef(
       adults,
       handleDetailPress,
       handleSelectPress, //(2)
+      handleComparisonPress,
     },
     ref
   ) => {
@@ -342,6 +347,7 @@ const RoomBookingSection = forwardRef(
               // extraFee={room?.extraFee}
               totalPrice={room?.totalPrice}
               numOfNights={numOfNights}
+              onComparisonPress={() => handleComparisonPress(room?.id)}
               onDetailPress={() => handleDetailPress(room?.id)}
               onSelectPress={() =>
                 handleSelectPress(
@@ -512,7 +518,6 @@ const HotelDetail = () => {
     useLocalSearchParams();
   const { userFavoriteList, fetchUserFavoriteList } = useAppContext();
   const userFavorite = userFavoriteList.some((item) => item?.id === hotelID);
-  console.log(hotelID);
 
   const from = fromDate ? new Date(fromDate) : null; //from date passed from the prev screen
   const to = toDate ? new Date(toDate) : null; //to date passed from the prev screen
@@ -533,9 +538,13 @@ const HotelDetail = () => {
   const [stayPeriod, setStayPeriod] = useState(null);
   const [guests, setGuests] = useState(null);
 
+  const [selectedComparisonRoomID, setSelectedComparisonRoomID] = useState("");
+
   //Modal visibility states
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
+  const [comparisonConfirmModalVisible, setComparisonConfirmModalVisible] =
+    useState(false);
 
   useEffect(() => {
     const getHotelByID = async (hotelID) => {
@@ -595,15 +604,15 @@ const HotelDetail = () => {
   const bookingSectionRef = useRef(null);
 
   const onFavoritePress = async (userID, hotelID) => {
-    if(!isFavorite) {
+    if (!isFavorite) {
       const response = await addFavoriteHotelAPI(userID, hotelID);
-      if(response.status === HttpStatusCode.Ok){
+      if (response.status === HttpStatusCode.Ok) {
         setIsFavorite(!isFavorite);
         await fetchUserFavoriteList();
       }
-    } else{
+    } else {
       const response = await removeFavoriteHotelAPI(userID, hotelID);
-      if(response.status === HttpStatusCode.Ok){
+      if (response.status === HttpStatusCode.Ok) {
         setIsFavorite(!isFavorite);
         await fetchUserFavoriteList();
       }
@@ -706,6 +715,21 @@ const HotelDetail = () => {
     setSelectedExtraOption(selectedOption);
   };
 
+  const handleComparisonPress = async (roomID) => {
+    setComparisonConfirmModalVisible(true);
+    setSelectedComparisonRoomID(roomID);
+  };
+
+  const handleConfirmComparisonPress = async (roomID) => {
+    const response = await addRoomToComparisonListAPI(user.id, roomID);
+    if (response.status === HttpStatusCode.Ok) {
+      setComparisonConfirmModalVisible(false);
+      router.replace({
+        pathname: "/comparison",
+      })
+    }
+  };
+
   const handleBookingPress = () => {
     bookingSectionRef.current?.measure((x, y, width, height, pageX, pageY) => {
       scrollViewRef.current?.scrollTo({
@@ -717,6 +741,16 @@ const HotelDetail = () => {
 
   return (
     <View style={styles.container}>
+      <ConfirmActionModal
+        visible={comparisonConfirmModalVisible}
+        title="Thêm vào So sánh?"
+        confirmationText="Bạn có chắc muốn thêm phòng này vào danh sách So sánh phòng?"
+        confirmButtonText="Thêm"
+        onClose={() => setComparisonConfirmModalVisible(false)}
+        onConfirmPress={() =>
+          handleConfirmComparisonPress(selectedComparisonRoomID)
+        }
+      />
       <BookingAdditionalModal
         visible={additionalModalVisible}
         additionalOptions={hotelInfo?.extraOptions}
@@ -794,7 +828,9 @@ const HotelDetail = () => {
                 <Image
                   style={{ width: "100%", height: "100%" }}
                   source={{
-                    uri: hotelInfo?.images ? hotelInfo?.images[0] : "temp_string",
+                    uri: hotelInfo?.images
+                      ? hotelInfo?.images[0]
+                      : "temp_string",
                   }}
                   resizeMode="cover"
                   onError={() => setWallpaperError(true)}
@@ -833,6 +869,7 @@ const HotelDetail = () => {
               onRoomFilterSelected={(selectedFilter) =>
                 onFilterSelected(selectedFilter)
               }
+              handleComparisonPress={(roomID) => handleComparisonPress(roomID)} // This is a 4 layer deep function, caution when maintaining
               handleDetailPress={(roomID) =>
                 handleDetailPress(roomID, hotelInfo?.extraOptions)
               } //This is a 4 layer deep function, caution when maintaining

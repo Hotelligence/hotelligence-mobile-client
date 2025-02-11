@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,16 +6,75 @@ import {
   ScrollView,
   Pressable,
   Image,
+  RefreshControl,
+  StatusBar,
 } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { Plus } from "lucide-react-native";
-import { rooms } from "@/assets/TempData";
 import { formatVND } from "@/utils/ValueConverter";
 import { NoImage, CircleButton } from "@/components/search";
-import { X } from "lucide-react-native";
+import { X, Trash2 } from "lucide-react-native";
+import {
+  getRoomComparisonListAPI,
+  removeRoomFromComparisonListAPI,
+  removeAllRoomsFromComparisonListAPI,
+} from "@/api/RoomServices";
+import { HttpStatusCode } from "axios";
+import { useUser } from "@clerk/clerk-expo";
+import ScreenSpinner from "@/components/ScreenSpinner";
+import { useRouter } from "expo-router";
 
 const ComparisonScreen = () => {
-  const [compareRooms, setCompareRooms] = useState(rooms.slice(0, 2));
+  const { user } = useUser();
+  const router = useRouter();
+
+  const [compareRooms, setCompareRooms] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const fetchComparisonList = async (userID) => {
+    setLoading(true);
+    const response = await getRoomComparisonListAPI(userID);
+    if (response.status === HttpStatusCode.Ok) {
+      if (response.data) {
+        setCompareRooms(response.data.comparedRooms);
+      }
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchComparisonList(user.id);
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchComparisonList(user.id);
+    setRefreshing(false);
+  };
+
+  const onAddRoomPress = (hotelID) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    router.push({
+      pathname: "/hotels/[hotelID]",
+      params: {
+        hotelID: hotelID,
+        fromDate: new Date(),
+        toDate: tomorrow,
+        numOfAdults: 1,
+        numOfChild: 0,
+      },
+    });
+  }
+
+  const onDeleteAllPress = async (userID) => {
+    const response = await removeAllRoomsFromComparisonListAPI(userID);
+    if (response.status === HttpStatusCode.Ok) {
+      setCompareRooms([]);
+    }
+  }
 
   const categories = [
     "Tên phòng",
@@ -33,6 +92,15 @@ const ComparisonScreen = () => {
   const TableColumn = ({ room, index }) => {
     const [imageError, setImageError] = useState(false);
 
+    const handleRemoveRoomPress = async (roomID) => {
+      const response = await removeRoomFromComparisonListAPI(user.id, roomID);
+      if (response.status === HttpStatusCode.Ok) {
+        console.log("Removed");
+        setCompareRooms((prev) => prev.filter((_, i) => i !== index));
+        // setCompareRooms(compareRooms.filter((room) => room.id !== roomID));
+      }
+    }
+
     return (
       <View style={styles.room_column}>
         <View style={{ height: 120, paddingTop: 10 }}>
@@ -40,9 +108,7 @@ const ComparisonScreen = () => {
             Icon={X}
             size={20}
             style={styles.delete_button}
-            onPress={() => {
-              setCompareRooms((prev) => prev.filter((_, i) => i !== index));
-            }}
+            onPress={() => handleRemoveRoomPress(room.id)}
           />
           {imageError ? (
             <NoImage style={styles.room_image} />
@@ -94,13 +160,44 @@ const ComparisonScreen = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <>
+        <StatusBar
+          barStyle={"light-content"}
+          translucent={true}
+          backgroundColor="transparent"
+        />
+        <ScreenSpinner />
+      </>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={COLOR.primary_gold_100}
+        />
+      }
+    >
       <Text style={styles.title}>So sánh phòng</Text>
       {/* Categories column */}
       {compareRooms.length > 0 ? (
         <View style={{ flexDirection: "row" }}>
           <View style={styles.categories_column}>
+            <View style={{ height: 120, alignItems: "center", justifyContent: "center"}}>
+              <CircleButton
+                Icon={Trash2}
+                color={COLOR.tertiary_red_100}
+                onPress={() => onDeleteAllPress(user.id)}
+              />
+              <Text style={[styles.cell_text, { color: COLOR.tertiary_red_100, marginTop: 5, }]}>Xóa tất cả</Text>
+            </View>
             {categories.map((category, index) => (
               <View
                 key={index}
@@ -120,17 +217,15 @@ const ComparisonScreen = () => {
           >
             <View style={styles.table_container}>
               {/* Room columns */}
-              {compareRooms.slice(0, 2).map((room, index) => (
+              {compareRooms.map((room, index) => (
                 <TableColumn key={index} room={room} index={index} />
               ))}
 
               {/* Add room button */}
-              {true && (
+              {compareRooms.length < 3 && (
                 <Pressable
                   style={styles.add_button}
-                  onPress={() => {
-                    /* Navigate to room selection */
-                  }}
+                  onPress={() => onAddRoomPress(compareRooms[0].hotelId)}
                 >
                   <Plus size={24} color={COLOR.primary_blue_100} />
                   <Text style={styles.add_button_text}>Thêm phòng</Text>
@@ -156,14 +251,9 @@ const ComparisonScreen = () => {
             }}
           >
             Chưa có phòng nào được thêm để{" "}
-            <Text style={{ fontWeight: 600, }}>
-              So sánh
-            </Text>
-            , vui lòng quay về{" "}
-            <Text style={{ fontWeight: 600, }}>
-              Trang chủ
-            </Text>{" "}
-            và bắt đầu tìm kiếm một phòng khách sạn để sử dụng tính năng này
+            <Text style={{ fontWeight: 600 }}>So sánh</Text>, vui lòng quay về{" "}
+            <Text style={{ fontWeight: 600 }}>Trang chủ</Text> và bắt đầu tìm
+            kiếm một phòng khách sạn để sử dụng tính năng này
           </Text>
         </View>
       )}
@@ -192,7 +282,6 @@ const styles = StyleSheet.create({
 
   categories_column: {
     width: 130,
-    marginTop: 120,
   },
 
   room_column: {

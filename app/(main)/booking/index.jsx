@@ -13,15 +13,16 @@ import BouncyCheckbox from "react-native-bouncy-checkbox";
 import GeneralHeader from "@/components/GeneralHeader";
 import { InputField, SubmitButton } from "@/components/search";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useUser, useSignUp } from "@clerk/clerk-expo";
+import { useUser, } from "@clerk/clerk-expo";
 import {
   formatVND,
   dateObjectToFullDateTime,
   dateObjectToDateTime,
+  dateObjectToVNTimeISOString,
 } from "@/utils/ValueConverter";
 import { Check } from "lucide-react-native";
 import { getRoomByID_API } from "@/api/RoomServices";
-import { placeBookingAPI } from "@/api/BookingServices";
+import { initiateBookingAPI } from "@/api/BookingServices";
 import { HttpStatusCode } from "axios";
 import ScreenSpinner from "@/components/ScreenSpinner";
 
@@ -29,12 +30,16 @@ const BookingInfoSection = ({
   hotelName,
   checkinTime,
   checkoutTime,
+  numOfNights,
   numOfGuest,
   roomName,
+  extraOptionsPrice,
   originPrice,
   discountedPrice,
-  totalPrice,
+  taxFee,
+  paymentAmount,
 }) => {
+
   return (
     <View style={styles.booking_info_container}>
       <Text style={styles.hotel_name_text}>{hotelName}</Text>
@@ -81,7 +86,7 @@ const BookingInfoSection = ({
           style={[styles.content_text, { flex: 2, marginStart: 5 }]}
           numberOfLines={2}
         >
-          {numOfGuest} khách
+          {numOfGuest} khách, {numOfNights} đêm
         </Text>
       </View>
       <View style={styles.divider} />
@@ -100,9 +105,11 @@ const BookingInfoSection = ({
           marginVertical: 5,
         }}
       >
-        <Text style={[styles.label_text, { flex: 1 }]}>Giá gốc</Text>
+        <Text style={[styles.label_text, { flex: 1.2 }]}>
+          Giá phòng ({numOfNights} đêm + phụ phí)
+        </Text>
         <Text style={[styles.content_text, { textAlign: "right", flex: 2 }]}>
-          {formatVND(originPrice)}đ
+          {formatVND((originPrice + extraOptionsPrice) * numOfNights)}đ
         </Text>
       </View>
       <View
@@ -112,9 +119,9 @@ const BookingInfoSection = ({
           marginVertical: 5,
         }}
       >
-        <Text style={[styles.label_text, { flex: 1 }]}>Giá đã giảm</Text>
+        <Text style={[styles.label_text, { flex: 1 }]}>Giảm giá</Text>
         <Text style={[styles.content_text, { textAlign: "right", flex: 2 }]}>
-          -{formatVND(originPrice - discountedPrice)}đ
+          - {formatVND((originPrice - discountedPrice) * numOfNights)}đ
         </Text>
       </View>
       <View
@@ -124,9 +131,9 @@ const BookingInfoSection = ({
           marginVertical: 5,
         }}
       >
-        <Text style={[styles.label_text, { flex: 1 }]}>Thuế & Phí</Text>
+        <Text style={[styles.label_text, { flex: 1 }]}>Thuế</Text>
         <Text style={[styles.content_text, { textAlign: "right", flex: 2 }]}>
-          {formatVND(totalPrice - discountedPrice)}đ
+          {formatVND(taxFee)}đ
         </Text>
       </View>
       <View
@@ -139,7 +146,7 @@ const BookingInfoSection = ({
       >
         <Text style={[styles.label_text, { flex: 1 }]}>Tổng giá</Text>
         <Text style={[styles.total_price_text, { textAlign: "right" }]}>
-          {formatVND(totalPrice)}đ
+          {formatVND(paymentAmount)}đ
         </Text>
       </View>
     </View>
@@ -416,8 +423,10 @@ const BookingScreen = () => {
     hotelName,
     checkinDate,
     checkoutDate,
+    numOfNights,
     guestNumber,
     extraOptionsName,
+    extraOptionsPrice,
   } = useLocalSearchParams();
 
   const [selectedOption, setSelectedOption] = useState("0");
@@ -437,6 +446,12 @@ const BookingScreen = () => {
   //Other states
   const [generalErrorMessage, setGeneralErrorMessage] = useState(" ");
   const [buttonLoading, setButtonLoading] = useState(false);
+
+  const taxFee =
+    ((roomInfo?.discountedPrice + parseInt(extraOptionsPrice)) * numOfNights) /
+    roomInfo?.taxPercentage;
+  const paymentAmount =
+    (roomInfo?.discountedPrice + parseInt(extraOptionsPrice)) * numOfNights + taxFee;
 
   useEffect(() => {
     const getRoomInfo = async (roomID) => {
@@ -493,31 +508,29 @@ const BookingScreen = () => {
       setButtonLoading(false);
     } else {
       try {
-        const bookingInfo = {
-          userID: user.id,
-          hotelID: roomInfo?.hotelId,
-          roomID: roomInfo?.id,
-          roomName: roomInfo?.roomName,
-          fullName: fullName,
-          email: email,
-          phoneNumber: phoneNumber,
-          paymentMethod: selectedOption === "0" ? "offline" : "online",
-          bookingDate: new Date().toISOString(),
-          checkinDate: new Date(checkinDate).toISOString(),
-          checkoutDate: new Date(checkoutDate).toISOString(),
-          cancelDue: cancelDue.toISOString(),
-          unCancelDue: unCancelDue.toISOString(),
-        };
-
-        const response = await placeBookingAPI(bookingInfo);
-        if (response.status === HttpStatusCode.Created) {
+        const response = await initiateBookingAPI(email);
+        if(response.status === HttpStatusCode.Created) {
           router.replace({
-            pathname: "/booking/booking-status",
+            pathname: "/booking/booking-confirmation",
             params: {
-              isSuccess: true,
+                userID: user.id,
+                hotelID: roomInfo?.hotelId,
+                roomID: roomInfo?.id,
+                roomName: roomInfo?.roomName,
+                fullName: fullName,
+                email: email,
+                phoneNumber: phoneNumber,
+                paymentMethod: selectedOption === "0" ? "offline" : "online",
+                paymentAmount: paymentAmount,
+                bookingDate: dateObjectToVNTimeISOString(new Date()),
+                checkinDate: dateObjectToVNTimeISOString(new Date(checkinDate)),
+                checkoutDate: dateObjectToVNTimeISOString(new Date(checkoutDate)),
+                cancelDue: dateObjectToVNTimeISOString(cancelDue),
+                unCancelDue: dateObjectToVNTimeISOString(unCancelDue),
             },
           });
         }
+
       } catch (err) {
         console.log("Error in handleConfirmBookingPress: ", err);
         setGeneralErrorMessage("Đã xảy ra lỗi, vui lòng thử lại sau");
@@ -545,11 +558,16 @@ const BookingScreen = () => {
             hotelName={hotelName}
             checkinTime={new Date(checkinDate)}
             checkoutTime={new Date(checkoutDate)}
+            numOfNights={numOfNights}
             numOfGuest={guestNumber}
             roomName={roomInfo?.roomName}
             originPrice={roomInfo?.originPrice}
             discountedPrice={roomInfo?.discountedPrice}
             totalPrice={roomInfo?.totalPrice}
+            extraOptionsPrice={parseInt(extraOptionsPrice)}
+            taxPercentage={roomInfo?.taxPercentage}
+            taxFee={taxFee}
+            paymentAmount={paymentAmount}
           />
           <FirstStepSection
             fullName={fullName}

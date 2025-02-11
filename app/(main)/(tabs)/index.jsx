@@ -42,7 +42,7 @@ const HomeScreen = () => {
 
   const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
     useState(false);
-  const [numOfAdult, setNumOfAdult] = useState(0);
+  const [numOfAdult, setNumOfAdult] = useState(1);
   const [numOfChild, setNumOfChild] = useState(0);
 
   useEffect(() => {

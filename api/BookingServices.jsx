@@ -1,15 +1,25 @@
 import MyAxios from "@/utils/MyAxios";
 
 const endpoints = {
+  INITIATE_BOOKING: "/bookings/initiateBooking",
   PLACE_BOOKING: "/bookings/placeBooking",
   GET_USER_BOOKING: "/bookings/getBookingsByUserId",
   CANCEL_BOOKING: "/bookings/cancelBooking",
 };
 
-export const placeBookingAPI = async (bookingInfo) => {
+export const initiateBookingAPI = async (email) => {
+  try {
+    const response = await MyAxios.post(endpoints.INITIATE_BOOKING, { email: email });
+    return response;
+  } catch (error) {
+    console.log("Error in initiateBookingAPI: ", error);
+  }
+};
+
+export const placeBookingAPI = async (bookingInfo, otpCode) => {
   try {
     const response = await MyAxios.post(
-      `${endpoints.PLACE_BOOKING}/${bookingInfo.roomID}`,
+      `${endpoints.PLACE_BOOKING}/${bookingInfo.roomID}/${otpCode}`,
       {
         userId: bookingInfo.userID,
         hotelId: bookingInfo.hotelID,
@@ -18,6 +28,7 @@ export const placeBookingAPI = async (bookingInfo) => {
         email: bookingInfo.email,
         phoneNumber: bookingInfo.phoneNumber,
         paymentMethod: bookingInfo.paymentMethod,
+        paymentAmount: bookingInfo.paymentAmount,
         bookingDate: bookingInfo.bookingDate,
         checkinDate: bookingInfo.checkinDate,
         checkoutDate: bookingInfo.checkoutDate,

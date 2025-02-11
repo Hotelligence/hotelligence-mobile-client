@@ -169,11 +169,20 @@ const RoomBookingSection = forwardRef(
     const [selectedFromDate, setSelectedFromDate] = useState(fromDate);
     const [toDatePickerVisible, setToDatePickerVisible] = useState(false);
     const [selectedToDate, setSelectedToDate] = useState(toDate);
+    const [numOfNights, setNumOfNights] = useState();
 
     const [guestNumberPickerVisible, setGuestNumberPickerVisible] =
       useState(false);
     const [numOfAdult, setNumOfAdult] = useState(parseInt(adults));
     const [numOfChild, setNumOfChild] = useState(parseInt(child));
+
+    useEffect(() => {
+      if (selectedFromDate && selectedToDate) {
+        const diffTime = Math.abs(selectedToDate - selectedFromDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        setNumOfNights(diffDays);
+      }
+    }, [selectedFromDate, selectedToDate])
 
     const handleOutsideModalPress = (adults, children) => {
       setNumOfAdult(adults);
@@ -328,6 +337,7 @@ const RoomBookingSection = forwardRef(
               // taxPrice={room?.taxPrice}
               // extraFee={room?.extraFee}
               totalPrice={room?.totalPrice}
+              numOfNights={numOfNights}
               onDetailPress={() => handleDetailPress(room?.id)}
               onSelectPress={() =>
                 handleSelectPress(
@@ -338,8 +348,9 @@ const RoomBookingSection = forwardRef(
                     discountedPrice: room?.discountedPrice,
                     discountPercentage: room?.discountPercentage,
                     totalPrice: room?.totalPrice,
+                    taxPercentage: room?.taxPercentage,
                   },
-                  { fromDate: selectedFromDate, toDate: selectedToDate },
+                  { fromDate: selectedFromDate, toDate: selectedToDate, numOfNights: numOfNights },
                   { numOfAdults: numOfAdult, numOfChild: numOfChild },
                 )
               }
@@ -506,13 +517,15 @@ const HotelDetail = () => {
   const [roomFilterSelected, setRoomFilterSelected] = useState(0);
   const [selectedRoomPriceInfo, setSelectedRoomPriceInfo] = useState(null);
   const [selectedRoomID, setSelectedRoomID] = useState(null);
+  const [selectedExtraOption, setSelectedExtraOption] = useState(null);
   const [stayPeriod, setStayPeriod] = useState(null);
   const [guests, setGuests] = useState(null);
+  
 
   //Modal visibility states
   const [additionalModalVisible, setAdditionalModalVisible] = useState(false);
   const [priceModalVisible, setPriceModalVisible] = useState(false);
-
+    
   useEffect(() => {
     const getHotelByID = async (hotelID) => {
       try {
@@ -584,16 +597,18 @@ const HotelDetail = () => {
     setRoomFilterSelected(selectedFilter);
   };
 
-  const handleDetailPress = (roomID) => {
+  const handleDetailPress = (roomID, extraOptions) => {
     router.push({
       pathname: "/rooms/[roomID]",
-      params: { roomID: roomID },
+      params: { roomID: roomID, extraOptions: extraOptions },
     });
   };
 
   const handleSelectPress = (roomID, extraOptions, priceInfo, stayPeriod, guests) => {
+    //adjust the handleAdditionalBookingPress as well
     //(4)
     if (extraOptions) {
+      //need to set these states so we can access them inside the additional option modal to place a booking
       setAdditionalModalVisible(true);
       setSelectedRoomPriceInfo(priceInfo);
       setSelectedRoomID(roomID);
@@ -607,8 +622,10 @@ const HotelDetail = () => {
           hotelName: hotelInfo?.hotelName,
           checkinDate: stayPeriod.fromDate,
           checkoutDate: stayPeriod.toDate,
+          numOfNights: stayPeriod.numOfNights,
           guestNumber: guests.numOfAdults + guests.numOfChild,
           extraOptionsName: extraOptions?.optionName,
+          extraOptionsPrice: extraOptions?.optionPrice ? extraOptions?.optionPrice : 0,
         },
       });
     }
@@ -616,11 +633,13 @@ const HotelDetail = () => {
 
   const handleViewAllReviewPress = () => {};
 
-  const onAdditionalModalClose = () => {
+  const onAdditionalModalClose = (selectedOption) => {
     setAdditionalModalVisible(false);
+    setSelectedExtraOption(selectedOption);
   };
 
   const handleAdditionalBookingPress = async (selectedOption, roomID, stayPeriod, guests) => {
+    //adjust the handleSelectPress as well
     setAdditionalModalVisible(false);
     router.push({
       pathname: "/booking",
@@ -629,8 +648,10 @@ const HotelDetail = () => {
         hotelName: hotelInfo?.hotelName,
         checkinDate: stayPeriod.fromDate,
         checkoutDate: stayPeriod.toDate,
+        numOfNights: stayPeriod.numOfNights,
         guestNumber: guests.numOfAdults + guests.numOfChild,
         extraOptionsName: selectedOption?.optionName,
+        extraOptionsPrice: selectedOption?.optionPrice,
       },
     });
   };
@@ -640,16 +661,14 @@ const HotelDetail = () => {
     setAdditionalModalVisible(true);
   };
 
-  const handlePriceBookingPress = async () => {
-    setPriceModalVisible(false);
-    router.push({
-      pathname: "/booking",
-    });
-  };
+  // const handlePriceBookingPress = async () => {
+  //   setPriceModalVisible(false);
+  // };
 
-  const handleViewPricePress = () => {
+  const handleViewPricePress = (selectedOption) => {
     setAdditionalModalVisible(false);
     setPriceModalVisible(true);
+    setSelectedExtraOption(selectedOption);
   };
 
   const handleBookingPress = () => {
@@ -667,16 +686,27 @@ const HotelDetail = () => {
         visible={additionalModalVisible}
         additionalOptions={hotelInfo?.extraOptions}
         priceInfo={selectedRoomPriceInfo}
-        onClose={() => onAdditionalModalClose()}
+        numOfNights={stayPeriod?.numOfNights}
+        onClose={(selectedOption) => onAdditionalModalClose(selectedOption)}
         onBookingPress={(selectedOption) =>
-          handleAdditionalBookingPress(selectedOption, selectedRoomID, stayPeriod, guests)
+          handleAdditionalBookingPress(
+            selectedOption,
+            selectedRoomID,
+            stayPeriod,
+            guests
+          )
         }
-        onViewPriceDetailPress={handleViewPricePress}
+        onViewPriceDetailPress={(selectedOption) => handleViewPricePress(selectedOption)}
       />
       <DetailPriceModal
+        buttonText="Đóng"
+        numOfNights={stayPeriod?.numOfNights}
+        discountedPrice={selectedRoomPriceInfo?.discountedPrice}
+        extraPrice={selectedExtraOption?.optionPrice ? selectedExtraOption?.optionPrice : 0}
+        taxPercentage={selectedRoomPriceInfo?.taxPercentage}
         visible={priceModalVisible}
         onClose={() => onPriceModalClose()}
-        onBookingPress={() => handlePriceBookingPress()}
+        onBookingPress={() => onPriceModalClose()}
       />
       {loading ? (
         <ScreenSpinner />
@@ -754,21 +784,21 @@ const HotelDetail = () => {
               rooms={roomsInHotel}
               displayedRoom={hotelInfo?.roomCount}
               totalRoom={hotelInfo?.roomCount}
-              fromDate={from ? from : new Date()}
-              toDate={to ? to : new Date()}
+              fromDate={from}
+              toDate={to}
               child={numOfChild}
               adults={numOfAdults}
               roomFilterSelected={roomFilterSelected}
               onRoomFilterSelected={(selectedFilter) =>
                 onFilterSelected(selectedFilter)
               }
-              handleDetailPress={(roomID) => handleDetailPress(roomID)} //This is a 4 layer deep function, caution when maintaining
+              handleDetailPress={(roomID) => handleDetailPress(roomID, hotelInfo?.extraOptions)} //This is a 4 layer deep function, caution when maintaining
               handleSelectPress={(
                 roomID,
                 priceInfo,
                 stayPeriod,
                 guests,
-                roomName, //(3)
+                roomName //(3)
               ) =>
                 handleSelectPress(
                   roomID,
@@ -776,7 +806,7 @@ const HotelDetail = () => {
                   priceInfo,
                   stayPeriod,
                   guests,
-                  roomName,
+                  roomName
                 )
               } //This is a 4 layer deep function, caution when maintaining
             />

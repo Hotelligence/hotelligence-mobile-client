@@ -306,4 +306,8 @@ export function isoStringToDateString(isoString) {
   }
 }
 
-//date object to ISOString
+export const dateObjectToVNTimeISOString = (date) => { //use this if the date time is earlier than the current time by 7 hours
+  const vnDate = new Date(date);
+  vnDate.setHours(vnDate.getHours() + 7);
+  return vnDate.toISOString();
+};

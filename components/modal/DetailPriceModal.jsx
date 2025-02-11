@@ -10,38 +10,24 @@ import {
 } from "react-native";
 import { CircleButton, DiscountTag, SubmitButton } from "@/components/search";
 import { COLOR } from "@/assets/colors/Colors";
-import { X, ChevronRight } from "lucide-react-native";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
+import { X } from "lucide-react-native";
 import { formatVND } from "@/utils/ValueConverter";
 
 const DetailPriceModal = ({
   buttonText = "Đặt",
   visible,
   onClose,
-  priceDetails = [],
+  numOfNights,
+  discountedPrice,
+  extraPrice,
+  taxPercentage,
   onBookingPress,
 }) => {
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
-  const tempPriceDetails = [
-    //use priceDetails instead of tempPriceDetails later
-    {
-      id: "0",
-      name: "1 đêm",
-      price: 1000000,
-    },
-    {
-      id: "1",
-      name: "Thuế",
-      price: 100000,
-    },
-    {
-      id: "2",
-      name: "Phí khác",
-      price: 1500000,
-    },
-  ];
+  const taxFee = ((discountedPrice + extraPrice) * numOfNights) / taxPercentage;
+  const totalFee = (discountedPrice + extraPrice) * numOfNights + taxFee;
 
   useEffect(() => {
     if (visible) {
@@ -81,17 +67,27 @@ const DetailPriceModal = ({
           </View>
           <View>
             <View style={{ marginTop: 20 }}>
-              {tempPriceDetails.map((item) => (
-                <View
-                  key={item.id}
-                  style={{ flexDirection: "row", marginVertical: 5 }}
-                >
-                  <Text style={styles.option_text}>{item.name}</Text>
-                  <Text style={styles.price_text}>
-                    {formatVND(item.price)}đ
-                  </Text>
-                </View>
-              ))}
+              <View style={{ flexDirection: "row", marginVertical: 5 }}>
+                <Text style={styles.option_text}>
+                  Giá phòng ({numOfNights} đêm)
+                </Text>
+                <Text style={styles.price_text}>
+                  {discountedPrice
+                    ? formatVND(discountedPrice * numOfNights)
+                    : formatVND(0)}
+                  đ
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", marginVertical: 5 }}>
+                <Text style={styles.option_text}>Phụ phí</Text>
+                <Text style={styles.price_text}>
+                  {extraPrice ? formatVND(extraPrice) : formatVND(0)}đ
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", marginVertical: 5 }}>
+                <Text style={styles.option_text}>Thuế ({taxPercentage}%)</Text>
+                <Text style={styles.price_text}>{formatVND(taxFee)}đ</Text>
+              </View>
             </View>
             <View style={styles.divider} />
             <View
@@ -106,11 +102,11 @@ const DetailPriceModal = ({
               >
                 Tổng
               </Text>
-              <Text style={styles.price_text}>{formatVND(2600000)}đ</Text>
+              <Text style={styles.price_text}>{formatVND(totalFee)}đ</Text>
             </View>
             <SubmitButton
               text={buttonText}
-              style={{ marginBottom: 20, marginTop: 40, }}
+              style={{ marginBottom: 20, marginTop: 40 }}
               onPress={() => onBookingPress()}
             />
           </View>

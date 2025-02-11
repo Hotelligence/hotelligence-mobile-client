@@ -13,6 +13,7 @@ const RoomDetailCard = ({
   discountPercentage,
   discountedPrice,
   totalPrice,
+  numOfNights,
   style,
   onDetailPress,
   onSelectPress,
@@ -60,19 +61,19 @@ const RoomDetailCard = ({
             <>
               <DiscountTag discount={discountPercentage} />
               <Text style={styles.origin_price_text}>
-                {formatVND(originPrice)}đ
+                {formatVND(originPrice * numOfNights)}đ
               </Text>
             </>
           )}
           <Text style={styles.discount_price_text}>
-            {formatVND(discountedPrice)}đ
+            {formatVND(discountedPrice * numOfNights)}đ
           </Text>
           <Text
             style={styles.total_price_text}
             ellipsizeMode="tail"
             numberOfLines={1}
           >
-            Tổng {formatVND(totalPrice)}đ bao gồm thuế và phí
+            Tổng {formatVND(totalPrice * numOfNights)}đ bao gồm thuế
           </Text>
         </View>
         <SubmitButton text="Chọn" onPress={onSelectPress} style={{ width: "50%", marginStart: "auto", marginTop: 15, }} />

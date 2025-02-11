@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, StatusBar, ScrollView } from "react-native";
+import { View, Text, StyleSheet, StatusBar, ScrollView, RefreshControl } from "react-native";
 import { COLOR } from "@/assets/colors/Colors";
 import { bookingHistory } from "@/assets/TempData"; //Delete later
 import { HotelHistoryCard } from "@/components/history";
@@ -16,18 +16,25 @@ const HistoryScreen = () => {
 
   const [userBookingHistory, setUserBookingHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchUserBookingHistory = async (userID) => {
-    setLoading(true);
     const response = await getUserBookingAPI(userID);
     if (response.status === HttpStatusCode.Ok) {
       setUserBookingHistory(response?.data);
     }
-    setLoading(false);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUserBookingHistory(user.id);
+    setRefreshing(false);
+  }
+
   useEffect(() => {
+    setLoading(true);
     fetchUserBookingHistory(user.id);
+    setLoading(false);
   }, []);
 
   const handleRatingPress = (hotelID, roomID) => {
@@ -73,13 +80,21 @@ const HistoryScreen = () => {
         backgroundColor="transparent"
       />
       <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLOR.primary_gold_100}
+          />
+        }
+        
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 20 }}
       >
         <Text style={styles.title_text}>Lịch sử đặt phòng</Text>
         <View style={{ gap: 20 }}>
-          {userBookingHistory.map((item, index) => (
+          {userBookingHistory.reverse().map((item, index) => (
             <View key={index}>
               <View
                 style={{

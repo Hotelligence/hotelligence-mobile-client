@@ -19,6 +19,7 @@ const BookingAdditionalModal = ({
   onClose,
   additionalOptions,
   priceInfo,
+  numOfNights,
   onBookingPress,
   onViewPriceDetailPress,
 }) => {
@@ -29,6 +30,10 @@ const BookingAdditionalModal = ({
 
   const { height: SCREEN_HEIGHT } = Dimensions.get("window");
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  const taxFee =
+    ((priceInfo?.discountedPrice + additionalFee) * numOfNights) / priceInfo?.taxPercentage;
+  const totalFee = (priceInfo?.discountedPrice + additionalFee) * numOfNights + taxFee;
 
   useEffect(() => {
     if (visible) {
@@ -61,11 +66,11 @@ const BookingAdditionalModal = ({
     <Modal
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={() => onClose(selectedOption)}
       animationType="fade"
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.dismiss_overlay} onPress={onClose} />
+        <Pressable style={styles.dismiss_overlay} onPress={() => onClose(selectedOption)} />
         <Animated.View
           style={[
             styles.modal_container,
@@ -139,18 +144,18 @@ const BookingAdditionalModal = ({
               <View style={{ width: "75%" }}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.discount_price_text}>
-                    {formatVND(priceInfo?.discountedPrice + additionalFee)}đ
+                    {formatVND((priceInfo?.discountedPrice + additionalFee) * numOfNights)}đ
                   </Text>
                   <Text style={styles.origin_price_text}>
-                    {formatVND(priceInfo?.originPrice + additionalFee)}đ
+                    {formatVND((priceInfo?.originPrice + additionalFee) * numOfNights)}đ
                   </Text>
                 </View>
                 <Text style={styles.total_price_text}>
-                  Tổng {formatVND(priceInfo?.totalPrice + additionalFee)}đ bao
+                  Tổng {formatVND((totalFee))}đ bao
                   gồm thuế và phí
                 </Text>
                 <Pressable
-                  onPress={onViewPriceDetailPress}
+                  onPress={() => onViewPriceDetailPress(selectedOption)}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",

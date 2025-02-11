@@ -81,19 +81,18 @@ const AmenitiesSection = ({ amenities }) => {
 };
 
 const BottomSection = ({
-  extraOptions,
+  // extraOptions,
   originPrice,
   discountPercentage,
   discountedPrice,
   totalPrice,
-  onBookingPress,
   onViewPriceDetailPress,
 }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
+  // const [selectedOption, setSelectedOption] = useState(null);
 
   return (
     <View style={styles.bottom_section_container}>
-      <Text
+      {/* <Text
         style={{ color: COLOR.primary_blue_100, fontSize: 20, fontWeight: 600 }}
       >
         Tùy chọn thêm
@@ -162,7 +161,7 @@ const BottomSection = ({
           Không.
         </Text>
       )}
-      <View style={styles.divider} />
+      <View style={styles.divider} /> */}
       <DiscountTag
         discount={discountPercentage}
         style={{ alignSelf: "flex-start", marginTop: 5 }}
@@ -196,11 +195,6 @@ const BottomSection = ({
             />
           </Pressable>
         </View>
-        <SubmitButton
-          text="Đặt"
-          style={{ justifySelf: "flex-end", width: "25%", marginTop: 30 }}
-          onPress={() => onBookingPress(selectedOption)}
-        />
       </View>
     </View>
   );
@@ -209,8 +203,7 @@ const BottomSection = ({
 const RoomDetail = () => {
   const router = useRouter();
 
-  const { roomID } = useLocalSearchParams();
-  const room = rooms[1];
+  const { roomID, extraOptions } = useLocalSearchParams();
   const amenities = [
     {
       amenityIconName: "ShowerHead",
@@ -247,6 +240,7 @@ const RoomDetail = () => {
         const response = await getRoomByID_API(roomID);
         if (response.status === HttpStatusCode.Ok) {
           setRoomInfo(response.data);
+          console.log(roomID);
         }
       } catch (err) {
         console.log(err);
@@ -310,7 +304,7 @@ const RoomDetail = () => {
               numberOfLines={1}
               style={styles.header_title_text}
             >
-              {room?.roomName}
+              {roomInfo?.roomName}
             </Text>
           </Animated.View>
           <CircleButton
@@ -335,7 +329,7 @@ const RoomDetail = () => {
                 <Image
                   style={{ width: "100%", height: "100%" }}
                   source={{
-                    uri: room?.images[0],
+                    uri: roomInfo?.images[0],
                   }}
                   resizeMode="cover"
                   onError={() => setWallpaperError(true)}
@@ -354,7 +348,7 @@ const RoomDetail = () => {
             <AmenitiesSection amenities={amenities} />
             <View style={[styles.divider, { marginHorizontal: 20 }]} />
             <BottomSection
-              extraOptions={roomInfo?.extraOptions}
+              // extraOptions={roomInfo?.extraOptions}
               originPrice={roomInfo?.originPrice}
               discountPercentage={roomInfo?.discountPercentage}
               discountedPrice={roomInfo?.discountedPrice}

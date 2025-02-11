@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "600",
     color: COLOR.primary_blue_100,
     marginBottom: 12,
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   },
 
   confirm_text: {
-    fontSize: 14,
+    fontSize: 16,
     color: COLOR.primary_blue_100,
     marginBottom: 20,
     textAlign: "center",

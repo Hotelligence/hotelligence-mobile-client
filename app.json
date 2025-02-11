@@ -2,6 +2,22 @@
   "expo": {
     "name": "hotelligence-client-mobile",
     "slug": "hotelligence-client-mobile",
+    "scheme": "hotelligence",
+    "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "hotelligence",
+              "host": "payment",
+              "pathPrefix": "/callback"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "hotelligence-client-mobile",

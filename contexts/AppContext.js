@@ -13,18 +13,19 @@ export const AppProvider = ({ children }) => {
   const [userRecentViewHotels, setUserRecentViewHotels] = useState([]);
 
   const fetchUserFavoriteList = async () => {
-    try {
-      const response = await getFavoriteHotelAPI(user.id);
-      if (response.status === HttpStatusCode.Ok) {
-        if (response?.data?.favoriteHotels) {
-          setUserFavoriteList(response?.data?.favoriteHotels);
+    if (user.id) {
+      try {
+        const response = await getFavoriteHotelAPI(user.id);
+        if (response.status === HttpStatusCode.Ok) {
+          if (response?.data?.favoriteHotels) {
+            setUserFavoriteList(response?.data?.favoriteHotels);
+          }
         }
+      } catch (error) {
+        console.log("Error in fetchUserFavoriteList: ", error);
       }
-    } catch (error) {
-      console.log("Error in fetchUserFavoriteList: ", error);
     }
   };
-
 
   const value = {
     userFavoriteList,

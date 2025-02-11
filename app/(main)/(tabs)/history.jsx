@@ -36,10 +36,10 @@ const HistoryScreen = () => {
     setLoading(false);
   }, []);
 
-  const handleRatingPress = (hotelID, roomID) => {
+  const handleRatingPress = (bookingID, hotelID, roomID) => {
     router.push({
       pathname: "/reviews/[roomID]",
-      params: { roomID: roomID, hotelID: hotelID, },
+      params: { bookingID: bookingID, roomID: roomID, hotelID: hotelID, },
     });
   };
 
@@ -50,8 +50,11 @@ const HistoryScreen = () => {
     }    
   };
 
-  const handlePaymentPress = (hotelID) => {
-    console.log("Payment pressed: ", hotelID);
+  const handlePaymentPress = (bookingID, paymentAmount) => {
+    router.push({
+      pathname: "/booking/payment",
+      params: { bookingID: bookingID, paymentAmount: paymentAmount, paymentMethod: "online" },
+    });
   };
 
   const handleOnHotelCardPress = (hotelID) => {
@@ -86,7 +89,6 @@ const HistoryScreen = () => {
             tintColor={COLOR.primary_gold_100}
           />
         }
-        
         showsVerticalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 20 }}
@@ -118,9 +120,14 @@ const HistoryScreen = () => {
                 checkinDate={isoStringToDate(item?.checkinDate)}
                 checkoutDate={isoStringToDate(item?.checkoutDate)}
                 bookingStatus={item?.bookingStatus}
-                onRatingPress={() => handleRatingPress(item?.hotelId, item?.roomId)}
+                paymentMethod={item?.paymentMethod}
+                onRatingPress={() =>
+                  handleRatingPress(item?.id, item?.hotelId, item?.roomId)
+                }
                 onCancelPress={() => handleCancelPress(item?.id)}
-                onPaymentPress={() => handlePaymentPress(item?.id)}
+                onPaymentPress={() =>
+                  handlePaymentPress(item?.id, item?.paymentAmount)
+                }
                 onPress={() => handleOnHotelCardPress(item?.id)}
               />
             </View>

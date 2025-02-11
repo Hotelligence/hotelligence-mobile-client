@@ -15,6 +15,7 @@ import { SubmitButton } from "@/components/search";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import GeneralHeader from "@/components/GeneralHeader";
 import { reviewRoomAPI } from "@/api/RoomServices";
+import { updateBookingStatusAPI } from "@/api/BookingServices";
 import { HttpStatusCode } from "axios";
 import { useUser } from "@clerk/clerk-expo";
 
@@ -58,7 +59,7 @@ const RoomReview = ({}) => {
   const router = useRouter();
   const { user } = useUser();
 
-  const { roomID, hotelID } = useLocalSearchParams();
+  const { roomID, hotelID, bookingID } = useLocalSearchParams();
 
   const [ratings, setRatings] = useState({
     cleanliness: 5,
@@ -88,6 +89,7 @@ const RoomReview = ({}) => {
 
       const response = await reviewRoomAPI(roomID, hotelID, reviewInfo);
       if (response.status === HttpStatusCode.Created){
+        await updateBookingStatusAPI(bookingID, "Đã đánh giá");
         router.back();
       }
     } catch(err){

@@ -34,6 +34,12 @@ const BookingConfirmStackLayout = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="payment-status"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 };

@@ -8,6 +8,7 @@ import {
   StatusBar,
   Platform,
   Pressable,
+  Linking,
 } from "react-native";
 import {
   RecentSearchedCard,
@@ -19,6 +20,7 @@ import {
   DatePicker,
   GuestNumberPicker,
   SubmitButton,
+  CircleButton,
 } from "@/components/search";
 import ScreenSpinner from "@/components/ScreenSpinner";
 import { COLOR } from "@/assets/colors/Colors";
@@ -26,6 +28,8 @@ import { useRouter } from "expo-router";
 import { dateObjectToTruncatedDate } from "@/utils/ValueConverter";
 import MyAsyncStorage from "@/utils/MyAsyncStorage";
 import { useAppContext } from "@/contexts/AppContext";
+import { MessageCircleQuestion } from "lucide-react-native";
+import { Circle } from "react-native-svg";
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -134,6 +138,12 @@ const HomeScreen = () => {
         numOfChild: 0,
       },
     });
+  }
+
+  const handleChatPress = async () => {
+    await Linking.openURL(
+      "https://tawk.to/chat/673d90394304e3196ae57d35/1id48df4r"
+    );
   }
 
   const renderRecentSearched = useCallback(
@@ -367,6 +377,16 @@ const HomeScreen = () => {
           />
         </View> */}
       </ScrollView>
+      <CircleButton
+        Icon={MessageCircleQuestion}
+        diameter={62}
+        style={{ position: "absolute", bottom: 20, right: 20, zIndex: 999 }}
+        borderRadius={50}
+        color={COLOR.primary_white_100}
+        backgroundColor={COLOR.primary_gold_100}
+        isShadow={true}
+        onPress={handleChatPress}
+      />
     </View>
   );
 };

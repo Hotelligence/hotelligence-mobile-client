@@ -12,6 +12,7 @@ const HotelHistoryCard = ({
   checkinDate,
   checkoutDate,
   bookingStatus,
+  paymentMethod,
   style,
   onRatingPress,
   onCancelPress,
@@ -158,7 +159,7 @@ const HotelHistoryCard = ({
                       ? COLOR.secondary_blue_100
                       : status === "CANCELLED"
                       ? COLOR.secondary_red_100
-                      : COLOR.primary_gold_120
+                      : COLOR.primary_gold_120,
                 },
               ]}
             >
@@ -191,13 +192,15 @@ const HotelHistoryCard = ({
                 color={COLOR.primary_blue_100}
                 style={{ width: "70%", paddingVertical: 6 }}
               />
-              <SubmitButton
-                text="Thanh toán"
-                fontSize={16}
-                color={COLOR.primary_white_100}
-                onPress={onPaymentPress}
-                style={{ width: "55%", paddingVertical: 6, marginTop: 10 }}
-              />
+              {paymentMethod === "online" && (
+                <SubmitButton
+                  text="Thanh toán"
+                  fontSize={16}
+                  color={COLOR.primary_white_100}
+                  onPress={onPaymentPress}
+                  style={{ width: "55%", paddingVertical: 6, marginTop: 10 }}
+                />
+              )}
             </>
           )}
         </View>

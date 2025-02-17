@@ -53,7 +53,7 @@ const ProfileScreen = () => {
           />
           <Text
             style={styles.user_name_text}
-          >{`${user.lastName} ${user.firstName}`}</Text>
+          >{`${user.lastName ? user.lastName : ""} ${user.firstName ? user.firstName : ""}`}</Text>
         </View>
       </View>
       <View style={{ marginTop: 30, paddingHorizontal: 20, gap: 20 }}>

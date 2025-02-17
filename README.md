@@ -1,50 +1,41 @@
-# Welcome to your Expo app 👋
+# Hotelligence - Hotel Booking Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Prerequisites
+- Node.js and npm installed
+- Java 17 or higher installed 
+- Maven installed
+- Git installed
+- Expo CLI
+- Expo Go app (iOS/Android) to preview the mobile app
+- IDE that supports running Java Spring Boot (IntelliJ is suggested)
 
-## Get started
+## Setup Instructions
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### 1. Clone Repositories
 ```bash
-npm run reset-project
+git clone https://github.com/Hotelligence/hotelligence-mobile-client
+git clone https://github.com/Hotelligence/hotelligence-microservices
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Start Backend Services (Microservice)
+- Open the back-end folder inside an IDE that supports running Java Spring Boot (suggesting using IntelliJ)
+- At IntelliJ project folder tree, run a service by opening the .java file by clicking on a folder -> src -> main -> java -> file {service_name}Application.java (<b>{service_name}</b> here is the name of the service).
+- Right-click on the {service_name}Application.java and click "Run {service_name}Application.main()" to run the service.
+- Doing the same for the other 6 folders (services).
+- Services will need about 2 minutes to run and warm up before can be started to use.
 
-## Learn more
+### 3. Start Frontend Development Server (using Expo)
+- Open the MyAxios.js file and change the <b>baseURL</b> to the correct IP Address of the device that currently running the back-end server (the server by default will be running at port 8080), for example if the device IP address is "192.168.2.20", the <b>baseURL</b> should be set to http://192.168.2.20:8080/api"
+- Open the terminal and navigate to the front-end directory, then run these command lines:
+```
+# Install dependencies
+npm install
 
-To learn more about developing your project with Expo, look at the following resources:
+# Start development server
+npm start
+```
+- After the front-end development server is run by Expo, a QR code will be generated. Use a mobile phone (which has already installed the Expo Go app) to scan that QR and the app should now be opened on your phone.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Demo
+[Hotelligence Mobile App Demo](https://drive.google.com/drive/folders/1o-yAm4uxvKJjLYQlYhMpuufKpbNXfCRW?usp=sharing)
